@@ -1,0 +1,73 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    {\bf Problem 2}\\[5pt]
+    Let the real-valued random variable $X$ have density $f$. Let $\alpha,\beta\in\mbb{R}$ with $\alpha\neq 0$. Suppose that $Y=\alpha X+\beta$. Find the density of $Y$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Let $\lambda$ be the Lebesgue measure on $\mc{B}(\mbb{R})$. Then we proceed by finding the Radon-Nikodym derivative of $\mc{L}(Y)$. For this, take $A\in\mc{B}(\mbb{R})$. Then,
+    \begin{align*}
+        \mc{L}(Y)(A)=P(Y^{-1}(A))=P((\alpha X+\beta)^{-1}(A))=P\bp{X^{-1}\bp{\frac{A-\beta}{\alpha}}}=\mc{L}(X)\bp{\frac{A-\beta}{\alpha}}
+    \end{align*}
+    where we define $\tfrac{A-\beta}{\alpha}=\{x\in\mbb{R}:\alpha x+\beta\in A\}$ and used $\{\alpha X+\beta\in A\}=\{X\in\tfrac{A-\beta}{\alpha}\}$ to justify the second-to-last equality. With this, we have
+    \begin{align*}
+        \mc{L}(Y)(A)=\mc{L}(X)\bp{\frac{A-\beta}{\alpha}}&=\int_{\frac{A-\beta}{\alpha}}f(x)\lambda(dx)\\
+        &=\int_A\frac{1}{\alpha}f\bp{\frac{t-\beta}{\alpha}}\lambda(dt)
+    \end{align*}
+    having applied the change of variables $t=\alpha x+\beta$ so that $x\in\tfrac{A-\beta}{\alpha}$ implies that $t\in A$. Of course, if $A$ were to be such that $\lambda(A)=0$, then by the above expression $\mc{L}(Y)(A)=0$ too, so $L(Y)\ll\lambda$ and $\tfrac{d\mc{L}(Y)}{d\lambda}(x)=\frac{1}{\alpha}f\bp{\tfrac{x-\beta}{\alpha}}$ is
+    the density of $Y$.\hfill{$\qed$}\\[5pt]
+\end{document}

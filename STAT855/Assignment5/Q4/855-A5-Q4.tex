@@ -1,0 +1,59 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 4} Calls arrive at a telephone exchange as a Poisson process of rate $\lambda$, and the length of the calls are independent exponential random variables
+    of rate $\mu$. Assume that infinitely many telephone lines are available, and denote $X_t$ the number of lines in use at time $t$.\\[10pt]
+    {\bf a)} Identify the state space $\mc{I}$ and the Q-matrix $Q$ associated with $\{X_t:t\geq 0\}$.\\[10pt]
+    {\bf Solution} We have $\mc{I}=\{0,1,2,\dots,\}=\mbb{N}$ and
+    \begin{align*}
+        Q=\begin{pmatrix}
+            -\lambda & \lambda & 0 & 0 & 0 & 0 & 0 & 0\cdots\\
+            \mu & -(\lambda +\mu) & \lambda & 0 & 0 & 0 & 0 & 0\cdots\\
+            0 & 2\mu & -(\lambda+2\mu) & \lambda & 0 & 0 & 0 & 0\cdots\\
+            0 & 0 & 3\mu & -(\lambda +3\mu) & \lambda & 0 & 0 & 0\cdots\\
+            0 & 0 & 0 & 4\mu & -(\lambda+4\mu) & \lambda & 0 & 0\cdots\\
+            0 & 0 & 0 & 0 & 5\mu & -(\lambda+5\mu) & \lambda & 0\cdots\\
+            0 & 0 & 0 & 0 & 0 & 6\mu & -(\lambda+6\mu) & \lambda\cdots\\
+            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots
+        \end{pmatrix}.
+    \end{align*}
+    That is, we model this process as a $M/M/\infty$ queue. To be more explicit, we write for $i\in\mc{I}$
+    \[Q_{i,i+1}=\lambda\;\;\forall i\in\mc{I},\quad Q_{i,i-1}=i\mu\;\text{if\;}i>0,\quad Q_{i,i}=-(\lambda+i\mu)\;\;\forall i\in\mc{I}\tag*{$\qed$}\]
+    {\bf b)} Find the invariant distribution.\\[10pt]
+    {\bf Solution} Let $\pi=(\pi_i:i\in\mc{I})$ define a measure on $\mc{I}$ for this process. We know that this measure is invariant if it satisfies the detailed balance equations given by
+    \[\pi_jq_{i,j}=\pi_jq_{j,i}\quad\forall i,j\in\mc{I}.\]
+    Now, observe that these equations are trivially satisfied when $i=j$ and when $|i-j|>1$, since if $i=j$, then $\pi_iq_{i,i}=\pi_iq_{i,i}$ and if $|i-j|>1$, then $q_{ij}=q_{ji}=0$, so $\pi_iq_{i,j}=\pi_jq_{j,i}$.
+    Thus we need only consider the case when $|i-j|=1$, and without loss of generality we will take $j=i+1$, $i\geq 0$. Then
+    \[\pi_{i+1}q_{i+1,i}=\pi_iq_{i,i+1}\quad\Rightarrow\quad (i+1)\mu\pi_{i+1}=\lambda \pi_i\quad\Rightarrow\quad\pi_{i+1}=\frac{\lambda}{\mu(i+1)}\pi_i.\]
+    Now, letting $\xi=\lambda/\mu$, we have for $i\geq 1$
+    \[\pi_i=\xi\frac{1}{i}\pi_{i-1}=\xi^2\frac{1}{(i)(i-1)}\pi_{i-2}=\dots=\xi^i\frac{1}{i!}\pi_0\]
+    so that
+    \[\pi=(\pi_0,\xi\pi_0,(\xi^2/2)\pi_0,\dots)\]
+    is an invariant measure. For this to be an invariant distribution, we impose the constraint
+    \[\sum_{i\in\mc{I}}\pi_i=1\quad\Rightarrow\quad\sum_{k=0}^\infty\frac{\xi^k}{k!}\pi_0=1\quad\Rightarrow\quad\pi_0=e^{-\xi}=e^{-\lambda/\mu}.\]
+    Thus we arrive at an invariant distribution for this process, defined by
+    \[\pi_i=e^{-\lambda/\mu}\frac{(\lambda/\mu)^i}{i!}\]
+    for any $i\in\mc{I}$.\hfill{$\qed$}
+\end{document}

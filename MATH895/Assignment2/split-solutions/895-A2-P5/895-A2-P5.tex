@@ -1,0 +1,89 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \noindent{\bf Problem 5}\\[5pt]
+    Let $0<p<1/2$  and $(X_k)_{k\geq 1}$ be a sequence of $\iid$ random variables defined on a common probability space $(\Omega,\mc{F},P)$ so that $P(X_k=-1)=p$ and $P(X_k=1)=1-p$. Define $S_n=\sum_{k=1}^nX_k$ and $D=\limsup_n\{S_n=0\}=\{S_n=0\;\io\}$. Compute $P(D)$.\\[5pt]
+    {\bf Solution}\hspace{5pt}
+    Let $Y_n=\sum_{k=1}^n\1{\{X_k=-1\}}$ so that for $0\leq k\leq n$ we have
+    \[P(Y_n=k)=\nck{n}{k}p^k(1-p)^{n-k}\]
+    which is the probability that exactly $k$ of $(X_i)_{1\leq i\leq n}$ are $-1$. Any such realization of $Y_n$ determines the value of $S_n$, since
+    \[S_n=\sum_{k=1}^n X_k=\sum_{k=1}^n\1{\{X_k=1\}}-\sum_{k=1}^n\1{\{X_k=-1\}}=n-2Y_n.\]
+    Thus, for any $n\geq 1$, we obtain the probability
+    \[P(S_n=0)=P(n-2Y_n=0)=P(Y_n=n/2)=\begin{cases}
+        0,\quad&\text{if $2\nmid n$}\\
+        \nck{n}{n/2}p^{n/2}(1-p)^{n/2},\quad&\text{if $2\mid n$}.
+    \end{cases}\]
+    Equipped with this, the result follows the Borel-Cantelli lemma and some elementary analysis. We wish to determine whether or not the series
+    \begin{align*}
+        \sum_{k=1}^\infty P(Sk=0)=\sum_{k=1}^\infty\nck{2k}{k}p^k(1-p^k)
+    \end{align*}
+    converges. For $n\geq 1$, let $a_n=\nck{2n}{n}p^n(1-p)^n$. By the ratio test:
+    \begin{align*}
+        \limsup_{n\rightarrow\infty}\left|\frac{a_{n+1}}{a_n}\right|=\limsup_{n\rightarrow\infty}\bp{\frac{(2n+2)!n!n!}{2n!(n+1)!(n+1)!}\cdot\frac{p^{n+1}((1-p)^{n+1})}{p^n(1-p)^{n}}}&=\limsup_{n\rightarrow\infty}\bp{\frac{(2n+2)(2n+1)p(1-p)}{(n+1)^2}}\\
+        &=\limsup_{n\rightarrow\infty}\bp{\frac{4n^2+6n+2}{n^2+2n+1}p(1-p)}\\
+        &=4p(1-p).
+    \end{align*}
+    Taking $f(x)=x(1-x)$, we get $f^\prime(x)=1-2x$ and $f^{\prime\prime}(x)=-2$. But $f^{\prime\prime}<0$ on all of $\mbb{R}$, so it is strictly concave and admits a global maximum at $x=1/2$ since $f^\prime(x)=0$ if and only if $x=1/2$. Further, $f(1/2)=1/4$, so $f(p)<1/4$ because $p\neq 1/2$. Then
+    \begin{align*}
+        \limsup_{n\rightarrow\infty}\left|\frac{a_{n+1}}{a_n}\right|=4p(1-p)=4f(p)<1
+    \end{align*}
+    and thus $\sum_{k=1}^\infty P(S_k=0)<\infty$. By direct application of the Borel-Cantelli lemma, this fact implies $P(\limsup_n\{S_n=0\})=0$. \\[5pt]
+    Treating $S_n$ as the position of an asymmetric random walk on $\mbb{Z}$ at time $n$, we conclude that, starting from $S_0=0$, there is almost surely
+    a finite number of steps after which the process will never return to the origin.\hfill{$\qed$}\\[5pt]
+\end{document}

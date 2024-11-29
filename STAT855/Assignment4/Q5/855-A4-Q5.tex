@@ -1,0 +1,62 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 5} Let $S=\{\dots,-2,-1,0,1,2,\dots,\}$ be the set of all integers. Let $X_n,n\geq 0$ be a Markov chain with the state space $S$ and transition probabilities given by
+    \begin{align*}
+        &P_{0,1}=P_{0,-1}=1/2\\
+        &P_{i,i+1}=p,\quad P_{i,i-1}=q\quad\text{for $i>0$}\\
+        &P_{i,i+1}=q,\quad P_{i,i-1}=p\quad\text{for $i<0$}
+    \end{align*}
+    where $p\in(0,1/2)$ and $q=1-p$. Find the invariant distribution of the Markov chain.\\[10pt]
+    {\bf Solution} Let $\pi=\{\pi_i:i\in S\}$ be the invariant distribution of interest. We seek to identify its elements, which we can do by solving an infinite system of detailed balance equations. Take $i,j\in S$, and suppose that $i\geq 1$, $j\leq 1$. Then
+    \[\pi_0P_{0,1}=\pi_1P_{1,0} \quad\Rightarrow\quad \pi_0\frac{1}{2}=\pi_1q\quad\Rightarrow\quad \pi_1=\frac{1}{2q}\pi_0\]
+    and
+    \[\pi_0P_{0,-1}=\pi_{-1}P_{-1,0} \quad\Rightarrow\quad \pi_0\frac{1}{2}=\pi_{-1}q\quad\Rightarrow\quad \pi_{-1}=\frac{1}{2q}\pi_0.\]
+    We can use these to obtain expressions for every element of $\pi$ in terms of $\pi_0$:
+    \[\pi_{i}P_{i,i-1}=\pi_{i-1}P_{-1,i}\quad\Rightarrow\quad \pi_{i}q=p\pi_{i-1}\quad\Rightarrow\quad\pi_i=\left(\frac{p}{q}\right)^{i-1}\frac{1}{2q}\pi_0=\frac{1}{2}\left(\frac{p^{i-1}}{q^i}\right)\pi_0\]
+    and
+    \[\pi_{j}P_{j,j+1}=\pi_{j+1}P_{j+1,j}\quad\Rightarrow\quad \pi_jq=p\pi_{j+1}\quad\Rightarrow\quad\pi_j=\left(\frac{p}{q}\right)^{-j-1}\frac{1}{2q}\pi_0=\frac{1}{2}\left(\frac{p^{-j-1}}{q^{-j}}\right)\pi_0.\]
+    We can use the constraint $\sum_{i\in S}\pi_i=1$ to now solve for $\pi_0$. To begin, we can split up this sum:
+    \begin{align*}
+        \sum_{n=-\infty}^\infty\pi_n=1\quad&\Rightarrow\quad\pi_0+\sum_{n=1}^\infty\pi_n+\sum_{n=-1}^{-\infty}\pi_n=1\\
+        &\Rightarrow\quad\pi_0+\sum_{n=1}^\infty\frac{1}{2}\left(\frac{p^{n-1}}{q^n}\right)\pi_0+\sum_{n=-1}^{-\infty}\frac{1}{2}\left(\frac{p^{-n-1}}{q^{-n}}\right)\pi_0=1\\
+        &\Rightarrow\quad\pi_0\left(1+\frac{1}{2p}\sum_{n=1}^\infty\left(\frac{p}{q}\right)^n+\frac{1}{2p}\sum_{n=1}^\infty\left(\frac{p}{q}\right)^n\right)=1\\
+        &\Rightarrow\quad\pi_0\left(1-\frac{2}{2p}+\frac{1}{2p}\sum_{n=0}^\infty\left(\frac{p}{q}\right)^n+\frac{1}{2p}\sum_{n=0}^\infty\left(\frac{p}{q}\right)^n\right)=1\\
+        &\Rightarrow\quad\pi_0\left(1-\frac{1}{p}+\frac{1}{p}\left(\frac{1}{1-p/q}\right)\right)=1
+    \end{align*}
+    since the series are both geometric. Continuing,
+    \begin{align*}
+        \pi_0\left(\frac{p-1}{p}+\frac{1}{p}\left(\frac{q}{q-p}\right)\right)=1\quad&\Rightarrow\quad\pi_0\left(\frac{(p-1)(q-p)}{p(q-p)}+\frac{q}{p(q-p)}\right)=1\\
+        &\Rightarrow\quad\pi_0\left(\frac{pq-p^2-q+p+q}{p(q-p)}\right)=1\\
+        &\Rightarrow\quad\pi_0\left(\frac{q-p+1}{q-p}\right)=1\\
+        &\Rightarrow\quad\pi_0=\frac{q-p}{q-p+1}.
+    \end{align*}
+    So we have the solution; the invariant distribution is defined so that, for $i\in S$,
+    \begin{align*}
+        &i\geq 1\quad\Rightarrow\quad \pi_i=\frac{1}{2}\left(\frac{p^{i-1}}{q^i}\right)\left(\frac{q-p}{q-p+1}\right)=\frac{1}{4}\left(\frac{p^{i-1}}{q^i}\right)\left(\frac{1-2p}{1-p}\right)\\
+        &i\leq 1\quad\Rightarrow\quad \pi_i=\frac{1}{2}\left(\frac{p^{-i-1}}{q^{-i}}\right)\left(\frac{q-p}{q-p+1}\right)=\frac{1}{4}\left(\frac{p^{-i-1}}{q^{-i}}\right)\left(\frac{1-2p}{1-p}\right)\\
+        &i=0\quad\Rightarrow\quad\pi_i=\frac{q-p}{q-p+1}=\frac{1}{2}\left(\frac{1-2p}{1-p}\right)
+    \end{align*}
+    and we are done.\hfill{$\qed$}
+\end{document}

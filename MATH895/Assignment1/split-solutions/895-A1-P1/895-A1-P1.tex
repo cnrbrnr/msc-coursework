@@ -1,0 +1,143 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Some solutions presented here were, at least in part, the product of collaboration with my fellow students and
+            Professor Cellarosi himself. To be more precise, problems 1, 3, 5, and 7 incorporate ideas presented to me during discussion with Osman Bicer (1b)
+            Anthony Pasion (problem 7) and Timothy Liu (problems 3 and 5). Professor Cellarosi contributed significantly to solutions for problems 2, 3 and 5.
+            Problems 7-10 were completed with occasional reference to [1].
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    \noindent{\bf Problem 1}\\[5pt]
+    {\bf a)} Let $(\Omega, \mc{F},P)$ be a probability space, and let $A_1,\dots, A_n\in\mc{F}$ be $n\geq 1$ events.
+    Prove the so-called {\it inclusion-exclusion formula}
+    \[P\left(\bigcup_{i=1}^nA_i\right)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{1}\]
+    {\bf Proof}\hspace{5pt} We proceed by induction. First, consider the basis where we fix $n=1$. Then, trivially,
+    \[P\left(\bigcup_{i=1}^n A_i\right)=P(A_1)=\sum_{k=1}^1(-1)^{k+1}P(A_1)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\]
+    Now supposing that (1) holds for any subcollection of $\mc{F}$ of size $n\geq 1$, we aim to show that for $A_1,\dots,A_{n+1}\in\mc{F}$
+    \[P\left(\bigcup_{i=1}^{n+1}A_i\right)=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{2}\]
+    For notational compactness, take $A=\cup_{i=1}^nA_i$ and $B=A_{n+1}$, each an element of $\mc{F}$. Then, we can rewrite the probability of interest
+    \begin{align*}
+        P\left(\cup_{i=1}^{n+1}A_i\right)=P(A\cup B)=P(A)+P(B\setminus(A\cap B))&=P(A)+P(B\setminus (A\cap B))+P(A\cap B)-P(A\cap B)\\
+        &=P(A)+P((B\setminus(A\cap B))\cup (A\cap B))-P(A\cap B)\\
+        &=P(A)+P(B)-P(A\cap B)
+    \end{align*}
+    yielding an expression amenable to the inductive hypothesis:
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=P\bp{\bigcup_{i=1}^nA_i}+P(A_{n+1})-P\bp{\bigcup_{i=1}^n(A_i\cap A_{n+1})}\\
+        &=P(A_{n+1})+\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots A_{i_k})
+        \quad+\sum_{k=1}^n(-1)^{k+2}\sum_{1\leq i_1<\dots<i_k\leq n}P(A_{i_1}\cap\dots A_{i_k}\cap A_{n+1})\tag{3}
+    \end{align*}
+    since both $\cup_{i=1}^nA_i$ and $\cup_{i=1}^n(A_i\cap A_{n+1})$ are $n$-unions over elements of $\mc{F}$. Massaging this expression, we find that
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=\sum_{k=1}^{n+1}P(A_k)+\sum_{k=2}^n(-1)^{k+1}\sum_{1\leq i_1<\dots<i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k})+\sum_{k=2}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots<i_{k-1}\leq n}P(A_{i_1}\cap\cdots\cap A_{i_{k-1}}\cap A_{n+1})
+    \end{align*}
+    where the second term contains all intersections of $2$ or more elements of $\{A_i\}_{i=1}^n$ (i.e., those not including $A_{n+1}$) and the third term contains all intersections of two or more elements of $\{A_i\}_{i=1}^{n+1}$, at least once of which is $A_{n+1}$.
+    Combining these, we get the appropriate sum of probabilities over all intersections of two or more elements of $\{A_i\}_{i=1}^{n+1}$:
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=\sum_{k=1}^{n+1}P(A_{k})+\sum_{k=2}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots<i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k})\\
+        &=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k}).
+    \end{align*} 
+    whereby the basis, inductive step, and principle of induction we have that (1) holds for any $n\geq 1$.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Let $n\geq 3$ be given, and consider $A_1,\dots,A_n$ in some probability space $(\Omega,\mc{F},P)$. We say that an event {\it occurs} if it has nonzero probability.
+    Assume that
+    \begin{itemize}
+        \item at least one of the events occurs,
+        \item no more than three events occur,
+        \item the probability of at least two events occuring is $\frac{1}{2}$,
+        \item $P(A_i)=p$, $P(A_i\cap A_j)=q$ and $P(A_i\cap A_j\cap A_k)=r$ for $1\leq i<j<k\leq n$.
+    \end{itemize}
+    Show that both $p\geq \frac{3}{2n}$ and $q\leq \frac{4}{n}$.\\[5pt]
+    {\bf Proof}\hspace{5pt}\\[5pt]
+    Since at least one of the events occur, we have (restricting the probability space to the union of the $\{A_i\}_{i=1}^n$)
+    \[P\bp{\bigcup_{i=1}^nA_i}=1\]
+    where from the inclusion-exclusion principle, we obtain
+    \begin{align*}
+        1=\sum_{i=1}^nP(A_i)-\sum_{1\leq i<j\leq n}P(A_i\cap A_j)+\sum_{1\leq i<j<k\leq n}P(A_i\cap A_j\cap A_k)=np-\nck{n}{2}q+\nck{n}{3}r.
+    \end{align*}
+    Now, letting $\mathcal{I}=\{(i,j): 1\leq i<j\leq n\}$, the probability that at least two events occur is $\frac{1}{2}$ so we can again apply the inclusion-exclusion principle to obtain
+    \begin{align*}
+        \frac{1}{2}&=P\bp{\bigcup_{1\leq i<j\leq n}(A_i\cap A_j)}\\
+        &=\sum_{1\leq i<j\leq n}P(A_i\cap A_j)-\sum_{\substack{(i,j),(k,\ell)\in\mathcal{I} \\ (i,j)\neq (k,\ell)}}P(A_i\cap A_j\cap A_k\cap A_\ell)+\sum_{\substack{(i,j),(k,\ell),(s,t)\in\mathcal{I} \\ (i,j)\neq(k,\ell)\neq(s,t)}}P(A_i\cap A_j\cap A_k\cap A_\ell\cap A_s\cap A_t).
+    \end{align*}
+    Some care is needed to justify this latest expression, in particular the fact that we can truncate the expansion after the third sum. For this, simply observe that $\nck{2}{2}=1<\nck{3}{2}=3$, so any set of $\geq 4$ combinations of two (out of three) events cannot be pairwise distinct. Equivalently,
+    taking $\geq 4$ pairwise distinct elements of $\mathcal{I}$ must specify at least four distinct events such that the probability of their intersection is zero.\\[5pt]
+    Through a similar line of reasoning, observe that for any $(i,j),(k,\ell)\in\mathcal{I}$ with $(i,j)\neq(k,\ell)$, at least three of $A_i, A_j,A_k,A_\ell$ are pairwise distinct. Of course, we can restrict our attention to the case when exactly three are pairwise distinct,
+    since the probability that greater than three events occur is zero. Now, fixing three sets $A_{i_1},A_{i_2},A_{i_3}\in\{A_i\}_{i=1}^n$, there are $\nck{3}{2}$ distinct elements of $\mathcal{I}$ specifying a pair of them. Then, there are $\nck{\nck{3}{2}}{2}=\nck{3}{2}=3$ ways of selecting two of these three elements, each
+    of which specify the same intersection $A_{i_1}\cap A_{i_2}\cap A_{i_3}$.\\[5pt]
+    Finally, for any $(i,j),(k,\ell),(s,t)\in\mathcal{I}$ with $(i,j)\neq(k,\ell)\neq (s,t)$, at least three of $A_i,A_j,A_k,A_\ell,A_s,A_t$ are pairwise distinct and, again,
+    we restrict our consideration for the case when exactly three are pairwise distinct. With the same arbitrary $A_{i_1},A_{i_2},A_{i_3}$ as before, there is now $\nck{\nck{3}{2}}{3}=\nck{3}{3}=1$ way of selecting three of the three available pairwise distinct elements of $\mathcal{I}$ specifying a pair of them.
+    Importantly, there were $\nck{n}{3}$ ways we could have fixed $A_{i_1},A_{i_2}$ and $A_{i_3}$.\\[5pt]
+    With this cumbersome counting aside, the above plainly reduces to
+    \begin{align*}
+        \frac{1}{2}=\nck{n}{2}q-3\nck{n}{3}r+\nck{n}{3}r=\nck{n}{2}q-2\nck{n}{3}r\leq \nck{n}{2}q-\nck{n}{3}r
+    \end{align*}
+    which we can use to obtain the desired inequalities. Specifically, we will need the facts
+    \[\frac{1}{2}\leq \nck{n}{2}q-\nck{n}{3}r\quad\text{and}\quad\nck{n}{3}r=\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\]
+    the latter of which is easily derived from the above result. Using the first, we can get
+    \begin{align*}
+        1=np-\nck{n}{2}q+\nck{n}{3}r\quad\Rightarrow\quad 1+\frac{1}{2}\leq np\quad\Rightarrow\quad p\geq \frac{3}{2n}
+    \end{align*}
+    as desired. We also know that $p\leq 1$, so that
+    \begin{align*}
+        1=np-\nck{n}{2}q+\nck{n}{3}r&\leq n-\nck{n}{2}q+\nck{n}{3}r+\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\\
+        &=n-\frac{1}{2}\nck{n}{2}q-\frac{1}{4}.
+    \end{align*}
+    Isolating for $q$ gives us
+    \begin{align*}
+        1\leq n-\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\quad\Rightarrow\quad \nck{n}{2}q\leq 2n-\frac{5}{2}\quad\Rightarrow\quad &q\leq \frac{(4n-5)(n-2)!2!}{2n!}\\
+        \Rightarrow\quad &q\leq \frac{4n-5}{n^2-n}=\frac{4n}{n^2}\frac{(1-\frac{5}{4n})}{(1-\frac{1}{n})}\leq \frac{4}{n}
+    \end{align*}
+    with the final inequality holding since $(1-\frac{5}{4n})\leq (1-\frac{1}{n})$. Thus we have shown that both $p\geq \frac{3}{2n}$ and $q\leq \frac{4}{n}$, as desired.\hfill{$\qed$}\\[5pt]
+\end{document}

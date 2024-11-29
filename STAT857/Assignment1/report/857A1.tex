@@ -1,0 +1,257 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-02-04}
+    \end{center}
+    \noindent{\bf Problem 1}\\[5pt]
+    Let $\{(x_i,y_i)\in\mbb{R}^{p+1}:1\leq i\leq n\}$ be the training data, where $p$ is the number
+    of covariates and $n$ is the number of training instances. Suppose $x_i$ and $y_i$ are standardized.
+    The elastic net solves the following optimization problem:
+    \[\min_{\beta\in\mbb{R}^p}\left\{\frac{1}{2n}\sum_{i=1}^n(y_i-\beta^Tx_i)^2+\lambda\bp{\frac{1-\alpha}{2}\sum_{j=1}^p\beta_j^2+\alpha\sum_{j=1}^p|\beta_j|}\right\}\]
+    where $\lambda>0$, $\alpha\in[0,1]$, and 
+    \begin{align*}
+        y=\begin{pmatrix}
+            y_1\\
+            y_2\\
+            \vdots\\
+            y_n
+        \end{pmatrix},\quad X=\begin{pmatrix}
+            x_{1,1} & x_{1,2} & \cdots & x_{1,p}\\
+            x_{2,1} & x_{2,2} & \cdots & x_{2,p}\\
+            \vdots & \vdots & \ddots & \vdots\\
+            x_{n,1} & x_{n,2} & \cdots & x_{n,p}
+        \end{pmatrix}.
+    \end{align*}
+    When $\alpha=0$ this reduces to ridge regression, when $\alpha=1$ this reduces to LASSO.\\[5pt]
+    {\bf a)}\hspace{5pt} Let $r\in\mbb{R}^n$ and $V\in\mbb{R}^n$ and consider the following one-dimensional optimization problem:
+    \begin{align*}
+        \min_{z\in\mbb{R}}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\}.
+    \end{align*}
+    Show that the minimizer $z^\ast$ is
+    \[z^\ast=\mc{S}_{\frac{n\lambda\alpha}{\|V\|^2+n\lambda(1-\alpha)}}\bp{\frac{r^TV}{\|V\|^2+n\lambda(1-\alpha)}}\] 
+    where for $x,\delta\in\mbb{R}$ we define $\mc{S}_\delta(x):=\sgm(x)(|x|-\delta)_+$, called the {\it soft-thresholding operator}, with $\sgm(\cdot)$
+    the signum function and $(|x|-\delta)_+$ the positive part of $x$.\\[5pt]
+    {\bf Proof}\hspace{5pt}Let $f$ be the objective function and define
+    \begin{align*}
+        g(z):=\frac{1}{2n}(r-zV)^T(r-zV)+\frac{\lambda(1-\alpha)}{2}z^2,\qquad h(z):=\lambda\alpha|z|
+    \end{align*}
+    so that $f(z)=g(z)+h(z)$. Let us begin by finding the optimum of $g$, which is differentiable. First, let us express $g$ in a more convenient form:
+    \begin{align*}
+        g(z)&=\frac{1}{2n}(r-zV)^T(r-zV)+\frac{\lambda(1-\alpha)}{2}z^2\\
+        &=\frac{r^Tr}{2n}-\frac{2zr^TV}{2n}+\frac{z^2V^TV}{2n}+\frac{\lambda(1-\alpha)z^2}{2}\\
+        &=\frac{r^Tr}{2n}-\frac{zr^TV}{n}+z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}\\
+    \end{align*}
+    so that by differentiating we obtain
+    \begin{align*}
+        g^\prime(z)&=\frac{-r^TV}{n}+2z\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}.
+    \end{align*}
+    Thus, if $\hat{z}_{LS}$ is an extremum of $g$, then we get
+    \begin{align*}
+        0=g^\prime(\hat{z}_{LS})=\frac{-r^TV}{n}+2\hat{z}_{LS}\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}\quad\Rightarrow\quad \hat{z}_{LS}=\frac{r^TV}{V^TV+n\lambda(1-\alpha)}.
+    \end{align*}
+    Further, $\hat{z}_{LS}$ is a global minimum, since, for all $x\in\mbb{R}$,
+    \begin{align*}
+        g^{\prime\prime}(x)=\frac{V^TV+n\lambda(1-\alpha)}{n}\geq0
+    \end{align*}
+    so that $g$ is convex on $\mbb{R}$. From here, we may proceed by cases to identify the optimum of $f$. Let us begin by
+    taking $\hat{z}_{LS}>0$. Under this assumption, the minimizer of $f(z)=g(z)+h(z)$, call it $\hat{z}$, is $\geq 0$ too.
+    To see this, notice that if $\hat{z}<0$, then both $h(z)$ and $g(z)$ could be reduced by taking $z=0$ (which follows by the definition of $h$ and the convexity of $g$),
+    so the minimizer must be nonnegative.\\[5pt]
+    We may thus continue by solving the problem on a restricted domain. That is, we find
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\} = \argmin_{z\in\mbb{R}_+}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha z\right\}
+    \end{align*}
+    where $\mbb{R}_+:=\{x\in\mbb{R}:x\geq 0\}$, and is solved easily in the typical manner.
+    \begin{align*}
+        f(z)=\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha z&=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV}{n}}+\frac{r^Tr}{2n}+\lambda\alpha z\\
+        &=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV-n\lambda\alpha}{n}}+\frac{r^Tr}{2n}
+    \end{align*}
+    so that
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{f(z)\right\}&=\argmin_{z\in\mbb{R}_+}\left\{z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV-n\lambda\alpha}{n}}\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{z^2-2z\bp{\frac{r^TV-n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}+\bp{\frac{r^TV-n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}^2\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{\bp{z-\bp{\hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}}^2\right\}\\
+        &=\begin{cases}
+            \hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad&\text{if $\hat{z}_{LS}>\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad&\text{if $0\leq\hat{z}_{LS}\leq \tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}
+        \end{cases}\tag{1}
+    \end{align*}
+    Similarly, we may consider the second possibility where $\hat{z}_{LS}\leq 0$. Under this new assumption, $\hat{z}$ is $\leq 0$ as well. If it weren't, we could once again reduce both $g(z)$ and $h(z)$ by taking
+    $z=0$, so that $h(z)=0$ and $z$ is closer to the global minimum of $g$. Thus, the minimizer must be nonpositive.\\[5pt]
+    We may thus proceed in precisely the same manner as for the previous case, only now the objective is to find
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_-}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\} = \argmin_{z\in\mbb{R}_-}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}-\lambda\alpha z\right\}
+    \end{align*}
+    with $\mbb{R}_-:=\{x\in\mbb{R}:x\leq 0\}$. By precisely the same computation as above, we obtain
+    \begin{align*}
+        f(z)=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV+n\lambda\alpha}{n}}+\frac{r^Tr}{2n}
+    \end{align*}
+    so that now,
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{f(z)\right\}&=\argmin_{z\in\mbb{R}_+}\left\{z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV+n\lambda\alpha}{n}}\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{z^2-2z\bp{\frac{r^TV+n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}+\bp{\frac{r^TV+n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}^2\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{\bp{z-\bp{\hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}}^2\right\}\\
+        &=\begin{cases}
+            \hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad&\text{if $\hat{z}_{LS}<-\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad&\text{if $-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\leq\hat{Z}_{LS}\leq 0$}
+        \end{cases}\tag{2}
+    \end{align*}
+    whereby combining (1) and (2), we obtain
+    \begin{align*}
+        \hat{z}=\begin{cases}
+            \hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad & \text{if $\hat{z}_{LS}>\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad & \text{if $0\leq |\hat{z}_{LS}|\leq\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            \hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad &\text{if $\hat{z}_{LS}<-\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}
+        \end{cases}&=\sgm(\hat{z}_{LS})\bp{|\hat{z}_{LS}|-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}_+\\
+        &=\mc{S}_{\frac{n\lambda\alpha}{\|V\|^2+n\lambda(1-\alpha)}}\bp{\frac{r^TV}{\|V\|^2+n\lambda(1-\alpha)}}
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 2}\\[5pt]
+    Consider a problem of the form 
+    \[\min_{\beta\in\mbb{R}^m,\theta\in\mbb{R}^n}(f(\beta)+g(\theta))\quad\text{subject to $A\beta+B\theta=c$}\]
+    where $f:\mbb{R}^m\rightarrow\mbb{R}$ and $g:\mbb{R}^n\rightarrow\mbb{R}$ are convex, $A\in\mbb{R}^{d\times m}$ and $B\in\mbb{R}^{d\times n}$ are known matrices
+    of constraints, with $c\in\mbb{R}^d$ a constraint vector.\\[5pt]
+    Define
+    \[L_\rho(\beta,\theta,\mu):=f(\beta)+g(\theta)+\langle\mu, A\beta+B\theta-c\rangle+\tfrac{\rho}{2}\|A\beta+B\theta-c\|^2\]
+    where $\rho>0$ is a small, fixed parameter (akin to a learning rate in ML) and $\mu\in\mbb{R}^d$. The Alternating Direction Method of Multipliers (ADMM)
+    tries to solve the optimization problem by the following updates:
+    \begin{align*}
+        \beta^{t+1}&=\argmin_{\beta\in\mbb{R}^m} L_\rho(\beta,\theta^t,\mu^t)\\
+        \theta^{t+1}&=\argmin_{\theta\in\mbb{R}^n} L_\rho(\beta^{t+1},\theta,\mu^t)\\
+        \mu^{t+1}&=\mu^t+\rho(A\beta^{t+1}+B\theta^{t+1}-c).
+    \end{align*}
+    Under relatively mild conditions, one can show that this procedure converges to and optimal solution to the above optimization problem.\\[5pt]
+    {\bf a)}\hspace{5pt} Assume the design matrix $X$ and response vector $y$ have been standardized. The Lagrange form of the LASSO can be expressed in an equivalent form as
+    \[\min_{\beta\in\mbb{R}^P,\theta\in\mbb{R}^p}\left\{\tfrac{1}{2}\|y-X\beta\|^2+\lambda\|\theta\|_1\right\}\quad\text{subject to $\beta-\theta=0$}.\]
+    Find explicitly the ADMM updates for this problem.\\[5pt]
+    {\bf Proof}\hspace{5pt} For this problem, define
+    \[f(\beta)=\frac{1}{2}\|y-X\beta\|^2,\quad g(\theta)=\lambda\|\theta\|_1,\quad A=1,\quad B=-1,\quad c=0\tag{3}\]
+    and fix some $\rho\in\mbb{R}$ nonnegative. Now, fix $\beta^0,\theta^0,\mu^0\in\mbb{R}^p$. The ADMM updates allow us to recursively
+    define sequences of vectors $\{\beta^t\}_{t\geq 0}$, $\{\theta^t\}_{t\geq 0}$ and $\{\mu^t\}_{t\geq 0}$ by the above updates using our definitions in (3).
+    Let us find each of these in turn, beginning with a recursive formula for $\beta^{t+1}$ given $\beta^t$ for some $t\geq 0$.
+    \begin{align*}
+        \beta^{t+1}&=\argmin_{\beta\in\mbb{R}^p} \left\{f(\beta)+g(\theta^t)+\langle\mu^t, A\beta+B\theta^t-c\rangle+\tfrac{\rho}{2}\|A\beta+B\theta^t-c\|^2\right\}\\
+        &=\argmin_{\beta\in\mbb{R}^p} \left\{\frac{1}{2}(y-X\beta)^T(y-X\beta)+\lambda\|\theta^t\|_1+\langle\mu^t,\beta-\theta^t\rangle+\tfrac{\rho}{2}(\beta-\theta^t)^T(\beta-\theta^t)\right\}\\
+        &=\argmin_{\beta\in\mbb{R}^p} \left\{\frac{1}{2}(y^Ty-2y^TX\beta+\beta^TX^TX\beta)+(\mu^t)^T\beta-(\mu^t)^T\theta^t+\frac{\rho}{2}(\beta^T\beta-2(\theta^t)^T\beta+(\theta^t)^T(\theta^t))\right\}\\
+        &=\argmin_{\beta\in\mbb{R}^p} \left\{-y^TX\beta+\frac{1}{2}\beta^TX^TX\beta+(\mu^t)^T\beta+\frac{\rho}{2}\beta^T\beta-\rho(\theta^t)^T\beta\right\}\\
+        &=:\argmin_{\beta\in\mbb{R}^p} \left\{G(\beta)\right\}.
+    \end{align*}
+We can solve this by identifying critical points in the gradient of $G$. That is, if $\beta^{t+1}$ is to be our update, then it must satisfy
+\begin{align*}
+    0=\nabla_\beta G(\beta^{t+1})&=-X^Ty+X^TX\beta^{t+1}+\mu^t+\rho\beta^{t+1}-\rho\theta^t
+\end{align*}
+which implies that
+\[(X^TX+\rho\mbb{I})\beta^{t+1}=X^Ty-\mu^t+\rho\theta^t\quad\Rightarrow\quad\beta^{t+1}=(X^TX+\rho\mbb{{I}})^{-1}(X^Ty+\rho\theta^t-\mu^t).\]
+where $\mbb{I}$ is the $p\times p$ identity matrix. It can also be shown that $X^TX+\rho\mbb{I}$ is nonsingular since $\rho>0$, but we omit this from the present proof.
+We can also see that this point is a global minimum of $G$, since the Hessian is given by
+\begin{align*}
+    \nabla^2_\beta G(\beta)=X^TX+\rho\mbb{I},\quad\text{and $\forall x\in\mbb{R}^p$,}\quad x^T(X^TX+\rho\mbb{I})x=x^TX^TXx+\rho x^Tx=\|Xx\|^2+\rho\|x\|^2\geq 0.
+\end{align*}
+so $\nabla^2_\beta G(\beta)$ is positive semidefinite, and thus convex on $\mbb{R}^p$, such that $\beta^{t+1}$ is in fact a global minimum. We may proceed similarly to find the update formula for $\theta^{t+1}$. That is,
+\begin{align*}
+    \theta^{t+1}&=\argmin_{\theta\in\mbb{R}^p}\left\{\frac{1}{2}(y-X\beta^{t+1})^T(y-X\beta^{t+1})+\lambda\|\theta\|_1+\langle\mu^t,\beta^{t+1}-\theta\rangle+\tfrac{\rho}{2}(\beta^{t+1}-\theta)^T(\beta^{t+1}-\theta)\right\}\\
+    &=\argmin_{\theta\in\mbb{R}^p}\left\{\lambda\|\theta\|_1-(\mu^t)^T\theta-\rho(\beta^{t+1})^T\theta+\frac{\rho}{2}\theta^T\theta\right\}\tag{4}\\
+    &=:\argmin_{\theta\in\mbb{R}^p}\left\{H(\theta)\right\}
+\end{align*}
+where now the function $H$ can be decomposed into two convex parts, one differentiable and the other not differentiable, but separable. That is,
+\begin{align*}
+    H(\theta)&=\frac{\rho}{2}\sum_{i=1}^p\theta_i^2-\sum_{i=1}^p\mu_i^t\theta_i-\rho\sum_{i=1}^p\beta^{t+1}_i\theta_i+\lambda\sum_{j=1}^p|\theta_j|\\
+    &=\frac{\rho}{2}\sum_{i=1}^p\theta_i^2-\rho\sum_{i=1}^p\left(\beta_i^{t+1}-\frac{\mu_i}{\rho}\right)\theta_i+\lambda\sum_{j=1}^p|\theta_j|\\
+    &=\frac{\rho}{2}\left[\sum_{i=1}^p\theta_i^2-2\bp{\beta_i^{t+1}-\frac{\mu_i}{\rho}}\theta_i\right]+\lambda\sum_{j=1}^p|\theta_j|\\
+    &=\frac{1}{2}\left[\sum_{i=1}^p\theta_i^2-2\bp{\beta_i^{t+1}-\frac{\mu_i}{\rho}}\theta_i+\bp{\beta^{t+1}_i+\frac{\mu_i}{\rho}}^2\right]+\frac{\lambda}{\rho}\sum_{j=1}^p|\theta_j|\\
+    &=\frac{1}{2}\left[\sum_{i=1}^p\bp{\theta_i-\bp{\beta_i^{t+1}-\frac{\mu_i}{\rho}}}^2\right]+\frac{\lambda}{\rho}\sum_{j=1}^p|\theta_j|\tag{5}\\
+    &=\frac{1}{2}\left[\sum_{i\neq j}\bp{\theta_i-\bp{\beta_i^{t+1}-\frac{\mu_i}{\rho}}}^2\right]+\frac{1}{2}\bp{\theta_j-\bp{\beta_j^{t+1}-\frac{\mu_j}{\rho}}}^2+\frac{\lambda}{\rho}|\theta_j|+\frac{\lambda}{\rho}\sum_{i\neq j}|\theta_i|
+\end{align*}
+where $1\leq j\leq p$ is an arbitrary coordinate. We can clearly verify from (5)that $H$ is of the form mentioned, and so coordinate descent is guaranteed to converge to the global minimum. That is, we can update each coordinate individually as
+\begin{align*}
+    \theta^{t+1}_j&=\argmin_{\theta_j\in\mbb{R}}\left\{\frac{1}{2}\bp{\theta_j-\bp{\beta_j^{t+1}-\frac{\mu_j}{\rho}}}^2+\frac{\lambda}{\rho}|\theta_j|\right\}
+\end{align*}
+which we know (from our coverage of LASSO) has a minimizer given by
+\[\theta^{t+1}_j=\mathcal{S}_{\frac{\lambda}{\rho}}\bp{\beta_j^{t+1}-\frac{\mu_j}{\rho}}\]
+where the $\beta^{t+1}_j+\tfrac{\mu_j}{\rho}$ in the soft-thresholding operator is due to the fact that this is the least squares solution to the differentiable component of this univariate optimization. Since we apply this for every coorindate, we may write
+\[\theta^{t+1}=\mathcal{S}_{\frac{\lambda}{\rho}}\bp{\beta^{t+1}-\frac{1}{\rho}\mu}.\]
+Finally, the update for $\mu^{t+1}$ follows directly from the definition with no derivation required:
+\begin{align*}
+    \mu^{t+1}=\mu^t+\rho(\beta^{t+1}-\theta^{t+1})
+\end{align*}
+and we are done.\hfill{$\qed$}\\[5pt]
+{\bf b)} Suppose that instead we write
+    \[\min_{\beta\in\mbb{R}^P,\theta\in\mbb{R}^p}\left\{\tfrac{1}{2n}\|y-X\beta\|^2+\lambda\|\theta\|_1\right\}\quad\text{subject to $\beta-\theta=0$}.\]
+From {\bf a}, find the corresponding update formulae for $\beta^{t+1},\theta^{t+1}$ and $\mu^{t+1}$.\\[5pt]
+{\bf Proof}\hspace{5pt} In this new scenario, our definitions for $g$, $A$, $B$ and $c$ are unchanged, and the only modification is that now
+\[f(\beta)=\frac{1}{2n}\|y-X\beta\|^2.\]
+For $\beta^{t+1}$, it is easy to see that the new objective function $G$ is given by
+\begin{align*}
+    G(\beta):=-\frac{1}{n}y^TX\beta+\frac{1}{2n}\beta^TX^TX\beta+(\mu^t)^T\beta+\frac{\rho}{2}\beta^T\beta-\rho(\theta^t)^T\beta
+\end{align*}
+identical to what we found previously except for the factor of $\tfrac{1}{n}$ in the first two terms. We can easily compute its gradient
+\begin{align*}
+    \nabla_\beta G(\beta)&=-\frac{1}{n}X^Ty+\frac{1}{n}X^TX\beta+\mu^t+\rho\beta-\rho\theta^t
+\end{align*}
+which has a new global minimum given by
+\begin{align*}
+    \beta^{t+1}&=\bp{\frac{1}{n}X^TX+\rho\mbb{I}}^{-1}\bp{\frac{1}{n}X^Ty+\rho\theta^t-\mu^t}
+\end{align*}
+which is still a global minimum because the Hessian is
+\begin{align*}
+    \nabla^2_\beta G(\beta)&=\frac{1}{n}X^TX+\rho\mbb{I}\quad\text{and, $\forall x\in \mbb{R}^p$,}\quad x^T\frac{1}{n}X^TXx+\rho x^Tx=\frac{1}{n}\|Xx\|^2+\rho\|x\|^2\geq 0
+\end{align*}
+such that $\nabla^2_\beta G$ is positive semidefinite. Now, observe that in (4) of part {\bf a}, the objective function does not include $f$. This means that modifying $f$ does not change the update rule for $\theta^{t+1}$, and this is
+also the case for $\mu^{t+1}$. Thus, their update rules remain unchanged. Thus, altogether our final update formulae are given by
+\begin{align*}
+    \beta^{t+1}&=\bp{\frac{1}{n}X^TX+\rho\mbb{I}}^{-1}\bp{\frac{1}{n}X^Ty+\rho\theta^t-\mu^t}\\
+    \theta^{t+1}&=\mathcal{S}_{\frac{\lambda}{\rho}}\bp{\beta^{t+1}-\frac{1}{\rho}\mu}\\
+    \mu^{t+1}&=\mu^t+\rho(\beta^{t+1}-\theta^{t+1})
+\end{align*}
+and we are done. \hfill{$\qed$}
+
+\end{document}

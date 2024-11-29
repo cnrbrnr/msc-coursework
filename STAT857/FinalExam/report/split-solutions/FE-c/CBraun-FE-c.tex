@@ -1,0 +1,108 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf FINAL EXAM} \hfill {\bf Connor Braun} \hfill {\bf 2024-04-16}
+    \end{center}
+\noindent{\bf c)} Write down the E-step and M-step of the EM algorithm.\\[5pt]
+{\bf Solution}\hspace{5pt} We shall begin with the E-step. Let $\theta^\prime=(c_1^\prime,c_0^\prime,\sigma^{2\prime},p^\prime)$ denote the current parameter estimate.  Proceding by direct computation, we have
+\begin{align*}
+    Q(\theta|\theta^\prime)&=\E(\ell_c(\theta|\mc{D}_c)|\mc{D},\theta^\prime)\\
+    &=\sum_{i=1}^n(1-\E(\Delta_i|\mc{D},\theta^\prime))\bp{\log(\phi(Y_i,2\mathbbm{1}_{(x_i>c_0)},\sigma^2))+\log(1-p)}+\E(\Delta_i|\mc{D},\theta^\prime)\bp{\log(\phi(Y_i,\mathbbm{1}_{(x_i>c_1)},\sigma^2))+\log(p)}.
+\end{align*}
+and we remind the reader that $\phi(y,\mu,\sigma^2)$ denotes the Gaussian density evaluated at $y$ with mean $\mu$ and variance $\sigma^2$. Now, since $\Delta_i\overset{i.i.d.}{\sim}\text{Bernoulli}(p)$, we get
+\begin{align*}
+    \E(\Delta_i|\mc{D},\theta^\prime)&=P(\Delta_i=1|\mc{D},\theta^\prime)=\frac{\phi(Y_i,\mathbbm{1}_{(x_i>c_1^\prime)},\sigma^{2\prime})p^\prime}{\phi(Y_i,\mathbbm{1}_{(x_i>c_1^\prime)},\sigma^{2\prime})p^\prime + \phi(Y_i,2\mathbbm{1}_{(x_i>c_0^\prime)},\sigma^{2\prime})(1-p^\prime)}.\tag{Baye's theorem}
+\end{align*}
+Now, denoting $\hat{\xi}_i:=\E(\Delta_i|\mc{D},\theta^\prime)$ as given above, we may return to the expression for $Q$ and write
+\begin{align*}
+    Q(\theta|\theta^\prime)=\sum_{i=1}^n(1-\hat{\xi}_i)\bp{\log(\phi(Y_i,2\mathbbm{1}_{(x_i>c_0)},\sigma^2))+\log(1-p)}+\hat{\xi}_i\bp{\log(\phi(Y_i,\mathbbm{1}_{(x_i>c_1)},\sigma^2))+\log(p)}
+\end{align*}
+which defines the E-step. Algorithmically, we update $\hat{\xi}_i$ for $i=1,\dots,n$ at each step using the latest parameter estimates, and these will then be used to further update the parameter estimates. For the M-step, we begin by finding an expression for $\hat{p}$ which maximizes $Q$ in $p$. By differentiating,
+\begin{align*}
+    \frac{\partial}{\partial p}Q(\theta|\theta^\prime)=\sum_{i=1}^n-\frac{1-\hat{\xi}_i}{1-p}+\frac{\hat{\xi}_i}{p}\quad\Rightarrow\quad\frac{\sum_{i=1}^n\hat{\xi}_i}{\hat{p}}=\frac{n-\sum_{i=1}^n\hat{\xi}_i}{1-\hat{p}}\quad\Rightarrow\quad n\hat{p}=\sum_{i=1}^n\hat{\xi}_i\quad\Rightarrow\quad \hat{p}=\frac{1}{n}\sum_{i=1}^n\hat{\xi}_i.
+\end{align*} 
+In a similar fashion we may determine a maximizer $\hat{\sigma}^2$ for $Q$ in $\sigma^2$. Before that though, we have 
+\[\log(\phi(y,\mu,\sigma^2))=-\log(\sqrt{2\pi})-\frac{1}{2}\log(\sigma^2)-\frac{1}{2\sigma^2}(y-\mu)^2\]
+which depends on $\sigma^2$ only through the second and third terms. Thus,
+\begin{align*}
+    \frac{\partial}{\partial\sigma^2}Q(\theta|\theta^\prime)&=\sum_{i=1}^n-(1-\hat{\xi}_i)\bp{\frac{1}{2\sigma^2}-\frac{(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2}{2\sigma^4}}-\hat{\xi}\bp{\frac{1}{2\sigma^2}-\frac{(Y_i-\mathbbm{1}_{(x_i>c_1)})^2}{2\sigma^4}}\\
+    &=\sum_{i=1}^n\frac{1}{2\sigma^4}\left[(\hat{\xi}_i-1)\bp{\sigma^2-(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2}-\hat{\xi}\bp{\sigma^2-(Y_i-\mathbbm{1}_{(x_i>c_1)})^2}\right]\\
+    &=\sum_{i=1}^n\frac{1}{2\sigma^4}\left[(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2-\sigma^2+\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right]
+\end{align*}
+so that
+\begin{align*}
+    n\hat{\sigma}^2=\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2+\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\quad\Rightarrow\quad\hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2+\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2
+\end{align*}
+which leaves only the maximizers $\hat{c}_0$, $\hat{c}_1$ of $Q$ in $c_0$, $c_1$ respectively. The issue here is that $Q$ is not differentiable in $c_0$, $c_1$. Instead, we have
+\begin{align*}
+    \max_{c_0,c_1}\left\{Q(\theta|\theta^\prime)\right\}=\max_{c_0,c_1}\Bigg\{\sum_{i=1}^n&(1-\hat{\xi}_i)\bp{-\log(\sqrt{2\pi})-\frac{1}{2}\log(\sigma^2)-\frac{1}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2+\log(1-p)}\\
+    &+\hat{\xi}_i\bp{-\log(\sqrt{2\pi})-\frac{1}{2}\log(\sigma^2)-\frac{1}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2+\log(p)}\Bigg\}.
+\end{align*}
+It is sufficient to minimize this expression in only those terms depending on $c_0$ or $c_1$, so we compute
+\begin{align*}
+    \max_{c_0,c_1}\left\{\sum_{i=1}^n-\frac{1-\hat{\xi}_i}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2-\frac{\hat{\xi}_i}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right\}&=\min_{c_0,c_1}\left\{\sum_{i=1}^n\frac{1-\hat{\xi}_i}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2+\frac{\hat{\xi}_i}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right\}\\
+    &=\min_{c_0}\left\{\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2\right\}+\min_{c_1}\left\{\sum_{i=1}^n\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right\}.
+\end{align*} 
+Now, let $\mc{D}:=\{x_{\alpha(j)}\}_{j=1}^n$ be a permutation of the feature variables so that $x_{\alpha(i)}\leq x_{\alpha(i+1)}$ for $i=1,\dots,n-1$. For any $1\leq i\leq n-1$, provided $x_{\alpha(i)}<x_{\alpha(i+1)}$, varying $x_{\alpha(i)}<c_1,c_0<x_{\alpha(i+1)}$ does not change the value of either term in the above objective function. It suffices then to minimize the objective over the finite set
+\[\mc{U}_x:=\{x_{\alpha(j)}\in\mc{D}:x_{\alpha(j)}\neq x_{\alpha(k)}\;\forall k<j\}\]
+which are the pairwise distinct values of the features in $\mc{D}_x$. Thus, to complete the M-step, we may compute
+\begin{align*}
+    \hat{c}_1=\argmin_{c_1\in\mc{U}_x}\left\{\sum_{i=1}^n\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right\}\quad\text{and}\quad\hat{c}_0=\argmin_{c_0\in\mc{U}_x}\left\{\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2\right\}.
+\end{align*}
+To summarize, the maximizers of each of the parameters are given by
+\begin{align*}
+    &\hat{p}=\frac{1}{n}\sum_{i=1}^n\hat{\xi}_i\\
+    &\hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2+\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\\
+    &\hat{c}_1=\argmin_{c_1\in\mc{U}_x}\left\{\sum_{i=1}^n\hat{\xi}_i(Y_i-\mathbbm{1}_{(x_i>c_1)})^2\right\}\\
+    &\hat{c}_0=\argmin_{c_0\in\mc{U}_x}\left\{\sum_{i=1}^n(1-\hat{\xi}_i)(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2\right\}
+\end{align*}
+where $\hat{\xi}_i$, $i=1,\dots,n$ are as defined in the E-step.\hfill{$\qed$}
+\end{document}

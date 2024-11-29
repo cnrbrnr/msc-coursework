@@ -1,0 +1,109 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 3} Suppose that an experiment consists of an infinite sequence of independent coin tosses, where the coin has
+    a probability $p$ of landing heads each flip. For each $n\geq 0$, let $X_n$ be equal to $0,1,2$ or $3$ depending on whether the $(n+1)$st and $(n+2)$nd coin toss
+    come up $HH$, $HT$, $TH$ or $TT$ respectively.\\[10pt]
+    {\bf a)} Show that $\{X_n\}_{n\geq 0}$ is a Markov chain and identify its one-step transition probability matrix.\\[10pt]
+    {\bf Solution} Let $\{Z_j\}_{j=1}^\infty$ be a random outcome of the coin flip process. Then the elements of this sequence are {\it i.i.d.} with $Z_1\sim Bernoulli(p)$, provided
+    we designate  'success' on the $k$th flip $Z_k=1$ to be an outcome of heads. We will let $q=1-p$ denote the probability of flipping tails. Next, let $f:\{0,1\}\times\{0,1\}\rightarrow\{0,1,2,3\}$ so that
+    \[f(1,1)=0\quad f(1,0)=1\quad f(0,1)=2\quad f(0,0)=3.\]
+    Then the process of interest can be written $\{X_n\}_{n\geq 0}=\{f(Z_{n+1},Z_{n+2})\}_{n\geq 0}$.\\[10pt] 
+    We next endeavor to determine $P$, the transition probability matrix of $\{X_n\}_{n\geq 0}$. Let $k^\prime,k\in\{0,1,2,3\}$ and $f^{-1}:\{0,1,2,3\}\rightarrow\{0,1\}\times\{0,1\}$ be the inverse of $f$,
+    which exists since clearly $f$ is a bijection between $\{0,1\}\times\{0,1\}$ and $\{0,1,2,3\}$. Then $f^{-1}(k^\prime)=(i^\prime,j^\prime)$ and $f^{-1}(k)=(i,j)$ for some $i,j,i^\prime,j^\prime\in\{0,1\}$ and
+    \begin{align*}
+        p_{k,k^\prime}&=P(X_{n+1}=k^\prime|X_n=k)\\
+        &=P(f^{-1}(X_{n+1})=f^{-1}(k^\prime)|f^{-1}(X_n)=f^{-1}(k))\\
+        &=P((Z_{n+2},Z_{n+3})=(i^\prime,j^\prime)|(Z_{n+1},Z_{n+2})=(i,j))\\
+        &=\begin{cases}
+            p\quad\text{if $i^\prime=j$ and $j^\prime=1$}\\
+            q\quad\text{if $i^\prime=j$ and $j^\prime=0$}\\
+            0\quad\text{{\it o.w.}}
+        \end{cases}
+    \end{align*}
+    Using this information we can construct a state transition diagram for $\{X_n\}_{n\geq 0}$, depicted below.
+\begin{center}
+  \makebox[\textwidth]{\includegraphics[width=90mm]{855A2-Dynkin.png}}
+\end{center}
+{\bf Figure 1} State transition diagram for the augmented coin flip process $\{X_n\}_{n\geq 0}$, where $p$ is the probability of flipping heads and $1-p=q$ is the probability of flipping tails.\\[10pt]
+This visualization makes it simple to deduce $P$.
+\begin{align*}
+    P=[p_{i-1,j-1}]_{1\leq i,j\leq 4}=\begin{pmatrix}
+        p & q & 0 & 0 \\
+        0 & 0 & p & q \\
+        p & q & 0 & 0 \\
+        0 & 0 & p & q \\
+    \end{pmatrix}.
+\end{align*}
+Noting that we index the matrix starting at $1$, but the transition probabilities by the states $0,1,2,3$.\\[10pt]
+{\it It turns out that this was all we need to show, but I will leave in my argument for why this process satisfies the Markov property for the sake of posterity.}\\[10pt]
+By the above construction it can also be shown that $\{X_n\}_{n\geq 0}$ obeys the Markov property. Fix $n\in\mbb{N}$ and let $\{x_j\}_{j=0}^{n+1}$ be a realization of $\{X_j\}_{j\geq 0}$ up to the $(n+1)$st element. Corresponding to this
+realization is the set of coin flips $\{z_j\}_{j=1}^{n+3}$ so that $x_j=(z_{j+1},z_{j+2})$ for $j=0,1,\dots,n+1$. Then
+\begin{align*}
+    P(X_{n+1}=x_{n+1}|X_n=x_{n},\dots,X_0=x_0)&=P(f^{-1}(X_{n+1})=f^{-1}(x_{n+1})|f^{-1}(X_n)=f^{-1}(x_{n}),\dots,f^{-1}(X_0)=f^{-1}(x_0))\\
+    &=P(Z_{n+3}=z_{n+3},Z_{n+2}=z_{n+2}|Z_{n+2}=z_{n+2},Z_{n+1}=z_{n+1},\dots,Z_1=z_1)\\
+    &=P(Z_{n+3}=z_{n+3},Z_{n+2}=z_{n+2}|Z_{n+2}=z_{n+2},Z_{n+1}=z_{n+1})\tag{3}\\
+    &=P(f(Z_{n+2},Z_{n+3})=f(z_{n+2},z_{n+3})|f(Z_{n+1}Z_{n+2})=f(z_{n+1},z_{n+2}))\\
+    &=P(X_{n+1}=x_{n+1}|X_n=x_n)
+\end{align*}
+where (3) holds since each of the coin flips are independent. So $\{X_n\}_{n\geq 0}$ obeys the Markov property and is thus a Markov process.\hfill{$\qed$}\\[10pt]
+{\bf b)} For each $n\geq 0$ find the probability mass function of $X_n$.\\[10pt]
+{\bf Solution} Let us first determine the probability mass function of $X_0$ over state space $S=\{0,1,2,3\}$. Taking $f:\{0,1\}\times\{0,1\}\rightarrow S$ as
+in the previous problem, we get
+\begin{align*}
+    P(X_0=0)=P(f^{-1}(X_0)=f^{-1}(0))=P((Z_1,Z_2)=(1,1))&=P(Z_1=1)P(Z_2=1)\tag{independence of flips}\\
+    &=p^2
+\end{align*}
+which is just the probability of flipping heads twice in a row. By precisely the same argument we find
+\[P(X_0=1)=pq,\quad P(X_0=2)=pq\quad\text{and}\quad P(X_0=3)=q^2\]
+so that the initial distribution is given by the vector
+\[\lambda=(p^2,pq,pq,q^2)\]
+where $\lambda:S\rightarrow [0,1]$, and we write $\lambda_j=\lambda(j)$ for $j\in S$. Now, letting $\lambda^{(n)}:S\rightarrow[0,1]$ be the probability mass function of $X_n$ for $n\geq 0$ (with the same indexing convention as $\lambda$), we have the result
+\[\lambda^{(n)}_j=P(X_n=j)=\sum_{i_0,i_1,\dots,i_{n-1}\in S}\lambda_{i_0}p_{i_0,i_1}p_{i_1,i_2}\cdots p_{i_{n-1},j}=(\lambda P^n)_j\]
+which is an explicit formula for the distribution $\lambda^{(n)}$ for any $n\geq 0$. Using this, we can find the form of $\lambda^{(n)}$ by induction.\\[10pt]
+Let $k=1$. Then
+\begin{align*}
+    \lambda^{(k)}&=\lambda P\\
+    &=(p^2,pq,pq,q^2)\begin{pmatrix}
+       p & q & 0 & 0\\
+       0 & 0 & p & q\\ 
+       p & q & 0 & 0\\
+       0 & 0 & p & q
+    \end{pmatrix}\\
+    &=(p^3+p^2q,p^2q+pq^2,p^2q+pq^2,pq^2+q^3)\\
+    &=(p^2(p+q), pq(p+q), pq(p+q), q^2(p+q))\\
+    &=(p^2,pq, pq, q^2)\tag{$p+q=p+1-p=1$}\\
+    &=\lambda
+\end{align*}
+so we have $\lambda^{(k)}=\lambda$ for $k=1$. Now, suppose that $\lambda^{(k)}=\lambda$ for some $k\geq 1$. Then
+\begin{align*}
+    \lambda^{(k+1)}&=\lambda P^{k+1}\\
+    &=(\lambda P^k)P\tag{associativity}\\
+    &=\lambda^{(k)}P\\
+    &=\lambda P\tag{inductive hypothesis}
+\end{align*}
+but $\lambda P=\lambda^{(1)}=\lambda$ as shown in the inductive basis, so $\lambda^{(k+1)}=\lambda$. Then, by the principle of
+mathematical induction, we have $\lambda^{(n)}=\lambda$ for all $n\geq 1$, and definitionally $\lambda^{(0)}=\lambda P^0=\lambda$, so the
+probability mass function of $X_n$ for any $n\geq 0$ is given by $\lambda=(p^2,pq,pq,q^2)$\hfill{$\qed$}.
+\end{document}

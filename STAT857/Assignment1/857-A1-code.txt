@@ -1,0 +1,263 @@
+##############################################################
+############ ASSIGNMENT 1: PROBLEMS 1b, 2c AND 3 #############
+##############################################################
+
+CONNOR BRAUN; 20425268
+
+# Problems were completed in both Python and R, necessitating 
+# this plain .txt file rather than a single .py or .r fiile.
+# I will make it as straightforward as possible to copy/paste
+# my work for grading purposes.
+
+##############################################################
+# PROBLEM 1b: Python (with result verification in R)
+##############################################################
+
+import os
+
+import numpy as np
+import pandas as pd
+
+# Define functions
+def sign(x):
+    '''returns -1, 0, 1 if x is negative, zero, positive, resp.'''
+    return int(x / np.abs(x)) if x !=0 else 0
+
+def soft_thresh(x, tau):
+    '''reduces the magnitude of x by tau, and returns zero if |x|<t'''
+    return sign(x) * (np.abs(x) - tau) if np.abs(x)>tau else 0
+
+# create soft-thresholding ufunc for application to arrays
+vec_soft_thresh = np.vectorize(soft_thresh)
+
+def elastic_net(X, y, reg, alpha, tol=1e-10, max_iter=1e3, verbose=False):
+
+    # initialize
+    delta = 1 # tracks fluctuations in coefficients
+    n = X.shape[0] # rows are samples
+    p = X.shape[1] # columns are predictors
+    beta = np.random.normal(loc=0.0, scale=1.0, size=(p, 1)) # Initialize regression coefficients
+    it = 0 # iterations
+    descent_constants = np.sum(X**2, axis=0) + (n * reg * (1 - alpha))
+
+    while it < max_iter and delta > tol:
+        it += 1
+        prev_beta = beta.copy()
+
+        # iterate over predictor coordinates
+        for j in range(p):
+            K = [c for c in range(p) if c != j] # predictor indices excluding coordinate
+            rj = y - (X[:, K] @ beta[K, :]) # form aggregate response
+            V = X[:, j].reshape((-1, 1))
+            dc = descent_constants[j]
+            beta[j, 0] = soft_thresh(np.sum(V * rj) / dc, (n * reg * alpha) / dc)
+
+        delta = np.amax(np.abs(beta - prev_beta))
+
+    if verbose == True:
+
+        if it >= max_iter:
+            print('Optimization timeout after {} iterations; delta={}'.format(it, round(delta, 4)))
+        else:
+            print('Estimate stabilized after {} iterations; tol={}, delta={}'.format(it, round(tol, 4), round(delta, 4)))
+
+    return beta
+
+# Load the data
+X = pd.read_csv('./data/A1Q1_X.csv').values
+y = pd.read_csv('./data/A1Q1_y.csv').values
+
+# Standardize predictors and response
+X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+y = (y - np.mean(y, axis=0)) / np.std(y, axis=0)
+
+# Estimate elastic net coefficients by coordinate descent
+reg = 0.1 # lambda penalty
+alpha = 0.6 # ridge-lasso balance parameter
+beta = elastic_net(X, y, reg, alpha, max_iter=1e3, verbose=True)
+
+# Coefficients match those obtained from glmnet in R
+print('elastic net coefficients estimated with custom coordinate descent function:\n{}\n'.format(beta[:, 0]))
+
+##############################################################
+# PROBLEM 2c: Python (with result verification in R)
+##############################################################
+
+import os
+
+import numpy as np
+import pandas as pd
+
+# Define functions
+def sign(x):
+    '''returns -1, 0, 1 if x is negative, zero, positive, resp.'''
+    return int(x / np.abs(x)) if x !=0 else 0
+
+def soft_thresh(x, tau):
+    '''reduces the magnitude of x by tau, and returns zero if |x|<t'''
+    return sign(x) * (np.abs(x) - tau) if np.abs(x)>tau else 0
+
+# create soft-thresholding ufunc for application to arrays
+vec_soft_thresh = np.vectorize(soft_thresh)
+
+def lasso_admm(X, y, reg, lr, max_iter=1e3, tol=1e-10, verbose=False):
+
+    # initialize
+    n = X.shape[0] # rows are samples
+    p = X.shape[1] # columns are predictors
+
+    delta = np.ones((3,))
+    max_delta = 1
+
+    # Initialize vectors from standard MVN distribution
+    beta = np.random.normal(size=(p, 1))
+    theta = np.random.normal(size=(p, 1))
+    mu = np.random.normal(size=(p, 1))
+
+    it = 0
+
+    while it < max_iter and max_delta > tol:
+        it += 1
+        prev_beta = beta.copy()
+        prev_theta = theta.copy()
+        prev_mu = mu.copy()
+
+        # Apply lasso-specific update rules
+        beta = np.linalg.inv((1 / n) * X.T @ X + (lr * np.identity(p))) @ ((1 / n) * X.T @ y + (lr * theta) - mu)
+        theta = vec_soft_thresh(beta + (mu / lr), reg / lr)
+        mu += lr * (beta - theta)
+
+        # Check adjustment magnitude
+        delta[0] = np.amax(np.abs(prev_beta - beta))
+        delta[1] = np.amax(np.abs(prev_theta - theta))
+        delta[2] = np.amax(np.abs(prev_mu - mu))
+
+        max_delta = np.amax(delta) # take maximum 
+
+    if verbose == True:
+
+        if it >= max_iter:
+            print('Optimization timeout after {} iterations; deltas (beta, theta, mu)={}'.format(it, delta))
+        else:
+            print('Estimate stabilized after {} iterations; tol={}, deltas (beta, theta, mu)={}'.format(it, round(tol, 4), delta))
+
+    return beta
+
+# Estimate lasso regression coefficients by ADMM iteration
+reg = 0.1 # lambda penalty
+lr = 10 # learning rate
+beta = lasso_admm(X, y, reg, 1, max_iter=1e3, verbose=True)
+
+# Coefficients match those obtained with glmnet in R
+print('LASSO coefficients estimated with custom ADMM function:\n{}\n'.format(beta[:,0]))
+
+# Use soft-threshold with threshold 1e-10 to eliminate miniscule nonzero coefficients
+print('LASSO coefficients estimated with custom ADMM function (with soft-threshold 1e-10):\n{}\n'.format(vec_soft_thresh(beta, 1e-10)[:,0]))
+
+##############################################################
+# PROBLEM 1b and 2c: R code used for result verification
+##############################################################
+
+# Load data
+X = read.csv('/A1Q1_X.csv')
+y = read.csv('/A1Q1_y.csv')
+
+n = nrow(X) # number of samples
+
+# Standardize variables
+X = scale(X) * sqrt(n / (n - 1))
+y = scale(y) * sqrt(n / (n - 1))
+
+# Fit the elastic net model with the given parameters
+fit <- glmnet(X, y, lambda = 0.1, alpha = 0.6)
+glmnet_coef <- predict(fit, type = "coefficients")[-1, 1]
+
+# Results match those obtained using custom algorithms
+glmnet_coef[]
+
+##############################################################
+# PROBLEM 3: R code
+##############################################################
+
+# Initialize simulation
+set.seed(196883)
+
+tol = 1e-5 # threshold for determining zero-ness of parameters
+N = 1000 # total number of trials
+n <- 500 # number of samples per fit
+p <- 20 # number of model parameters
+
+# True model recoveries for each method
+best_subset_successes = 0
+min_successes = 0
+se1_successes = 0
+
+for (i in 1:N) {
+
+  X <- matrix(rnorm(n * p), nrow=n, ncol=p) # randomize design matrix
+  y <- 1 + 0.2 * rowSums(X[, 1:5]) + rnorm(n, 0, 0.1) # generate response data from true model
+  train_indices = sample(nrow(X), nrow(X) * 0.7) # randomize training indices
+
+  # reformat data
+  Xy <- cbind(X, y)
+  df = as.data.frame(Xy)
+
+  # best subsets 
+  best_subsets = bestglm(df, IC = "BIC")
+
+  # get the numeric coefficient labels from best subsets
+  res_best_subsets = as.numeric(gsub("\\D", "", all.vars(formula(best_subsets$BestModel))[-1])) 
+
+  # lasso cross validation procedure
+  lasso_cv <- cv.glmnet(X[train_indices, ], y[train_indices], alpha=1)
+
+  # extract regularizations corresponding to minimum CV error and 1se CV error
+  lambda_min = lasso_cv$lambda.min
+  lambda_se1 = lasso_cv$lambda.1se
+
+  # fit LASSO linear model using CV minimizing regularization
+  lasso_min_lambda = glmnet(X[train_indices, ], y[train_indices], alpha=1, lambda=lambda_min)
+  lasso_min_lambda_coefficients = predict(lasso_min_lambda, type="coefficients")[1:ncol(X),]
+  res_min = as.vector(lasso_min_lambda_coefficients) # numeric coefficients
+
+  # fit LASSO linear model using CV 1se regularization 
+  lasso_min_lambda = glmnet(X[train_indices, ], y[train_indices], alpha=1, lambda=lambda_se1)
+  lasso_se1_lambda_coefficients = predict(lasso_min_lambda, type="coefficients")[1:ncol(X),]
+  res_se1 = as.vector(lasso_se1_lambda_coefficients) # numeric coefficients
+
+  # check if true model recovered using lambda min
+  if (all(abs(res_min[7:20]) < tol)) { # check that coefficients for irrelevant predictors are zero
+    if (all(abs(res_min[1:6]) >= tol)) { # check that coefficients for true predictors nonzero
+      min_successes = min_successes + 1
+    }
+  }
+
+  # check if true model recovered using one standard error rule
+  if (all(abs(res_se1[7:20]) < tol)) { # check that coefficients for irrelevant predictors are zero
+    if (all(abs(res_se1[1:6]) >= tol)) { # check that coefficients for true predictors are nonzero
+      se1_successes = se1_successes + 1
+    }
+  }
+
+  # check if best subsets selected any irrelevant predictors
+  if (any(6:20 %in% res_best_subsets)) {
+    best_subset_successes = best_subset_successes + 1
+  }
+}
+
+# Estimate chance of selecting true model for each method
+(best_subset_successes / N) # Select best predictor subset under BIC: ~18.7%
+(min_successes / N) # Fit model using CV error minimizing lambda: ~0.6% 
+(se1_successes / N) # Fit model using 1 standard error rule: ~69.2%
+
+# ===== SOLUTION =====
+# We rank the methods (from best to worst)
+
+# 1. one standard error rule
+# 2. best subsets
+# 3. CV error minimizing lambda
+
+# where using the regularization parameter which minimizes the CV error performed markedly worse.
+# ====================
+############################################################## 
+##############################################################

@@ -1,0 +1,104 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 4} \hfill {\bf Connor Braun} \hfill {\bf 2024-04-03}
+    \end{center}
+    \noindent{\bf Problem 4}\\[5pt]
+    Consider a mixture model of two exponential distributions:
+    \[f(x)=\alpha\lambda_1e^{-\lambda_1x}+(1-\alpha)\lambda_2e^{-\lambda_2x},x>0.\]
+    {\bf a)}\hspace{5pt} Recall the latent class membership view on the mixture model. That is, there is an underlying latent variable $\delta\sim\text{Bernoulli}(\alpha)$ such that if $\delta=1$, $Y$ is
+    generated from the density $\lambda_1e^{-\lambda_1y}$ and if $\delta=0$, $Y$ is generated from the density $\lambda_2e^{-\lambda_2y}$. We can then regard the complete data to be $\mathcal{D}_c=\{(y_i,\delta_i)\}_{i=1}^n$
+    while the observed data are just $\mathcal{D}=\{y_i\}_{i=1}^n$. Write down the complete data likelihood and log-likelihood functions.\\[5pt]
+    {\bf Solution}\hspace{5pt} We take $\theta=(\alpha, \lambda_1,\lambda_2)$ to be a parameterization of the joint distribution of $(Y,\delta)$, taking $\mc{D}_c$ to be an i.i.d. sample thereof. The marginal distribution of $Y$ can be written
+    \begin{align*}
+        f(y|\theta)=P(Y=y|\theta)=\sum_{k=0,1}P(Y=y,\delta=k|\theta)&=\sum_{k=0,1}P(Y=y|\delta=k,\theta)P(\delta=k|\theta)\\
+        &=\lambda_1e^{-\lambda_1y}P(\delta=1|\theta)+\lambda_2e^{-\lambda_2y}P(\delta=0|\theta)\\
+        &=\lambda_1e^{-\lambda_1y}\alpha+\lambda_2e^{-\lambda_2y}(1-\alpha)
+    \end{align*}
+    revealing the form of the joint density of $(Y,\delta)$:
+    \[P(Y=y,\delta=0|\theta)=(1-\alpha)\lambda_2e^{-\lambda_2y},\quad P(Y=y,\delta=1|\theta)=\alpha \lambda_1e^{-\lambda_1y}.\]
+    which renders clear the form of the likelihood function for the complete data:
+    \begin{align*}
+        L(\theta|\mc{D}_c)=\prod_{i=1}^nP(Y=y_i,\delta=\delta_i)=\prod_{i=1}^n\left[\alpha\lambda_1e^{-\lambda_1y_i}\right]^{\delta_i}\left[(1-\alpha)\lambda_2e^{-\lambda_2y_i}\right]^{(1-\delta_i)}
+    \end{align*}
+    with corresponding log-likelihood,
+    \begin{align*}
+        \ell(\theta|\mc{D}_c)=\sum_{i=1}^n\delta_i\log(\alpha)+\delta_i\log(\lambda_1)+(1-\delta_i)\log(1-\alpha)+(1-\delta_i)\log(\lambda_2)-\delta_i\lambda_1y_i-(1-\delta_i)\lambda_2y_i.\tag*{$\qed$}
+    \end{align*}
+    {\bf b)}\hspace{5pt}Derive the E-step and M-step of the EM algorithm for finding the MLE of the above mixture model.\\[5pt]
+    {\bf Solution}\hspace{5pt}For the E-step, we simply compute the expected complete data log-likelihood given a parameterization $\theta^\prime=(\alpha^\prime,\lambda_1^\prime,\lambda_2^\prime)$ and the observed data $y=(y_1,\dots,y_n)$,
+    \begin{align*}
+        Q(\theta|\theta^\prime)=\E(\ell(\theta|\mc{D}_c)|y,\theta^\prime)=\sum_{i=1}^n\E(\delta_i|y,\theta^\prime)\left[\log(\alpha)+\log(\lambda_1)-\lambda_1y_i\right]+(1-\E(\delta_i|y,\theta^\prime))\left[\log(1-\alpha)+\log(\lambda_2)-\lambda_2y_i\right].
+    \end{align*}
+    For this, we need to compute the $\E(\delta_i|y,\theta^\prime)$ term:
+    \begin{align*}
+        \E(\delta|y,\theta^\prime)=\E(\delta_i|y_i,\theta^\prime)&=\frac{P(y_i|\delta_i,\theta^\prime)P(\delta_i|\theta^\prime)}{P(y_i|\theta^\prime)}\\
+        &=\frac{P(y_i|\delta_i,\theta^\prime)P(\delta_i|\theta^\prime)}{P(y_i,\delta_i=0|\theta^\prime)+P(y_i,\delta_i=1|\theta^\prime)}\\
+        &=\frac{P(y_i|\delta_i,\theta^\prime)P(\delta_i|\theta^\prime)}{P(y_i|\delta_i=0,\theta^\prime)P(\delta_i=0|\theta^\prime)+P(y_i|\delta_i=1,\theta^\prime)P(\delta_i=1|\theta^\prime)}\\
+        &=\frac{(\alpha^\prime\lambda_1^\prime e^{-\lambda_1^\prime y_i})^{\delta_i}((1-\alpha^\prime)\lambda_2^\prime e^{-\lambda_2^\prime y_i})^{1-\delta_i}}{\alpha^\prime\lambda_1^\prime e^{-\lambda_1^\prime y_i}+(1-\alpha^\prime)\lambda_2^\prime e^{-\lambda_2^\prime y_i}}
+    \end{align*}
+    and we denote this expression with $\overline{\delta}_i=\E(\delta_i|y,\theta^\prime)$. Thus, $Q$ is expressed entirely in terms of observed data and known variables, and we have
+    \[Q(\theta|\theta^\prime)=\sum_{i=1}^n\overline{\delta}_i\left[\log(\alpha)+\log(\lambda_1)-\lambda_1y_i\right]+(1-\overline{\delta}_i)\left[\log(1-\alpha)+\log(\lambda_2)-\lambda_2y_i\right].\]
+    For the M-step, we derive the parameter updates by maximizing the $Q$ function over $\theta=(\alpha,\lambda_1,\lambda_2)$. Suppose that $\hat{\theta}=(\hat{\alpha},\hat{\lambda}_1,\hat{\lambda}_2)$ is a critical point such that $\nabla Q(\hat{\theta}|\theta^\prime)=0$. Then we compute
+    \begin{align*}
+        \frac{\partial Q(\theta|\theta^\prime)}{\partial\alpha}&=\sum_{i=1}^n\frac{\overline{\delta}_i}{\alpha}+\frac{\overline{\delta}_i-1}{1-\alpha}=\sum_{i=1}^n\frac{\overline{\delta}_i-\alpha}{\alpha(1-\alpha)}=\frac{1}{\alpha(1-\alpha)}\bp{\bp{\sum_{i=1}^n\overline{\delta}_i}-n\alpha}\\
+        &\Rightarrow\quad \sum_{i=1}^n\overline{\delta}_i=n\hat{\alpha}\quad\Rightarrow\quad \hat{\alpha}=\frac{1}{n}\sum_{i=1}^n\overline{\delta}_i.
+    \end{align*}
+    Similarly, we find that
+    \begin{align*}
+        \frac{\partial Q(\theta|\theta^\prime)}{\partial\lambda_1}=\sum_{i=1}^n\frac{\overline{\delta}_i}{\lambda_1}-\overline{\delta}_iy_i\quad\Rightarrow\quad\sum_{i=1}^n\frac{\overline{\delta}_i}{\hat{\lambda}_1}=\sum_{i=1}^n\overline{\delta}_iy_i\quad\Rightarrow\quad\hat{\lambda}_1=\frac{\sum_{i=1}^n\overline{\delta}_i}{\sum_{j=1}^n\overline{\delta}_jy_j}
+    \end{align*}
+    and finally,
+    \begin{align*}
+        \frac{\partial Q(\theta|\theta^\prime)}{\partial\lambda_2}=\sum_{i=1}^n\frac{1-\overline{\delta}_i}{\lambda_2}-(1-\overline{\delta}_i)y_i\quad\Rightarrow\quad\sum_{i=1}^n\frac{1-\overline{\delta}_i}{\hat{\lambda}_2}=\sum_{i=1}^n(1-\overline{\delta}_i)y_i\quad\Rightarrow\quad\hat{\lambda}_2=\frac{\sum_{i=1}^n(1-\overline{\delta}_i)}{\sum_{j=1}^n(1-\overline{\delta}_j)y_j}
+    \end{align*}
+    where now $(\hat{\alpha},\hat{\lambda}_1,\hat{\lambda}_2)$ maximizes the $Q$ function at each iteration given a previous parameterization $\theta^\prime$.\hfill{$\qed$}
+\end{document}

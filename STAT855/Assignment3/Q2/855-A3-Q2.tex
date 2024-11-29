@@ -1,0 +1,103 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment III}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document} 
+    \maketitle
+    \noindent{\bf Problem 2} Let $\{X_n,n\geq 0\}$ be a Markov chain with state space $S$. The stopping times below are associated with $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf a)} Let $T$ and $V$ be stopping times. Show that $U=\max\{T,V\}$ is also a stopping time.\\[10pt]
+    {\bf Solution} First we claim that for $n\geq 0$, 
+    \[\{U=n\}=\{\max\{T,V\}=n\}=\left(\{T=n\}\cap\{V\leq n\}\right)\cup\left(\{T\leq n\}\cap\{V=n\}\right).\]
+    To see this, suppose that $\omega\in\{U=n\}\subseteq\Omega$. Then $\max\{T,V\}=n$, so either $T=n$ or $V=n$, but also $T\leq n$ and $V\leq n$. That is, if $\omega\in\{T=n\}$, then $\omega\in\{V\leq n\}$, so $\omega\in\{T=n\}\cap\{V\leq n\}$, so 
+    $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$. If instead $\omega\in\{V=n\}$, then $\omega\in\{T\leq n\}$ so $\omega\in\{T\leq n\}\cap\{V=n\}$ and $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$, giving us
+    \[\{U=n\}\subseteq(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V\leq n\}).\]
+    Now suppose instead that $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\subseteq\Omega$. Then either $\omega\in(\{T=n\}\cap\{V\leq n\})$ or $\omega\in(\{T\leq n\}\cap\{V=n\})$. In the first case, we have $T=n$ and $V\leq n$, so $U=\max\{T,V\}=n$. If instead
+    $\omega\in\{T\leq n\}\cap\{V=n\}$, then $T\leq n$ and $V=n$, so $U=\max\{T,V\}=n$, so $\omega\in\{U=n\}$. Thus,
+    \[(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\subseteq\{U=n\}\]
+    and with both inclusions, we conclude $\{U=n\}=(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$. 
+    Now, as we show in 2b, since both $T$ and $V$ are stopping times, $\exists B^\prime_n,C^\prime_n\subset S^{n+1}$ deterministic so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B^\prime_n\}\quad\text{and}\quad \{V\leq n\}=\{(X_0,X_1,\dots,X_n)\in C^\prime_n\}.\]
+    But by definition, $\exists B_n,C_n\subset S^{n+1}$ so that
+    \[\{T=n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}\quad\text{and}\quad\{V=n\}=\{(X_0,X_1,\dots,X_n)\in C_n\}.\]
+    From these facts, we find that
+    \begin{align*}
+        \{U=n\}&=\{\max\{T,V\}=n\}\\
+        &=(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\\
+        &=(\{(X_0,X_1,\dots,X_n)\in B_n\}\cap\{(X_0,X_1,\dots,X_n)\in C_n^\prime\})\\
+        &\quad\cup(\{(X_0,X_1,\dots,X_n)\in B_n^\prime\}\cap\{(X_0,X_1,\dots,X_n)\in C_n\})\\
+        &=\{(X_0,X_1,\dots,X_n)\in (B_n\cap C_n^\prime)\cup(B_n^\prime\cap C_n)\}
+    \end{align*}
+    where $(B_n\cap C_n^\prime)\cup(B_n^\prime\cap C_n)\subset S^{n+1}$, so the event $\{U=n\}$ only depends on information up to $X_n$. Additionally, since $T$ and $V$ take values in $\{0,1,2,\dots\}\cup\{\infty\}$, $U=\max\{T,V\}$ does too. With both
+    of these properties, $U$ satisfies the definition of a stopping time.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $T$ be a random variable taking value in $\{0,1,2,\dots,\}\cup\{\infty\}$. Show that $T$ is a stopping time if and only if for any $n\geq 0$, $\{T\leq n\}$ is an event only involving $X_0,X_1,\dots,X_n$, i.e., $\exists B_n\subset S^{n+1}$ so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    {\bf Solution} Suppose that $T$ is a stopping time. Then, $\forall n\geq 0$, $\exists B_n\subset S^{n+1}$ so that
+    \[\{T= n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    Now fix $n\geq 0$, and set $B_i^\prime=B_i\times S^{n-i}\subset S^{n+1}$ for $i=0,1,2,\dots,n-1$. Also take $B_n=B_n^\prime$ for notational convenience. Then
+    \begin{align*}
+        \{T\leq n\}&=\bigcup_{j=0}^n\{(X_0,X_1,\dots,X_j)\in B_j\}\\
+        &=\bigcup_{j=0}^n\{(X_0,X_1,\dots,X_n)\in B_j^\prime\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in\cup_{j=0}^n B_j^\prime\}
+    \end{align*}
+    which completes the first part of the proof. Conversely now, suppose that $\forall n\geq 0$, $\exists B_n\subset S^{n+1}$ so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    Fixing $n\geq 1$, and using similar reasoning as previously, we have
+    \begin{align*}
+        \{T=n\}&=\{T\leq n\}\setminus\{T\leq n-1\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in B_n\}\setminus\{(X_0,X_1,\dots,X_n)\in B_{n-1}\times S\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in B_n\setminus (B_{n-1}\times S)\}
+    \end{align*}
+    and trivially, when $n=0$
+    \begin{align*}
+        \{T=0\}&=\{T\leq 0\}=\{(X_0)\in B_0\}
+    \end{align*}
+    so that now $\{T=n\}$ only involves information about $X_0,X_1,\dots,X_n$ for arbitrary $n\geq 0$. This in conjunction with the nonnegativity (and possible infinitude) of $T$ allow us to conclude it is a stopping time.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Let $T$ and $V$ be two stopping times. Show that $W=\min\{T,V\}$ is a stopping time.\\[10pt]
+    {\bf Solution} Similar to 2a, we begin by claiming that
+    \[\{W=n\}=\{\min\{T,V\}=n\}=\left(\{T=n\}\cap\{V\geq n\}\right)\cup\left(\{T\geq n\}\cap\{V=n\}\right).\]
+    which is proved very similarly, so we will be a bit more terse. Recalling that these events are all subsets of sample space $\Omega$, if $\omega\in \{U=n\}$ for some $n\geq 0$, then at least one of $\omega\in\{T=n\}$ or $\omega\in\{V=n\}$ are true, and both $\omega\in\{T\geq n\}$ and $\omega\in\{V\geq n\}$ hold.
+    But this simply says that at least one of $\omega\in\{T=n\}\cap\{V\geq n\}$ or $\omega\in\{T\geq n\}\cap\{V=n\}$, so $\omega\in(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})$, so we have found
+    \[\{W=n\}\subseteq (\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\}).\]
+    Conversely, suppose that $\omega\in(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})$. Then either $\omega\in\{T=n\}$ and $\omega\in\{V\geq n\}$, in which case $W=\min\{T,V\}=n$ so $\omega\in\{W=n\}$, or $\{V=n\}$ and $\{T\geq n\}$, in which case $W=\min\{T,V\}=n$, so $\omega\in\{W=n\}$. Thus we have
+    \[(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})\subseteq\{W=n\}\]
+    and thus $(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})=\{W=n\}$, as desired.\\[10pt]
+    Now, fix $n\geq 0$. Since $T,V$ are stopping times, by 2b, $\exists B_j,C_j\subset S^{j+1}$ so that
+    \[\{T\leq j\}=\{(X_0,X_1,\dots,X_j)\in B_j\}\quad\text{and}\quad\{V\leq j\}=\{(X_0,X_1,\dots,X_j)\in C_j\}\]
+    for $j=0,1,\dots,n$. Further, define $B_j^\prime=B_j\times S^{n-j}$ and $C_j^\prime=C_j\times S^{n-j}$ for $j=0,1,2,\dots,n-1$, with $B_n=B_n^\prime$ and $C_n=C_n^\prime$ for notational convenience. Then, observe that for $Z\in\{T,V\}$ with $\zeta_j=B_j, \zeta_j^\prime=B_j^\prime$ ($\zeta_j=C_j,\zeta_j^\prime=C_j^\prime$, respectively) when $Z=T$ ($Z=V$, respectively)
+    we find
+    \begin{align*}
+        \{Z\geq n\}&=\Omega\setminus\{Z\leq n-1\}\\
+        &=\Omega\setminus\{(X_0,X_1,\dots,X_{n-1})\in \zeta_{n-1}\}\\
+        &=\Omega\setminus\{(X_0,X_1,\dots,X_n)\in\zeta_{n-1}^\prime\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in(\zeta_{n-1}^\prime)^c\}.
+    \end{align*}
+    We also need to define $B_n^\ast,C_n^\ast\subseteq S^{n+1}$ satisfying
+    \[\{T=n\}=\{(X_0,X_1,\dots,X_n)\in B_n^\ast\}\quad\text{and}\quad\{V=n\}=\{(X_0,X_1,\dots,X_n)\in C_n^\ast\}\]
+    which exist because $T,V$ are stopping times. Finally, we get that
+    \begin{align*}
+        \{W=n\}&=\{\min\{T,V\}=n\}\\
+        &=(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})=\{W=n\}\\
+        &=(\{(X_0,X_1,\dots,X_n)\in B_n^\ast\}\cap\{(X_0,X_1,\dots,X_n)\in(C_{n-1}^\prime)^c\})\\
+        &\quad\cup(\{(X_0,X_1,\dots,X_n)\in (B_{n-1}^\prime)^c\}\cap\{(X_0,X_1,\dots,X_n)\in C_n^\ast\})\\
+        &=\{(X_0,X_1,\dots,X_n)\in(B_n^\ast\cap(C_{n-1}^\prime)^c)\cup((B_{n-1}^\prime)^c\cap C_n^\ast)\}
+    \end{align*}
+    where $(B_n^\ast\cap(C_{n-1}^\prime)^c)\cup((B_{n-1}^\prime)^c\cap C_n^\ast)\subset S^{n+1}$. Additionally, since $T$ and $V$ take values in $\{0,1,\dots\}\cup\{\infty\}$, $W=\min\{T,V\}$ does too. With both of these properties, $W$ satisfies the definition of a stopping time.\hfill{$\qed$}
+\end{document}

@@ -1,0 +1,478 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 1} Let $\mc{S}$ and $\mc{U}$ be finite sets, referred to as the state and action space respectively.
+    For each action $u\in\mc{U}$, it is associated with a transition matrix $P^{(u)}=\{P_{i,j}^{(u)}:i,j\in\mc{S}\}$. A policy is a mapping
+    $\mu:\mc{S}\rightarrow\mc{U}$ from the state to the action space.\\[10pt]
+    Fix a policy $\mu(\cdot)$. Consider the stochastic process ${(X_n,U_n):n\geq 0}$ with $X_n\in\mc{S}$ and $U_n\in\mc{U}$ for all $n\geq 0$.
+    Specifically, for $n\geq 0$
+    \[U_n=\mu(X_n)\]
+    and moreover, for $n\geq 1$ and $i_0,i_1,\dots,i_{n+1}\in\mc{S}$,
+    \[P(X_{n+1}=i_{n+1}|X_n=i_n,\dots,X_0=i_0)=P^{(u)}_{i_n,i_{n+1}},\quad\text{with $u=\mu(i_n)$}.\tag{1}\]
+    Next, let $c:\mc{S}\times\mc{U}\rightarrow\mbb{R}$ be a cost function and define the average cost function as 
+    \[V^\mu(i)=\limsup_{N\rightarrow\infty}\frac{1}{N}\mbb{E}\left[\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right],\quad\text{for $i\in \mc{S}$.}\]
+    We use limsup since, in general, the limit may not exist. Assume for simplicity that under the policy $\mu(\cdot)$, $\{X_n,n\geq 0\}$ is an irreducible
+    Markov chain with invariant distribution $\pi$.\\[10pt]
+    {\bf a)} Express $V^\mu$ in terms of the cost function, policy and invariant distribution.\\[10pt]
+    {\bf Solution} Since the process is irreducible, has an invariant distribution (call it $\pi=\{\pi_i:i\in\mc{S}\}$) and $c(\cdot,\cdot)$ is bounded (by the finiteness of $\mc{S}$)
+    we have
+    \[\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,U_n)=\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,\mu(X_n))=\sum_{i\in \mc{S}}c(i,\mu(i))\pi_i\quad\text{{\it w.p.} 1}\] 
+    by the ergodic theorem. Letting $j\in\mc{S}$, the average cost function simplifies as
+    \begin{align*}
+        V^\mu(i)=\limsup_{N\rightarrow\infty}\frac{1}{N}\mbb{E}\left[\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right]&=\mbb{E}\left[\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right]\\
+        &=\mbb{E}\left[\sum_{k\in\mc{S}}c(k,\mu(k))\pi_k\bigg|X_0=i\right]\\
+        &=\sum_{k\in\mc{S}}c(k,\mu(k))\pi_k\tag{{\it w.p. $1$}}
+    \end{align*}
+    where the interchange of the expectation and the limit was implicitly justified by the dominated convergence theorem, and the expectation of the deterministic sum is just the sum itself.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $\mc{S}=\{1,2,3\}$, $\mc{U}=\{1,2\}$. Further, let
+    \begin{align*}
+        P^{(1)}=\begin{pmatrix}
+            1/2 & 1/4 & 1/4\\
+            1/4 & 1/2 & 1/4\\
+            1/4 & 1/4 & 1/2
+        \end{pmatrix},\quad\text{and}\quad P^{(2)}=\begin{pmatrix}
+            1/3 & 1/3 & 1/3 \\
+            1/3 & 1/3 & 1/3\\
+            1/3 & 1/3 & 1/3
+        \end{pmatrix}
+    \end{align*}
+    and $c(s,u)=su$ $\forall s\in\mc{S},\;u\in\mc{U}$. Consider the following policy:
+    \[\mu(1)=1,\quad\mu(2)=2,\quad\mu(3)=1.\]
+    Compute $V^\mu$ numerically.\\[10pt]
+    {\bf Solution} Rather than find the invariant distribution and use the formula above, we simulate the process and rely on the ergodic theorem. See Appendix A.1 for the code used to do this.
+    We simply report the result here. For any $i\in\mc{S}$, we find that
+    \[V^\mu(i)=\sum_{k\in\mc{S}}\pi_kc(k,\mu(k))\approx\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,\mu(X_n))\]
+    provided $N$ is sufficiently large. Simulating fifty realizations of the process for $10^3$ steps, we obtain a running estimate of the average cost function:
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=100mm]{many_MDP_output.png}}
+    \end{center}
+    {\bf Figure 1} Running estimate of the average cost function over fifty realizations of the decision process, each simulated for $10^3$ steps. Initial state $X_0$ was selected with uniform probability on $\mc{S}$ for each realization.\\[10pt]
+    From figure 1, we can see that the estimate appears to converge rapidly. Letting $\{x_k\}_{k=0}^{999}$ denote one of these realizations, which happens to have $X_0=1$, we find
+    \[V^\mu(i)=V^\mu(1)\approx \frac{1}{1000}\sum_{k=0}^{999}c(x_k, \mu(x_k))=2.589.\tag*{$\qed$}\]
+    {\bf Problem 2} Each morning a student takes one of three books he owns from his shelf. The probability that he chooses book 1, 2, 3 is, respectively, $1/4$, $1/2$, $1/4$.
+    In the evening, with $90\%$ probability, he replaces the book in the middle of the two books on the shelf, and with $10\%$ probability, he sorts the books in the ordering $1,2,3$ from left to right.
+    Assume that the choices on successive days are independent, and denote by $X_n$ the ordering of the books from left to right at the end of day $n\geq 0$.\\[10pt]
+    {\bf a)} Identify the state space and transition probabilities for $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} For $i,j,k\in\{1,2,3\}$ distinct, let $(i,j,k)$ denote an ordering on the shelf, so that $X_n=(i,j,k)$ is the ordering on the shelf at the end of the $n$th day, $n\geq 0$.
+    Then the state space $S$ is the set of permutations of $\{1,2,3\}$, so $|S|=3!=6$. We depict the state transition diagram in figure 2 below. 
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=80mm]{855-A4-Q2-fig.png}}
+    \end{center}
+    {\bf Figure 2} State transition diagram for the take-a-book-leave-a-book process. Arrows indicate transitions with nonzero probability.
+    All states can transition to themselves in one step with nonzero probability (not shown).\\[10pt]
+    For the explicit transition probabilities, let $p_i$ be the probability of drawing the $i$th book on a given morning, so that 
+    \[p_1=1/4\quad p_2=1/2\quad\text{and}\quad p_3=1/4.\]
+    Every state can transition back to $(1,2,3)$ with probability $1/10$, since for $(i,j,k)\in S$,
+    \[\sum_{\ell\in S}p_\ell \cdot\frac{1}{10}=\frac{1}{10}\]
+    is the probability of choosing any of the three books, and then resorting them at the end of the day. Let $\mc{S}$ be an alternative state space for the process, defined by a map $\mu:S\rightarrow\mc{S}$ such that
+    \[\mu((1,2,3))=1,\quad\mu((1,3,2))=2,\quad\mu((3,1,2))=3,\quad\mu((3,2,1,))=4,\quad \mu((2,3,1))=5\quad\text{and}\quad\mu((2,1,3))=6\]
+    which allows us to more intuitively express the transition matrix for this system by 
+    \begin{align*}
+        P&=\begin{pmatrix}
+            (9/10)p_2+1/10 & (9/10)p_3 & 0 & 0 & 0 & (9/10)p_1\\
+            (9/10)p_2+1/10 & (9/10)p_3 & (9/10)p_1 & 0 & 0 & 0\\
+            1/10 & (9/10)p_3 & (9/10)p_1 & (9/10)p_2 & 0 & 0\\
+            1/10 & 0 & (9/10)p_1 & (9/10)p_2 & (9/10)p_3 & 0\\
+            1/ 10 & 0 & 0 & (9/10)p_2 & (9/10)p_3 & (9/10)p_1\\
+            (9/10)p_2+1/10 & 0 & 0 & 0 & (9/10)p_3 & (9/10)p_1
+        \end{pmatrix}\\
+        &=\begin{pmatrix}
+            22/40 & 9/40 & 0 & 0 & 0 & 9/40\\
+            22/40 & 9/40 & 9/40 & 0 & 0 & 0\\
+            4/40 & 9/40 & 9/40 & 18/40 & 0 & 0\\
+            4/40 & 0 & 9/40 & 18/40 & 9/40 & 0\\
+            4/40 & 0 & 0 & 18/40 & 9/40 & 9/40\\
+            22/40 & 0 & 0 & 0 & 9/40 & 9/40
+        \end{pmatrix}.\tag*{$\qed$}
+    \end{align*}
+    {\bf b)} Prove that $\{X_n,n\geq 0\}$ is irreducible and determine it's period.\\[10pt]
+    {\bf Solution} From figure 2 it is clear that the system is irreducible, since there is a path of nonzero probability from any state to any other. Additionally, for $i\in\mc{S}$ we have
+    $P_{i,i}>0$ so that $1\in\{n>0:(P^n)_{i,i}>0\}$, so
+    \[d_i=\gcd\{n>0:(P^n)_{i,i}>0\}=1.\]
+    But this was for arbitrary $i\in\mc{S}$, so we conclude that ever state of this process has period 1 -- that is, every state is aperiodic.\\[10pt]
+    {\bf c)} Compute the invariant distribution for $\{X_n,n\geq 0\}$ numerically.\\[10pt]
+    {\bf Solution} Please see Appendix A.2 for the code used to do this. Briefly, we seek the right eigenvector of $P^T$ corresponding to eigenvalue $1$. Denoting it $\pi=\{\pi_i,i\in\mc{S}\}$ we find\\[10pt]
+    {\bf Table 1} Invariant distribution computed numerically for the take-a-book-leave-a-book process with transition matrix as given above. See Appendix A.2 for the program used
+    to generate this result. Values are rounded up to five points of precision.
+    \begin{center}
+        \begin{tabular}{@{}lc|c|c|c|c|c@{}}\toprule
+                & $\pi_1$ & $\pi_2$ & $\pi_3$ & $\pi_4$ & $\pi_5$ & $\pi_6$\\
+                \midrule
+                &0.41889 & 0.14487 & 0.08013 & 0.13112 & 0.08013 & 0.14487\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    {\bf d)} Assuming the initial ordering is $(1,2,3)$ from left to right, what is the expected time that the ordering will return to this state?\\[10pt]
+    {\bf Solution} Our goal is to compute the expected value of the first passage time corresponding to the state $(1,2,3)\in S$. Let $T=\inf\{n>0:X_n=(1,2,3)\}$ be this passage time. 
+    Then we aim to compute $\mbb{E}_{(1,2,3)}[T]$. However, since $P$ is irreducible and has an invariant distribution $\pi$, we have the formula
+    \[\pi_i=\frac{1}{\mbb{E}_i[T_i^{(1)}]}\]
+    for $i\in S$, where $T_i^{(1)}=\inf\{n>0:X_n=i\}$. But then we can compute the result directly:
+    \[E_{(1,2,3)}[T]=\frac{1}{\pi_1}=2.38726,\quad\text{rounded to 5 points of precision.\tag*{$\qed$}}\]
+    \noindent{\bf Problem 3} Consider a finite state space $S=\{0,1,2,\dots, N\}$ where $N$ is a positive integer. Let $P$ be an irreducible transition matrix on $S$.\\[10pt]
+    {\bf a)} If $P_{i,j}=P_{j,i}$ for any $i,j\in S$, find the invariant distribution of $P$.\\[10pt]
+    {\bf Solution} We proceed by finding a solution to the detailed balance equations. Note that for any $i,j$ with $P_{i,j}=0$, the equations hold trivially. Thus, we check $P_{i,j}=P_{j,i}>0$ only:
+    \begin{align*}
+        &\pi_iP_{i,j}=\pi_j P_{j,i}\quad\Rightarrow\quad \pi_iP_{i,j}=\pi_j P_{i,j}\quad\Rightarrow\quad \pi_i=\pi_j\tag{1}
+    \end{align*}
+    which says that the invariant distribution is uniform on $S$. The only such distribution is given defined by
+    \[\pi_i=\frac{1}{|S|}=\frac{1}{N+1},\quad\text{for $i\in S$}\]
+    which obviously satisfies (1), but also $\sum_{n=0}^{N}1/(N+1)=1$. Since this system is irreducible with finite state space, the Perron-Fr\:obenius theorem tells us that this invariant distribution {\it w.r.t.} $P$ is unique.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $\{w_{i,j}:i,j\in S\}$ be a collection of non-negative numbers. Assume that $w_{i,j}=w_{j,i}$ for any $i,j\in S$, and that $\sum_{j\in S}w_{i,j}>0$ for each $i\in S$. Further assume that
+    \[P_{i,j}=\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}},\quad\text{for any $i,j\in S$.}\]
+    Find the invariant distribution of $P$ in terms of $\{w_{i,j}:i,j\in S\}$.\\[10pt]
+    {\bf Solution} This, once again, can be done by solving the detailed balance equations. We find that
+    \[\pi_i P_{i,j}=\pi_j P_{j,i}\quad\Rightarrow\quad \pi_{i}\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}}=\pi_j\frac{w_{j,i}}{\sum_{k\in S}w_{j,k}}\quad\Rightarrow\quad\pi_{i}\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}}=\pi_j\frac{w_{i,j}}{\sum_{k\in S}w_{j,k}}\]
+    where we note that in the event that we have $w_{i,j}=0$ then the equations hold trivially, so we consider only $w_{i,j}>0$. Continuing, we then obtain
+    \[\frac{\pi_i}{\sum_{k\in S}w_{i,k}}=\frac{\pi_j}{\sum_{k\in S}w_{j,k}}.\tag{2}\]
+    Letting $W=\sum_{k,\ell\in S}w_{k,\ell}$ and defining 
+    \[\pi_i=\frac{\sum_{k\in S}w_{i,k}}{W},\quad\text{for $i\in S$}\tag{3}\]
+    we get that
+    \[\sum_{i\in S}\pi_i=\frac{\sum_{i,k\in S}w_{i,k}}{W}=\frac{\sum_{i,k\in S}w_{i,k}}{\sum_{k,\ell\in S}w_{k,\ell}}=1\quad\text{and}\quad \frac{\pi_i}{\sum_{k\in S}w_{i,k}}=\frac{1}{W}=\frac{\pi_j}{\sum_{k\in S}w_{j,k}}\]
+    so that the vector $\pi=\{\pi_i:i\in S\}$ defined in (3) satisfies the detailed balance condition in (2) and sums to 1, and so is the unique invariant distribution of the irreducible transition matrix $P$ defined on finite state space $S$.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Assume that $P_{i,j}=0$ if $|i-j|\geq2$ and $i,j\in S$. Let $\pi$ be the unique invariant distribution of $P$. Prove that $\pi$ and $P$ are in detailed balance.\\[10pt]
+    From the definition of invariance, the distributon $\pi=\{\pi_i:i\in S\}$ satisfies
+    \[\pi_i=\sum_{k\in S}\pi_k P_{k,i}\]
+    for $i\in S$. Further, since the chain is irreducible, it must be the case that $P_{n,n+1}>0$ for $0\leq n<N$ and $P_{n,n-1}>0$ for $0<n\leq N$. To see why this is, suppose that $P_{i,i+1}=0$ for some $i\in S$, $i\neq N$. Then, since $\forall j\in S$ with $j<i$, we get $|j-i|>1$ (trivially true if $i=0$) so there is no number of steps
+    delivering the state from $i$ to $i+1$, contradicting the assumed irreducibility of the system. Precisely the same argument gets us $P_{n,n-1}>0$ for $0<n\leq N$.\\[10pt]
+    We will also make use of the observation that:
+    \[i\in S\setminus\{0,N\}\quad\Rightarrow\quad P_{i,i-1}+P_{i,i}+P_{i,i+1}=1,\quad\text{otherwise}\quad P_{0,1}+P_{0,0}=1\quad\text{and}\quad P_{N,N-1}+P_{N,N}=1.\tag{4}\]
+    From this we get
+    \[\pi_0=\sum_{k\in S}\pi_kP_{k,0}=\pi_1P_{1,0}+\pi_0P_{0,0}\]
+    and further,
+    \[\pi_0-\pi_0P_{0,0}=\pi_1P_{1,0}\quad\Rightarrow\quad\pi_0(1-P_{0,0})=\pi_1P_{1,0}\quad\Rightarrow\quad \pi_0 P_{0,1}=\pi_1 P_{1,0}\]
+    so we could say that the states $0$ and $1$ are in detailed balance. This supplies us with a basis to proceed by induction. \\[10pt]
+    Suppose that for some $0\leq n\leq N-2$ we have
+    \[\pi_n P_{n,n+1}=\pi_{n+1}P_{n+1,n}\tag{IH}\]
+    where (IH) stands for inductive hypothesis. We then find that
+    \begin{align*}
+        P_{n+1,n+2}\pi_{n+1}&=P_{n+1,n+2}\left(\sum_{k\in S}\pi_kP_{k,n+1}\right)\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}P_{n+1,n+1}+\pi_{n+2}P_{n+2,n+1})\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}(1-P_{n+1,n}-P_{n+1,n+2})+\pi_{n+2}P_{n+2,n+1})\tag{by 4}\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}-\pi_{n+1}P_{n+1,n}-\pi_{n+1}P_{n+1,n+2}+\pi_{n+2}P_{n+2,n+1})\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}-\pi_{n}P_{n,n+1}-\pi_{n+1}P_{n+1,n+2}+\pi_{n+2}P_{n+2,n+1})\tag{IH}\\
+        &=P_{n+1,n+2}\pi_{n+1}-P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}+P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}.
+    \end{align*}
+    Noticing that the first term on the RHS is the LHS, this implies
+    \begin{align*}
+        &-P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}+P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}=0\\
+        \Rightarrow\qquad&P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}=P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}\\
+        \Rightarrow\qquad&\pi_{n+1}P_{n+1,n+2}=\pi_{n+2}P_{n+2,n+1}
+    \end{align*}
+    so that now state $n+1$ is in detailed balance with $n+2$. Thus, by the principle of mathematical induction, we have $\forall n\in\{0,1,\dots,N-2\}$
+    \[\pi_nP_{n,n+1}=\pi_{n+1}P_{n+1,n}.\tag{5}\] 
+    Finally, we have
+    \[\pi_N=\sum_{k\in S}\pi_k P_{k,N}=\pi_{N-1}P_{N-1,N}+\pi_N P_{N,N}\]
+    such that
+    \[\pi_N(1-P_{N,N})=\pi_{N-1}P_{N-1,N}\quad\Rightarrow\quad \pi_NP_{N,N-1}=\pi_{N-1}P_{N-1,N}\tag{6}\]
+    so $N$ and $N-1$ are in detailed balance too. Taking (5) and (6) together, we have than any two adjacent states are in detailed balance.\\[10pt]
+    With all of this, take $i,j\in S$. If $|i-j|>1$, then $P_{i,j}=0=P_{j,i}$ and the detailed balance equations hold for these states trivially.
+    Of course, when $i=j$ then they hold trivially once more. Finally, in the case that $|i-j|=1$, we can take $i<j$ without loss of generality so that $j=i+1$. But then
+    \[\pi_iP_{i,j}=\pi_iP_{i,i+1}=\pi_{i+1}P_{i+1,i}=\pi_jP_{j,i}\]
+    so that, in all cases, $i$ and $j$ are in detailed balance.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 4} A particle moves on a $d$-dimensional hypercube $\{+1,-1\}^d$, where $d\geq 2$. Define $q=(-1,-1,\dots,-1)$ and $p=-q$, the vertex opposite to $q$.\\[10pt]
+    At each step, if the particle is not at $p$, it is equally likely to flip the sign of one of the coordinates in its position vector; if the particle is at $p$,
+    it jumps to $q$. Denote by $X_n$ the position vector of the particle after $n$ steps.\\[10pt]
+    {\bf a)} Show that $\{X_n,n\geq 0\}$ is irreducible.\\[10pt]
+    {\bf Solution} Let the state space $S$ be the set of all $d$-tuples specifying vertices of the hypercube. Then, for $X\in S$, $X=(x_1,x_2,\dots,x_d)$ so that $x_i=\pm 1$, $i=1,2,\dots,d$, define the functions
+    \[N_q(X)=\left\|\frac{X-q}{2}\right\|_1=\sum_{n=1}^d\left|\frac{x_n+1}{2}\right|\quad\text{and}\quad N_p(X)=\left\|\frac{X-p}{2}\right\|_1=\sum_{n=1}^d\left|\frac{x_n-1}{2}\right|\]
+    where $\|\cdot\|_1$ can be understood as the taxicab norm on $\mbb{R}^d$ restricted to the set of vertices of the $d$-dimensional hypercube, and $N_p(X)$, $N_q(X)$ count the number of coordinates in which $X$ differs from $p$ and $q$ respectively.
+    Now, noting that for $1\leq i\leq d$,
+    \[\left|\frac{x_i+1}{2}\right|=\begin{cases}
+        1\quad&\text{if $x_i=1$}\\
+        0\quad&\text{if $x_i=-1$}
+    \end{cases}\quad\text{and}\quad \left|\frac{x_i-1}{2}\right|=\begin{cases}
+        1\quad&\text{if $x_i=-1$}\\
+        0\quad&\text{if $x_i=1$}
+    \end{cases}\]
+    we get
+    \[0=\sum_{n=1}^d0\leq\sum_{n=1}^d\left|\frac{x_n\pm1}{2}\right|\leq\sum_{n=1}^d1=d\]
+    so $0\leq N_p(X),N_q(X)\leq d$. Further, $N_q(X)=0$ if and only if $x_i=-1$ $\forall i$. That is, $X=q$. Similarly,
+    $N_q(X)=d$ if and only if $X=p$, $N_p(X)=0$ if and only if $X=p$, and $N_p(X)=d$ if and only if $X=q$.\\[10pt]
+    Now, fixing some $X\in S\setminus\{p,q\}$, we have $0<N_p(X)<d$, so $X$ differs from $p$ in exactly $N_p(X)$ indices, call them $i_1,i_2,\dots,i_{N_p(X)}$.\\[10pt]
+    \noindent We next define a new process, $\{Z_n,n\geq 0\}$ so that $\{Z_n=j\}$ is the event that we flip the $j$-th coordinate of $X_n$, and $\{Z_n,n\geq 0\}$ has state space $D=\{1,2,\dots,d\}$. Thus we get $P(Z_n=j)=p_{j}=1/d$, since the probability of flipping the $j$-th coordinate is uniformly distributed on $D$.
+    With all of this, we obtain
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&=\sum_{z_0, z_1,\dots,z_{N_p(X)-1}\in D}P(X_{N_p(X)}=p,Z_{N_p(X)-1}=z_{N_p(X)-1},\dots,Z_1=z_1,Z_0=z_0|X_0=X)\\
+        &\geq P(X_{N_p(X)}=p,Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1|X_0=X).
+    \end{align*}
+    For notational expedience, let $\mc{Z}_{X,p}=\{Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1\}$. Then the above becomes
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&\geq P(X_{N_p(X)}=p,\mc{Z}_{X,p}|X_0=X)\\
+        &=P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)P(\mc{Z}_{X,p}).\tag{7}
+    \end{align*}
+    Next, note that $\mc{Z}_{X,p}\cup \{X_0=X\}\subseteq \{X_{N_p(X)}=p\}$. To see this, suppose that $\omega\in\mc{Z}_{X,p}\cup \{X_0=X\}$. Then $X$ differs from $p$ in coordinates $i_1,i_2,\dots,i_{N_p(X)}$. But $Z_0=i_1$ yields $X_1$ which differs
+    from $p$ only in coordinates $i_2,\dots,i_{N_p(X)}$. Continuing in this way, we see
+    \begin{align*}
+        N_p(X_1)&=N_p(X)-1\\
+        N_p(X_2)&=N_p(X)-2\\
+        &\vdots\\
+        N_p(X_{N_p(X)})&=N_p(X)-N_p(X)\\
+        &=0.
+    \end{align*}
+    But $N_p(X_{N_p(X)})=0$ if and only if $X_{N_p(X)}=p$, so $\omega\in\{X_{N_p(X)}=p\}$, and $\mc{Z}_{X,p}\cup \{X_0=X\}\subseteq \{X_{N_p(X)}=p\}$ as claimed. But this gives us $P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)=1$ so, continuing from (7), we thus have
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&\geq P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)P(\mc{Z}_{X,p})\\
+        &=P(Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1)\\
+        &=\left(1/d\right)^{N_p(X)}\tag{since $Z_i\perp Z_j$ whenever $i\neq j$}\\
+        &>0.
+    \end{align*}
+    So we have that $X\longrightarrow p$. Of course, $P(X_1=q|X_0=p)=1>0$, so $p\longrightarrow q$ as well. Observe now that $X\neq q$, so $0<N_q(X)$, and $X$ differs from $q$ in exactly $N_q(X)$ coordinates,
+    call them $j_1,j_2,\dots j_{N_q(X)}$. Defining $\mc{Z}_{q,X}=\{Z_{N_q(X)-1}=j_{N_q(X)},\dots,Z_1=j_2,Z_0=j_1\}$, we get $\mc{Z}_{q,X}\cup\{X_0=q\}\subseteq \{X_{N_q(X)}=X\}$ just as before. To see this, take $\omega\in\mc{Z}_{q,X}\cup\{X_0=q\}$. Then we get
+    $X_0=q$, which differs from $X$ at indices, $j_1,j_2,\dots,j_{N_q(X)}$, but $Z_0=j_1$ means that $X_1$ differs only at indices $j_2,\dots,j_{N_q(X)}$, and $Z_1=j_2$ means that $X_2$ differs from $X$ only in coordinates $j_3,\dots,j_{N_q(X)}$. Continuing in this way, we get
+    $X_{N_q(X)}$ differs from $X$ not at all, so $X_{N_q(X)}=X$  and thus $\omega\in \{X_{N_q(X)}=X\}$ implying that $\mc{Z}_{q,X}\cup\{X_0=q\}\subseteq\{X_{N_q(X)}=X\}$, as claimed.\\[10pt]
+    Then we can show that $q$ leads to $X$ just as we showed $X$ leads to $p$:
+    \begin{align*}
+        P(X_{N_q(X)}=X|X_0=q)&=\sum_{z_0,z_1,\dots,z_{N_q(X)-1}\in D}P(X_{N_q(X)}=X,Z_{N_q(X)-1}=z_{N_q(X)-1},\dots,Z_1=z_1,Z_0=z_0|X_0=q)\\
+        &\geq P(X_{N_q(X)}=X,\mc{Z}_{q,X}|X_0=q)\\
+        &=P(X_{N_q(X)}=X|\mc{Z}_{q,X},X_0=q)P(\mc{Z}_{q,X})\tag{since $P(X_{N_q(X)}=X|\mc{Z}_{q,X},X_0=q)=1$}\\
+        &=P(Z_{N_q(X)-1}=j_{N_q(X)},\dots,Z_1=j_2,Z_0=j_1)\\
+        &=(1/d)^{N_q(X)}\tag{since $Z_i\perp Z_j$ whenever $i\neq j$}\\
+        &>0.
+    \end{align*}
+    This tells us that $q\longrightarrow X$. So $X\longrightarrow p$ and $q\longrightarrow X$ so by transitivity of the 'leads to' relation, $q\longleftrightarrow p$ and $X\longleftrightarrow p$. But this was for arbitrary $X\in S\setminus\{p,q\}$, so now taking $A,B\in S$, we have that $A\longleftrightarrow p$, and $B\longleftrightarrow p$,
+    so by the transitivity of the communication relation, $A\longleftrightarrow B$, and thus the state space consists of a single communicating class and the process is irreducible.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Determine the period of $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} Some preliminaries to get us started. First, observe that in order to begin at one state and return to it, we must have flipped an even number of coordinates. 
+    That is, for every coordinate changed between returns to a state $X\in S$, we must revert each of them to be at $X$ again, so 2 divides the number of coordinate changes.\\[10pt]
+    Next, we associate a number of coordinate changes to each step in $\{X_n,n\geq 0\}$. If $X_i\in S$, $X_i\neq p$ for some $i\geq 0$, then $X_{i+1}$ will differ by
+    exactly one coordinate. If instead $X_i=p$, then $X_{i+1}=q$, and the two differ in $d$ coordinates, the dimension of the hypercube.\\[10pt]
+    Let $P$ be the one-step transition matrix for this process so that $\forall i,j\in S$, $P_{i,j}=P(X_1=j|X_0=i)$. Define $\mc{T}_q=\{n>0:(P^n)_{qq}>0\}$, so that the period of $q\in S$ is $\gcd\mc{T}_q$. We proceed by induction to show that $2k\in\mc{T}_q$ $\forall k\in\mbb{N}$.\\[10pt]
+    Let $k=1$, and $\ell\in S$ so that $\ell$ and $q$ differ in just one coordinate, so $P(X_1=\ell|X_0=q)=1/d$ and $P(X_1=q|X_0=\ell)=1/d$. Then by the Chapman-Kolmogorov equations
+    \[(P^{2k})_{q,q}=(P^2)_{q,q}=\sum_{j\in S}P_{q,j}P_{j,q}\geq P_{q,\ell}P_{\ell,q}=(1/d)^2>0\]
+    so $2\cdot1\in\mc{T}_q$. Now, for the inductive hypothesis, suppose that for some $k\geq 1$ we have $(P^{2k})_{q,q}>0$. This gives us
+    \[(P^{2(k+1)})_{q,q}=(P^{2k+2})_{q,q}=\sum_{j\in S}(P^{2k})_{q,q}(P^2)_{q,q}\geq(P^{2k})_{q,q}(1/d)^2>0\]
+    so $2k\in\mc{T}_q\Rightarrow 2(k+1)\in\mc{T}_q$, so by the principle of mathematical induction, for every $n$ even, $n\in\mc{T}_q$.\\[10pt]
+    We now consider the cases when $d$ is even versus odd separately. First, suppose that $d$ is even, so $\exists k\in\mbb{N}:$ $d=2k$. Then $d\in\mc{T}_q$ by the previous result, but also
+    \begin{align*}
+        (P^{d+1})_{q,q}=\sum_{j\in S}(P^d)_{q,j}(P)_{j,q}&\geq(P^d)_{q,p}(P)_{p,q}\\
+        &=(P^d)_{q,p}\tag{since $P_{p,q}=1$}\\
+        &=\sum_{z_0,z_1,\dots,z_{d-1}\in D}P(X_d=p,Z_{d-1}=z_{d-1},\dots,Z_1=z_1,Z_0=z_0|X_0=q)\\
+        &\geq P(X_d=p,Z_{d-1}=d,\dots,Z_1=2,Z_1=1|X_0=q)\\
+        &=P(X_d=p|Z_{d-1}=d,\dots,Z_1=2,Z_0=1,X_0=q)P(Z_{d-1}=d,\dots,Z_1=2,Z_0=1)
+    \end{align*} 
+    where we have reintroduced the process $\{Z_n,n\geq0\}$ from part a. We can also apply the same reasoning as in part a to show that the conditional probability in the last line is 1. In particular, it is clear that if $X_0=q$, and
+    we flip the first coordinate, then the second, and continue until we've flipped the $d$th coordinate, that we will be at $p$. Thus the above becomes
+    \begin{align*}
+        (P^{d+1})_{q,q}\geq P(Z_{d-1}=d,\dots,Z_1=2,Z_0=1)&=(1/d)^d>0
+    \end{align*}
+    so $d+1\in\mc{T}_q$. But the only number dividing $d$ and $d+1$ is $1$, so $\gcd\mc{T}_q=1$ and the state $q$ is aperiodic. By part a, this process is irreducible, so in fact every
+    element of $S$ shares the same period -- that is, period is a class property (see problem 6 for proof). Thus when $d$ is even, the chain is aperiodic.\\[10pt]
+    Now consider the case of $d$ odd. Previously, we commented that this implies that the transition from $p$ to $q$ is associated with an odd number of coordinate changes, along with every other
+    possible state transition.
+    Assume for the purpose of deriving a contradiction that $(P^{2k+1})_{q,q}>0$ for some $k\in\mbb{N}$. Then there exists a sequence of $2k+1$ transitions from state $q$ back to itself. Let $c_i$ be the number of coordinate changes associated with the
+    $i$th of these transitions for $i=1,2,\dots,2k+1$. Then $c_i$ is odd number, so $\exists k_i\in\mbb{N}:$ $c_i=2k_i+1$ for $i=1,2,\dots,2k+1$, and the total number of coordinate changes during the excursion is given by
+    \[\sum_{i=1}^{2k+1}c_i=\left(\sum_{i=1}^{2k+1}2k_i+1\right)=\left(\sum_{i=1}^{2k+1}2k_i\right)+2k+1=2\left[\left(\sum_{i=1}^{2k+1}k_i\right)+k \right]+1\]
+    so any path of an odd number of state transitions from $q$ to itself must incur an odd number of coordinate changes, and thus cannot terminate at $q$. Thus, $\forall n$ odd, $n\notin\mc{T}_q$, but $n-1\in\mc{T}_q$, so $\gcd\mc{T}_q=2$. Thus, when $d$ is odd, the period of $q\in S$ is two.
+    Once more appealing to the irreducibility of the process from a and the forthcoming result in problem 6, we get that $\forall i\in S$, the period of $i$ is also 2, since period is a class property.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 5} Let $S=\{\dots,-2,-1,0,1,2,\dots,\}$ be the set of all integers. Let $X_n,n\geq 0$ be a Markov chain with the state space $S$ and transition probabilities given by
+    \begin{align*}
+        &P_{0,1}=P_{0,-1}=1/2\\
+        &P_{i,i+1}=p,\quad P_{i,i-1}=q\quad\text{for $i>0$}\\
+        &P_{i,i+1}=q,\quad P_{i,i-1}=p\quad\text{for $i<0$}
+    \end{align*}
+    where $p\in(0,1/2)$ and $q=1-p$. Find the invariant distribution of the Markov chain.\\[10pt]
+    {\bf Solution} Let $\pi=\{\pi_i:i\in S\}$ be the invariant distribution of interest. We seek to identify its elements, which we can do by solving an infinite system of detailed balance equations. Take $i,j\in S$, and suppose that $i\geq 1$, $j\leq 1$. Then
+    \[\pi_0P_{0,1}=\pi_1P_{1,0} \quad\Rightarrow\quad \pi_0\frac{1}{2}=\pi_1q\quad\Rightarrow\quad \pi_1=\frac{1}{2q}\pi_0\]
+    and
+    \[\pi_0P_{0,-1}=\pi_{-1}P_{-1,0} \quad\Rightarrow\quad \pi_0\frac{1}{2}=\pi_{-1}q\quad\Rightarrow\quad \pi_{-1}=\frac{1}{2q}\pi_0.\]
+    We can use these to obtain expressions for every element of $\pi$ in terms of $\pi_0$:
+    \[\pi_{i}P_{i,i-1}=\pi_{i-1}P_{-1,i}\quad\Rightarrow\quad \pi_{i}q=p\pi_{i-1}\quad\Rightarrow\quad\pi_i=\left(\frac{p}{q}\right)^{i-1}\frac{1}{2q}\pi_0=\frac{1}{2}\left(\frac{p^{i-1}}{q^i}\right)\pi_0\]
+    and
+    \[\pi_{j}P_{j,j+1}=\pi_{j+1}P_{j+1,j}\quad\Rightarrow\quad \pi_jq=p\pi_{j+1}\quad\Rightarrow\quad\pi_j=\left(\frac{p}{q}\right)^{-j-1}\frac{1}{2q}\pi_0=\frac{1}{2}\left(\frac{p^{-j-1}}{q^{-j}}\right)\pi_0.\]
+    We can use the constraint $\sum_{i\in S}\pi_i=1$ to now solve for $\pi_0$. To begin, we can split up this sum:
+    \begin{align*}
+        \sum_{n=-\infty}^\infty\pi_n=1\quad&\Rightarrow\quad\pi_0+\sum_{n=1}^\infty\pi_n+\sum_{n=-1}^{-\infty}\pi_n=1\\
+        &\Rightarrow\quad\pi_0+\sum_{n=1}^\infty\frac{1}{2}\left(\frac{p^{n-1}}{q^n}\right)\pi_0+\sum_{n=-1}^{-\infty}\frac{1}{2}\left(\frac{p^{-n-1}}{q^{-n}}\right)\pi_0=1\\
+        &\Rightarrow\quad\pi_0\left(1+\frac{1}{2p}\sum_{n=1}^\infty\left(\frac{p}{q}\right)^n+\frac{1}{2p}\sum_{n=1}^\infty\left(\frac{p}{q}\right)^n\right)=1\\
+        &\Rightarrow\quad\pi_0\left(1-\frac{2}{2p}+\frac{1}{2p}\sum_{n=0}^\infty\left(\frac{p}{q}\right)^n+\frac{1}{2p}\sum_{n=0}^\infty\left(\frac{p}{q}\right)^n\right)=1\\
+        &\Rightarrow\quad\pi_0\left(1-\frac{1}{p}+\frac{1}{p}\left(\frac{1}{1-p/q}\right)\right)=1
+    \end{align*}
+    since the series are both geometric. Continuing,
+    \begin{align*}
+        \pi_0\left(\frac{p-1}{p}+\frac{1}{p}\left(\frac{q}{q-p}\right)\right)=1\quad&\Rightarrow\quad\pi_0\left(\frac{(p-1)(q-p)}{p(q-p)}+\frac{q}{p(q-p)}\right)=1\\
+        &\Rightarrow\quad\pi_0\left(\frac{pq-p^2-q+p+q}{p(q-p)}\right)=1\\
+        &\Rightarrow\quad\pi_0\left(\frac{q-p+1}{q-p}\right)=1\\
+        &\Rightarrow\quad\pi_0=\frac{q-p}{q-p+1}.
+    \end{align*}
+    So we have the solution; the invariant distribution is defined so that, for $i\in S$,
+    \begin{align*}
+        &i\geq 1\quad\Rightarrow\quad \pi_i=\frac{1}{2}\left(\frac{p^{i-1}}{q^i}\right)\left(\frac{q-p}{q-p+1}\right)=\frac{1}{4}\left(\frac{p^{i-1}}{q^i}\right)\left(\frac{1-2p}{1-p}\right)\\
+        &i\leq 1\quad\Rightarrow\quad \pi_i=\frac{1}{2}\left(\frac{p^{-i-1}}{q^{-i}}\right)\left(\frac{q-p}{q-p+1}\right)=\frac{1}{4}\left(\frac{p^{-i-1}}{q^{-i}}\right)\left(\frac{1-2p}{1-p}\right)\\
+        &i=0\quad\Rightarrow\quad\pi_i=\frac{q-p}{q-p+1}=\frac{1}{2}\left(\frac{1-2p}{1-p}\right)
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 6} Let $\{X_n:n\geq 0\}$ be a Markov chain with the state space $S$ and transition matrix $P$. We denote the period of a state $i\in S$ by
+    \[d_i=\gcd\{n\geq 1:(P^n)_{i,i}>0\}.\]
+    Show that for any $i,j\in S$, if $i$ and $j$ communicate, then $d_i=d_j$.\\[10pt]
+    {\bf Proof} Let $i,j\in S$ and suppose $i\neq j$ (since otherwise the proof is trivial). Let $d_i$ be the period of $i$ and $d_j$ the period of $j$. Since $i\longleftrightarrow j$, $\exists a,b\in\mbb{N}$ so that
+    $(P^{a})_{i,j}>0$ and $(P^{b})_{j,i}>0$. By the Chapman-Kolmogorov equations,
+    \[(P^{a+b})_{i,i}=\sum_{k\in S}(P^{a})_{i,k}(P^{b})_{k,i}\geq (P^{a})_{i,j}(P^{b})_{j,i}>0\]
+    So $a+b\in\{n\geq 1:(P^n)_{i,i}>0\}$, and thus $d_i|(a+b)$ (where $\forall \alpha,\beta\in\mbb{N}$, we write $\alpha|\beta$ to mean $\exists k\in\mbb{N}:$ $\beta=k\alpha$ ).
+    Now, since $j\longleftrightarrow i$ and $i\longleftrightarrow j$, $\exists {c_j}>0:$ $(P^{c_j})_{j,j}>0$. Then
+    \begin{align*}
+        (P^{a+c_j+b})_{i,i}=\sum_{k\in S}(P^a)_{i,k}(P^{c_j+b})_{k,i}&=\sum_{k\in S}(P^a)_{i,k}\left(\sum_{\ell\in S}(P^{c_j})_{k,\ell}(P^{b})_{\ell, i}\right)\\
+        &\geq\sum_{k\in S}(P^a)_{i,k}(P^{c_j})_{k,j}(P^b)_{j,i}\\
+        &\geq (P^a)_{i,j}(P^{c_j})_{j,j}(P^b)_{j,i}\\
+        &>0
+    \end{align*}
+    so that we also get $a+b+{c_j}\in\{n\geq 1:(P^n)_{i,i}>0\}$, thus $d_i|(a+b+{c_j})$. From this, $\exists k,m\in\mbb{N}$ so that $(a+b)=kd_i$, and $(a+b+{c_j})=md_i$. But then
+    \[(a+b+{c_j})=md_i\quad\Rightarrow\quad {c_j}+kd_i=md_i\quad\Rightarrow\quad {c_j}=d_i(m-k)\]
+    which gives us $d_i|{c_j}$. But $d_j|{c_j}$ by definition, and is the greatest such divisor, so $d_i\leq d_j$. We now reverse this argument. Observe that
+    \[(P^{b+a})_{j,j}=\sum_{k\in S}(P^{b})_{j,k}(P^{a})_{k,j}\geq (P^{b})_{j,i}(P^{a})_{i,j}>0\]
+    so $b+a\in\{n\geq 1: (P^n)_{j,j}>0\}$, and thus $d_j|(b+a)$. Next, since $i\longleftrightarrow j$ and $j\longleftrightarrow i$, $\exists c_i>0:$ $(P^{c_i})_{i,i}>0$. Then
+    \begin{align*}
+        (P^{b+c_i+a})_{j,j}=\sum_{k\in S}(P^b)_{j,k}(P^{c_i+a})_{k,j}&=\sum_{k\in S}(P^b)_{j,k}\left(\sum_{\ell\in S}(P^{c_i})_{k,\ell}(P^{a})_{\ell, j}\right)\\
+        &\geq\sum_{k\in S}(P^b)_{j,k}(P^{c_i})_{k,i}(P^a)_{i,j}\\
+        &\geq (P^b)_{j,i}(P^{c_i})_{i,i}(P^a)_{i,j}\\
+        &>0
+    \end{align*} 
+    so that $a+b+c_i\in\{n\geq 1:(P^n)_{j,j}>0\}$, thus $d_j|(a+b+c_i)$, and we know now that $\exists \ell,n\in\mbb{N}$ so that $(a+b)=\ell d_j$ and $(a+b+c_i)=nd_j$.  
+    But this gives us
+    \[(a+b+c_i)=nd_j\quad\Rightarrow\quad c_i+\ell d_j=nd_j\quad\Rightarrow\quad c_i=d_j(n-\ell)\]
+    which gives us $d_j|c_i$. But $d_i|c_i$, and is the greatest such divisor, so $d_j\leq d_i$. Previously we found that $d_i\leq d_j$, so we are forced to conclude that $d_i=d_j$.
+    Thus, for any two states $i,j\in S$ with $i\longleftrightarrow j$, we have $d_i=d_j$, so period is a class property.\hfill{$\qed$}\newpage
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Code used for problem 1b}
+    \begin{verbatim}
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        def sim_MDP(x_0, T, S, kernel):
+            '''
+            Simulate MDP with specified policy and transition kernel.
+            '''
+            T = int(T) # Number of iterations
+            mu = [0, 1, 0] # Fixed policy
+
+            # Initialize
+            u = mu[x_0] # action
+            x = x_0 # state
+            res = np.zeros((T, 2)) # empty array to contain process data
+            res[0, :] = np.array([x, u]) # include initial values in output
+
+            # Iterate
+            for i in range(1, T):
+
+                # Update state variables
+                x = np.random.choice(S, p=kernel[x, :, u])
+                u = mu[x]
+
+                # Store output
+                res[i, :] = np.array([x, u])
+
+            return res
+
+        def estimate_avg_cost(data):
+            '''
+            Compute cumulative estimate of average cost over MDP process
+            '''
+            N = data.shape[0] # Number of data points
+
+            # The running estimate vector
+            est = (1 / np.cumsum(np.ones((N,)))) * np.cumsum((data[:, 0] + 1) * (data[:, 1] + 1))
+
+            return est
+
+        # Process Parameters
+        S = np.array([0, 1, 2]) # State space
+        U = np.array([0, 1]) # Action space
+
+        # Action-specific transition matrices
+        P_1 = np.array([1/2, 1/4, 1/4, 1/4, 1/2, 1/4, 1/4, 1/4, 1/2]).reshape((3, 3, -1))
+        P_2 = np.array([1/3 for i in range(9)]).reshape((3, 3, -1))
+
+        # Concatenate transition matrices to be indexed by action
+        kernel = np.concatenate((P_1, P_2), axis=2)
+
+
+        # Simulation Parameters
+        T = 1e3 # number of time steps
+        x_0 = 1 # initial state
+        realizations = 50 # number of process realizations to simulate
+
+        # Initialize cost function output array
+        avg_cost_est_ = np.zeros((realizations, int(T)))
+
+        for j in range(realizations):
+            
+            init_ = np.random.choice(S) # equiprobable initial states
+
+            data_ = sim_MDP(init_, T, S, kernel) # simulate process
+            avg_cost_est_[j, :] = estimate_avg_cost(data_) # store running estimate of cost
+
+        # Plot the running estimates from all realizations
+        fig, ax = plt.subplots()
+
+        # L-axes
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+
+        # Plot every realization
+        for j in range(realizations):
+            ax.plot(np.linspace(1, T, num=int(T)), avg_cost_est_[j, :], linewidth=0.9)
+
+        # Set axes labels
+        ax.set_xlabel('Iterate')
+        ax.set_ylabel('Average Cost Function Estimate')
+    \end{verbatim}
+    {\bf A.2 Code used for problem 2c}
+    \begin{verbatim}
+        # Specify state transition probability matrix
+        P = np.array(
+            [
+                22/40, 9/40, 0, 0, 0, 9/40,
+                22/40, 9/40, 9/40, 0, 0, 0,
+                4/40, 9/40, 9/40, 18/40, 0, 0,
+                4/40, 0, 9/40, 18/40, 9/40, 0,
+                4/40, 0, 0, 18/40, 9/40, 9/40,
+                22/40, 0, 0, 0, 9/40, 9/40
+            ]
+        ).reshape((6,6))
+        print(P, '\n') # Print it to make sure the entries are correct
+
+        # Get left spectrum and eigenvectors
+        eigenvalues, eigenvectors = np.linalg.eig(P.T)
+
+        # Find an invariant eigenvector from the candidates
+        tol = 1e-13 # L1 norm tolerance for verifying invariance
+        D = [] # list to contain norms
+        for i in range(5):
+            # Compute distance between v^T and P^Tv^t for each eigenvector v
+            D.append(np.sum(np.abs(P.T @ eigenvectors[:, i] - eigenvectors[:, i])))
+
+        # Search for an approximately invariant vector w.r.t. tolerance
+        if np.amin(D) > tol:
+            raise Exception("No invariant eigenvectors") # Halt if no approximate invariance
+        else:
+            inv_ind = np.argmin(D) # index of invariant eigenvector
+
+            # Print spectrum and invariant eigenvector
+            print('Eigenvalues: {}'.format(eigenvalues))
+            print('Invariant Eigenvector: {}\n'.format(eigenvectors[:, inv_ind]))
+
+        # Extract and normalize the invariant measure to identify invariant distribution
+        pi = eigenvectors[:, 0] / np.sum(eigenvectors[:, 0])
+        print("Invariant distribution: {}\nSums to {}".format(pi, np.sum(pi)))
+    \end{verbatim}
+\end{document}

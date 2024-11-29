@@ -1,0 +1,451 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.7cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{sectsty}
+\usepackage{titlesec}
+\usepackage[tracking]{microtype}
+\usepackage{array, booktabs, ragged2e}
+\usepackage[bookmarks,hypertexnames=false,debug,linktocpage=true,hidelinks]{hyperref}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+\setcounter{MaxMatrixCols}{20}  % Permits more columns in amsmath matrices
+
+\allowdisplaybreaks 
+
+\hypersetup{
+    colorlinks,
+    linktoc=all,
+    linkcolor={black},
+    citecolor={black},
+    urlcolor={black}
+}
+
+\titleformat{\chapter}
+  {\color{black}\normalfont\LARGE\bfseries}
+  {\thechapter}{1em}
+  {}[]
+\sectionfont{\color{black}}
+\subsectionfont{\color{black}}
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+% \newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+\DeclareMathOperator{\DM}{DM}
+\DeclareMathOperator{\argmin}{argmin}
+
+\begin{document}
+\begin{titlepage}
+\vspace*{\fill}
+\begin{center}
+    {\bf\LARGE Learning in Decentralized Stochastic Games}\\[30pt]
+    {\bf Connor Braun}\\[10pt]
+    {\bf 04-07-2024}
+\end{center}
+\vspace*{\fill}
+\begin{center}
+    {\it TERM PAPER FOR MATH 872: OPTIMIZATION AND CONTROL OF STOCHASTIC SYSTEMS}
+\end{center}
+\end{titlepage}
+\tableofcontents
+\newpage
+\addcontentsline{toc}{section}{Introduction}
+\section*{Introduction}
+Since its inception in the 1950s [17] the framework of stochastic games has been widely adopted
+as a means of studying multi-agent interactions where agents are coupled not only directly in their actions
+but also indirectly through the stochastic evolution of some state process. Stochastic games can be couched
+as either a generalization of repeated games (by the inclusion of a nontrivial state process) or of Markov
+Decision Processes (MDPs) by the inclusion of more than one agent, and are thus indispensible as a means of
+modeling complex interactions between self-interested agents. Learning is of principle interest in these
+applications, but methods for learning in stochastic games remain poorly developed relative to those for
+repeated games and MDPs. What has been developed is either computationally infeasible in large systems
+or makes dubious assumptions on the information available to agents for most applications. The work presented
+in [1] establishes a new reinforcement learning (RL) algorithm for learning in a large
+class of stochastic games used to model cooperative systems. In particular, learning under this algorithm
+utilizes only local information and is guaranteed to induce convergence to equilibrium. In this paper we
+endeavor to review the relevant literature on the class of stochastic games considered before discussing the
+main contributions of [1] and their limitations in light of potential applications to neuroscientific modeling.
+\addcontentsline{toc}{section}{Discounted Stochastic Games and Weak Acyclicity}
+\section*{Discounted Stochastic Games and Weak Acyclicity}
+Our attention here is restricted to the setting of discrete-time finite discounted stochastic games [4], the general structure of which we shall introduce before discussing the necessary refinements. Any instance of such a game consists of a finite set of decision makers (DM) indexed DM$^i$ for $i\in\mathcal{N}=\{1,\dots,N\}$,
+finite state space and action spaces $\mbb{X}$ and $\mbb{U}^i$ respectively, a set of cost functionals $c^i:\mbb{X}\times\mbb{U}^1\times\cdots\times\mbb{U}^N\rightarrow\mbb{R}_+$, discount factors $\beta^i$, an initial state $x_0\in\mbb{X}$ and a
+stochastic kernel $\mc{T}:\mbb{X}\times\mbb{U}^1\times\cdots\times\mbb{U}^N\rightarrow\mc{P}(\mbb{X})$, where $\mc{P}(\mbb{X})$ is the set of probability measures over $\mbb{X}$ and any object indexed by $i$ corresponds to DM$^i$ for $i\in\mc{N}$.
+The form of the transition kernel renders the state process $\{x_t\}_{t\geq 0}$ controlled Markov; at each $t\geq 0$, $\DM^i$ selects an action $u_t\in\mbb{U}^i$ with, at the very least, access to the present state $x_t$. The joint action $(u^1_t,\dots,u^N_t)$ and state $x_t$ then
+determine the transition probabilities. We remark that such a system admits an equivalent stochastic realization [5] (lemma 1.2)
+\[x_{t+1}=f(x_t,u^1_t,\dots,u^N_t,w_t)\]
+for some $f$ measurable and $\{w_k\}_{k\geq 0}$ an i.i.d. noise process. For our purposes, agents are constrained to use stationary strategies for action selection. That is, denoting the set of these for $\DM^i$ with $\Delta^i$, we have $\forall \pi^i\in\Delta^i$, $\pi^i:\mbb{X}\rightarrow\mc{P}(\mbb{U}^i)$. Such a function is called a (randomized) policy (or equivalently, a mixed strategy in the game theory literature), with which $DM^i$ randomly selects its action at time $t$ according to the distribution $\pi^i(x_t)$.
+Each $\DM^i$ will often be further restricted to the set of deterministic policies (pure strategies in game theory) $\Pi^i$ where $\forall \pi^i\in\Pi^i$, $\pi^i:\mbb{X}\rightarrow\mbb{U}^i$. It is easy to see that $\Pi^i\subset\Delta^i$, since for $(x,u)\in\mbb{X}\times\mbb{U}^i$ we may write $\pi^i(x)=\delta_{u}\in\mc{P}(\mbb{U}^i)$, with $\delta_u$ the Dirac distribution centered at $u$.
+The primary objective of each $DM$ is to select a policy in $\Delta^i$ minimizing the expected discounted cost criterion 
+\[\E_x^\pi\bp{\sum_{t=0}^\infty(\beta^i)^tc^i(x_t,u^1_t,\dots,u^N_t)}\tag{1}\]
+where $\pi=(\pi^j)_{j\in\mc{N}}$ denotes the joint policy of all $\DM$s. Before reviewing some basic results on these games, we introduce some notational conventions. Let $\Pi:=\Pi^1\times\cdots\Pi^N$ and $\Delta:=\Delta^1\times\cdots\times\Delta^N$ be joint pure/mixed strategy spaces respectively, and take $\pi^{-i}:=\{\pi^j\}_{j\neq i}$ with corresponding spaces $\Delta^{-i}:=\times_{j\neq i}\Delta^j$, $\Pi^{-i}=\times_{j\neq i}(\Pi^j)$ for when we wish to specify a joint policy excluding a particular $\DM^i$ for $i\in\mc{N}$.
+With these, (1) will be henceforth denoted by $J^i(x,\pi)$.\\[5pt]
+In a stochastic team problem, we take $c^i\equiv c^j$ $\forall i\neq j$, so that $\DM$ objectives are perfectly aligned and optimality for one is optimality for all. Stochastic games are less restrictive,
+allowing agents to pursue conflicting objectives as encoded by their respective cost functions, and necessitating weaker notions of optimality for when no $\DM^i$ has any incentive to unilaterally deviate in strategy given fixed $\pi^{-i}\in\Delta^i$. Such regimes are stable despite potentially being globally suboptimal, and are described by Nash (person-by-person) equilibria, wherefor $(\pi^{\ast,i})_{i\in\mc{N}}\in\Delta$ and every $x\in\mbb{X}$, $i\in\mc{N}$,
+\[J^i(x,\pi^{\ast,i},\pi^{\ast,-i})=\min_{\pi^i\in\Delta^i}J^i(x,\pi^i,\pi^{\ast,-i}).\tag{2}\]
+In stochastic games such an equilibrium is called Markov perfect since it is subgame perfect and achieved by a jointly Markov strategy [13]. For a fixed $x_0\in\mbb{X}$ and any $i\in\mc{N}$, $\pi\in\Delta$, the law of iterated expectation yields
+\[J^i(x,\pi)=c^i(x_0,\pi(x_0))+\beta^i\E^\pi_{x_0}\bp{J^i(x_1,\pi)}\] 
+where for each $x_1\in\mbb{X}$, $J^i(x_1,\pi)$ encodes a subgame clearly solved by any solution to (2). By these recursions, any subgame of the stochastic game corresponding to $x_0$ can be expressed as the minimization of $J^i(x^\prime,\pi)$ over $\Delta$ for some $x^\prime$, so that every solution to (2) is subgame perfect. Pioneering work by [17] proved the existence of such equilibria for the $N=2$ case, which was later extended to $N<\infty$ [4] (theorem 2).\\[5pt]
+The algorithms to be presented assume that the game admits a deterministic equilibrium $\pi\in\Pi$ to (2), the set of which we shall denote $\Pi_{eq}\subset\Pi$. This assumption does not hold in general and requires that we restrict the class of games considered. To elaborate, observe that after fixing $i\in\mc{N}$, (2) has a solution $\pi^{\ast,i}\in\Pi^i$ since the problem is reduced to a single agent MDP with an infinite horizon discounted cost. However, simultaneously solving all $N$ equations with some $\pi\in\Pi$ is not possible in general.
+Optimal solutions in fully cooperative stochastic teams are deterministic under various conditions [6,7] but to accomodate player objective diversity in a stochastic game one could consider more general frameworks such as those for potential games [15].
+These permit the encoding of global system objectives in a so-called potential function [12] which decreases under an adjustment in a single $\DM$'s policy if and only if it would reduce that player's objective function [15]. What is more, for such games potential function minima correspond to deterministic Markov perfect equilibria [15] (Lemma 2.1). Still, in order to admit a potential function the objectives of each of the $\DM$s must be
+closely aligned -- a requirement which may be relaxed in the setting of weakly acyclic games.\\[5pt]
+Toward defining weak acyclicity and adopting (as we have been) the notation in [1], we define for each $\DM^i$ the set of deterministic best replies to any $\pi^{-i}\in\Delta^{-i}$
+\[\Pi^i_{\pi^{-i}}:=\left\{\hat{\pi}^i\in\Pi^i:J^i(x,\hat{\pi}^i,\pi^{-i})=\min_{\pi^i\in\Delta^i}J^i(x,\pi^i,\pi^{-i}),\;\forall x\in\mbb{X}\right\}\tag{3}\]
+where we emphasize that the minimum can be achieved by a deterministic policy when $\pi^{-i}$ is fixed {\it a priori}. Any best reply $\hat{\pi}^i\in\Pi^i_{\pi^{-i}}$ is said to be strict with respect to $(\pi^i,\pi^{-i})\in\Delta$ if $\exists x\in\mbb{X}$ with $J^i(x,\hat{\pi}^i,\pi^{-i})<J^i(x,\pi^i,\pi^{-i})$ so that $\DM^i$ strictly improves its performance by switching to $\hat{\pi}^i$.
+We denote the set of such policies with $\Pi^i_{s,\pi}\subset\Pi^i_{\pi^{-i}}$. Now, treating $\Pi$ as a set of nodes, we may define the best response graph [24] to be the directed graph $\mc{G}_{sBR}=(\Pi,\mc{E}_{sBR})$, where $\mc{E}_{sBR}\subset\Pi\times\Pi$ and $(\pi_t,\pi_{t+1})\in\mc{E}_{sBR}$ if and only if $\forall i\in\mc{N}$,
+\[\exists i\in\mc{N}:\pi^i_{t+1}\neq\pi^i_t\quad\text{and}\quad\pi_{t+1}^i\neq\pi^i_t\;\Rightarrow\;\pi^i_{t+1}\in\Pi^i_{s,\pi_t}\;\text{and}\;\pi^j_{t+1}=\pi^j_t\;\forall j\neq i\]
+so that any two connected nodes differ in only one $\DM^i$ policy and the downstream adjustment is a strict best reply to the preceeding joint policy. 
+With all of this, a discounted stochastic game is said to be weakly acyclic with respect to strict best replies if, $\forall \pi_0\in\Pi$, there exists a strict best reply path originating at $\pi_0$ and terminating at a node $\pi^\ast\in\Pi_{eq}$.\\[5pt]
+The policy dynamics imposed by strict best replies implies that nodes in $\Pi_{eq}$ have no outgoing edges, and are thus interpretable as sinks or local optima. Furthermore, weak acyclicity is equivalent to the property that all sinks in $\Pi$ are singletons,
+such that policies are unable to enter inescapable oscillations [3]. Unfortunately, even for a large class of repeated (non-stochastic) games, ruling out/in weak acyclicity is computationally intractable (PSPACE-complete, NP-hard, respectively) [14] and sufficient conditions for weak acyclicity
+are quite restrictive [3,24]. That said, all potential games and finite stochastic team problems are weakly acyclic [1,3] making the property applicable at least in the context of highly cooperative systems of $\DM$s.
+\addcontentsline{toc}{section}{Learning in Stochastic Games}
+\section*{Learning in Stochastic Games}
+Learning in the context of games describes the process by which $\DM$ policies evolve over the course of play under a particular rule. Often this is with the hope of convergence to some equilibrium, and one is typically interested in convergence results associated to a particular rule when deployed in a selected class of games.
+For stochastic games, learning is especially difficult since the state process is rendered non-stationary through $\DM$s regularly adjusting their policies. Various approaches exist to ameliorate this effect, for example by having $\DM$s maintain beliefs on the strategies of other agents using global information structures [8,16].
+However, the growth of state-joint action space is exponential in the number of agents, making global information methods intractable for large multi-agent systems [21].\\[5pt]
+Reinforcement learning, and in particular Q-learning, has been a popular direction for learning in stochastic games, but is primarily backed by empirical results with unsatisfactory outcomes [18] which can be ascribed to the same non-stationarity (due to multiple interacting learners) and complexity (due to global information) issues as above.
+Toward reducing the computational demands for each $\DM$, we consider the independent learners paradigm for Q-learning, where each $\DM$ is made oblivious to the existence of other learning agents. From the perspective of any $\DM$, the problem is reduced a single-agent MDP, albeit with extremely complex dynamics due to the hidden $\DM$s. In particular, [1] suppose that $\DM^i$ has knowledge of its parameters $\mbb{U}^i$ and $\beta^i$, and at time $t\geq 0$, has access to only the local information variable
+$\mc{I}^i_t:=\{x_{[0,t]},u^i_{[0,t-1]}\}$ and cost history $\{c^i(x_k,u^i_k,u^{-i}_k)\}_{k= 0}^{t-1}$. With this, $\DM^i$ adopts a strategy $\pi^i\in\Delta^i$ and implements the Q-learning algorithm where for $t\geq 0$, $(x,u^i)\neq(x_t^i,u_t^i)$, we have $\;Q^i_{t+1}(x,u^i)=Q_t^i(x,u^i)$ and otherwise
+\[Q_{t+1}^i(x_t,u^i_t)=Q_t^i(x_t,u^i_t)+\alpha^i_t\left[c^i(x_t,u^i_t,u^{-i}_t)+\beta^i\min_{v^i\in\mbb{U}^i}Q^i_t(x_{t+1},v^i)-Q^i_t(x_t,u^i_t)\right]\tag{4}\]
+where $Q^i_0$ is given and $\forall t\geq 0$, $u^i_t=\pi^i(x^i_t)$, and the $\alpha^i_{t}\in[0,1]$ are from a sequence of learning rates satisfying $\sum_n\alpha_n^i=\infty$ and $\sum_n(\alpha^i_n)^2<\infty$. Now, fixing $\pi^{-i}\in\Pi^{-i}$, the stochastic kernel $\mc{T}:\mbb{X}\times\mbb{U}^i\rightarrow\mc{P}(\mbb{X})$ is stationary and the recursions in (4) converge to the fixed point $Q^{\ast,i}$ satisfying
+\[Q^{\ast,i}(x,u)=\E(c^i(x,u))+\beta^i\sum_{x_1\in\mbb{X}}P(x_1|x_0=x,u_0=u)\min_{v\in\mbb{U}^i}Q^{\ast,i}(x,v)\tag{5}\]
+a.s. as $t\rightarrow\infty$, granting some mild assumptions on the exploration policy $\pi^i\in\Delta^i$ [20]. The minimum over $\mbb{U}^i$ of $Q^{\ast,i}$ at each $x\in\mbb{X}$ is a solution to the disounted cost optimality equation, such that a policy $\pi^{\ast,i}\in\Pi^i$ achieving $\min_{v\in\mbb{U}^i}Q^{\ast,i}(x,v)=Q^{\ast,i}(x,\pi^i(x))$ is optimal with respect to (1). Repeating this standard Q-learning setup, but instead fixing $\pi^{-i}\in\Delta^{-i}$, we may define the operator $F^i_{\pi^{-i}}$ so that
+\begin{align*}
+    F^i_{\pi^{-i}}(Q_t^i)(x,u^i)&=\E_{\pi^{-i}(x)}\left[c^i(x,u^i,u^{-i})+\beta^i\sum_{x_1\in\mbb{X}}P(x_1|x,u^i,u^{-i})\min_{v^i\in\mbb{U}^i}Q_t^i(x_1,v^i)\right]\tag{6}\\
+    &=\sum_{u\in\mbb{U}^{-i}}\left(\prod_{j\neq i}\pi^j(x)\right)(u)\left[c^i(x,u^i,u)+\beta^i\sum_{x_1\in\mbb{X}}P(x_1|x,u^i,u)\min_{v^i\in\mbb{U}^i}Q_t^i(x_1,v^i)\right]\tag{7}
+\end{align*}
+which is a contraction map and hence admits a unique fixed point, denoted by $Q^i_{\pi^{-i}}$ [4]. Further, (6) is the form of the optimality equation for discounted stochastic games obtained by dynamic programming recursions [4] so that the vector formed by $\min_{v^i\in\mbb{U}^i}Q^i_{\pi^{-i}}(x,v^i)$ for $x\in\mbb{X}$ is the optimal cost associated to $\DM^i$ when the game begins at $x_0=x$ and the other players act according to $\pi^{-i}$.
+That is, $\min_{v^i\in\mbb{U}^i}Q^i_{\pi^{-i}}(x,v^i)=\min_{\pi^i\in\Delta^i}J^i(x,\pi^i,\pi^{-i})$ and the policy $\hat{\pi}^i(x):=\argmin_{v^i\in\mbb{U}^i}Q^i_{\pi^{-i}}(x,v^i)$ is a best reply at the state $x$. Thus, (3) may be expressed according to these optimal Q-values
+\[\Pi^i_{\pi^{-i}}=\{\hat{\pi}^i\in\Pi^i:Q^i_{\pi^{-i}}(x,\hat{\pi}^i(x))=\min_{v^i\in\mbb{U}^i}Q^i_{\pi^{-i}}(x,v^i),\;\forall x\in\mbb{X}\}\tag{8}\]
+from which one might hope to formulate a stochastic approximation algorithm with iterates converging to the fixed point of $F^i_{\pi^{-i}}$. However, this only holds when $\pi^{-i}\in\Delta^{-i}$ is fixed, so that there is only one learning agent at a time.
+This brings us to the main idea behind the decentralized learning algorithm presented by [1]: set intervals of time where $\DM$s play under fixed policies and estimate their optimal Q-values, then update their strategies according to (8).
+\addcontentsline{toc}{section}{Decentralized Q-Learning for Weakly Acyclic Stochastic Games}
+\section*{Decentralized Q-Learning for Weakly Acyclic Stochastic Games}
+In this section we summarize the main results of [1]. Consider an $N$-player discounted stochastic game which is weakly acyclic under strict best replies. With an arbitrary initial $\pi_0\in\Delta$ we could traverse the graph $\mc{G}_{sBR}$ by letting, for each $t\geq 1$, exactly one agent (according to some predetermined rule) $\DM^i$ to update its policy so that $\pi^i_t\in\Pi^i_{s,\pi_{t-1}}$. Assuming that $\DM^i$ considers every alternative in $\Pi^i_{s,\pi_{t-1}}$ with positive probability, the process will continue until $\pi_T\in\Pi_{eq}$ for some $T\geq 0$ that is a.s. finite.
+This follows the fact that $|\Pi|<\infty$ and so there is a finite length path from every $\pi_0\in\Pi$ to some $\pi\in\Pi_{eq}$.
+At this point, the process stops (since every element of $\Pi_{eq}$ is an absorbing singleton) and the joint policy has converged to a Markov perfect equilibrium. In Appendix A.1. Algorithm 1 details the best reply process with inertia, whereby each $\DM$ may update their policies at every step, but with a set of inertias $\{\lambda^i\}_{i\in\mc{N}}\subset(0,1)$ so that with positive probability they do not.\\[5pt]
+Since the game is weakly acyclic under strict best replies, for any initial $\pi_0\in\Pi$, $\exists L_{\pi_0}\in\mbb{N}$ which is the (finite) shortest pathlength from $\pi_0$ to an element of $\Pi_{eq}$. Then take $L:=\max\{L_{\pi^\prime}\}_{\pi^\prime\in\Pi}$, the maximum shortest pathlength from any joint policy to an equilibrium. Under Algorithm 1, if at time $t\geq 0$ we have joint policy $\pi_t$, then
+there is a finite sequence of strict best replies under which $\pi_{t+L}\in\Pi_{eq}$, and precisely these steps occur with some strictly positive probability. Of course, in order to select a best reply at time $t\geq 0$, $\DM^i$ needs to have access to $\Pi^i_{\pi^{-i}_t}$. If $\DM$s have access to the transition kernel
+and $\pi_t^{-i}$, then $\Pi^i_{\pi^{-i}_t}$ may be computed by (3) using some model-based approach, like policy or value iteration. In practical applications such information is not typically available to agents, motivating a model-free approach based on Q-learning, where we compute $\Pi^i_{\pi^{-i}_t}$ according to (8) as alluded to previously. Policies selected from this set approximated this way are referred to as near best replies [1].\\[5pt]
+As explored above, the independent learners approach is useful as a means of reducing the computational overhead at each $\DM$, but renders the 'environment' as perceived by each $\DM$ (which consists now of other learning agents) nonstationary, preventing convergence of the Q-learning iterations (5). The present work offers a modification of classic Q-learning aimed at resolving this non-stationarity while approximating the best reply process described in algorithm 1.\\[5pt]
+Let $\{T_k\}_{k\geq 0}\subset\mbb{N}$ where $T_k$ defines the duration of the $k$-th so-called exploration phase. That is, for $n\geq 1$, the $n$-th exploration phase begins at the timestep $t_n=\sum_{k=0}^{n-1}T_k$ and runs until time $t_n+T_n-1$. Over this interval, agents maintain a baseline joint policy $\pi_n\in\Pi$ with some small probability of experimentation. The idea is that this should limit the non-stationarity of the environment, and permit convergence of standard Q-learning.
+That is, agents approximate Q-factors corresponding to the stationary game, use these to determine their near best replies, and then update their policies accordingly with inertia, thus approximating algorithm 1.
+Algorithm 2 in appendix A.1. presents the decentralized Q-learning algorithm proposed by [1]. We now present the convergence theorem for algorithm 2, following some underlying assumptions:\\[5pt]
+{\bf Assumption 1}\hspace{5pt} $\forall (x,x^\prime)\in\mbb{X}\times\mbb{X}$, $\exists M\in\mbb{Z}_+$ and $\tilde{u}_0,\dots,\tilde{u}_M\in\mbb{U}$ so that
+\[P(x_{M+1}=x^\prime|(x_M,u_{[0,M]})=(x,\tilde{u}_0,\dots,\tilde{u}_M))>0\]
+which ensures that elements of $\mbb{X}$ are hit infinitely often -- a prerequisite for the convergence of stochastic approximation procedures, like Q-learning [20].\\[5pt]
+{\bf Assumption 2}\hspace{5pt} $\forall i\in\mc{N}$, $0<\rho^i<\overline{\rho}$ and $0<\delta^i<\overline{\delta}$, where $\overline{\rho}$, $\overline{\delta}$ are bounds on the permissible
+experimentation probabilities and sub-optimality of near best replies respectively.\\[5pt]
+{\bf Theorem 1}\hspace{5pt} Let $\mathfrak{G}=(\mbb{X},\mc{N},\mbb{U},\Delta,\{c^i\}_{i\in\mc{N}},\{\beta^i\}_{i\in\mc{N}})$ be a finite discounted stochastic game and suppose it is weakly acyclic under strict best replies.
+Let assumptions 1 \& 2 hold, and suppose that $\DM^i$ updates its policy according to algorithm 2 (appendix A.1.). Then the following hold:\\[5pt]
+i) $\forall\varepsilon>0$, $\exists \hat{T}<\infty$, $\hat{k}<\infty$ such that if $\min_{j\geq 1}T_j\geq\hat{T}$ and $k\geq\hat{k}$, then $P(\pi_k\in\Pi_{eq})\geq 1-\varepsilon$.\\[5pt]
+ii) $\exists\{\hat{T}_k\}_{k\geq 0}$ so that if $\forall k$, $T_k\geq\hat{T}_k$, then, for some $\pi^\ast\in\Pi_{eq}$, $P(\pi_k\rightarrow\pi^\ast)=1$.\\[5pt]
+Intuitively, (i) says that we can find a uniform lower bound on the exploration phase duration so that, if all exploration phases are longer, after some finite time the game will have reached a Markov perfect equilibrium with arbitrarily high probability. Similarly, (ii) says that we can find a sequence of sufficiently long exploration phases so that
+the joint policy converges to an equilibrium almost surely.\\[5pt]
+To prove this result, we shall trace the logic and supporting lemmas presented in [1], beginning with a slight extension of the well-known convergence of single-agent Q-learning [20].\\[5pt]
+{\bf Lemma 1}\hspace{5pt} Assume that all pairs $(x,u)\in\mbb{X}\times\mbb{U}^i$ are visited infinitely often w.p. $1$. Then, fixing $\varepsilon>0$ and $\mbb{Q}^i\subset\mbb{R}^{|\mbb{X}\times\mbb{U}^i|}$ compact, there exists a positive integer $T_\varepsilon^{\mbb{Q}^i}<\infty$ such that
+for any initialization $Q_0\in\mbb{Q}^i$, 
+\[P\big(\sup_{t\geq T^{\mbb{Q}^i}_\varepsilon}\big|Q_t-\overline{Q}\big|_{\infty}\leq \varepsilon\big)\leq 1-\varepsilon\tag{9}\]
+where $\overline{Q}$ is the unique fixed point of the contraction mapping defined by (5). This result says that any initialization for the Q-factors from a compact subset will converge in probability under the iterations in (4) to the optimal Q-factors. \\[5pt]
+In algorithm 2 each agent operates under a deterministic policy, but with a small probability of experimentation. Thus, it needs to be shown that the added randomness does not disrupt convergence to the optimal Q-factors corresponding to the underlying deterministic policy. The {\it almost} deterministic policy for the $k$-th exploration phase and $\DM^i$ will be given by the convex combination $\overline{\pi}^i_k:=(1-\rho^i)\pi^i_k+\rho^i\nu^i$, where $\nu^i$ selects actions from $\mbb{U}^i$ equiprobabilistically at any state.\\[5pt]
+{\bf Lemma 2}\hspace{5pt} $\forall\varepsilon>0$ we can find a positive integer $T_\varepsilon>0$ so that 
+\[T_k\geq T_\varepsilon\quad\Rightarrow\quad P\big(\forall i\in\mc{N},\;\big|Q^i_{t_{k+1}}-Q^i_{\overline{\pi}^i_k}\big|_\infty\leq\varepsilon\big)\geq 1-\varepsilon.\tag{10}\]
+Which just says that Q-factor estimates will converge in probability to the optimal Q-factors for the almost deterministic policy provided the exploration phase is long enough. In the next lemma, it is established that for sufficiently small experimentation probability the optimal Q-factor
+estimates for the deterministic and near deterministic policies can be made arbitrarily close.\\[5pt]
+{\bf Lemma 3}\hspace{5pt} $\forall\varepsilon>0$, $\exists\rho_\varepsilon>0$ such that if $\rho^i<\rho_\varepsilon$ $\forall i\in\mc{N}$, then
+\[\big|Q^i_{\pi^{-i}_k}-Q^i_{\overline{\pi}^{-i}_k}\big|_\infty\leq\varepsilon,\quad\text{$\forall i,k.$}\tag{11}\]
+{\bf Proof} (sketch)\hspace{5pt}First, the $\{\rho^i\}_{i\in\mc{N}}$ are fixed. Then, since $Q^i_{\pi^{-i}_k}$ and $Q^i_{\overline{\pi}^i_k}$ are fixed points of $F^i_{\pi^{-i}_k}$ and $F^i_{\overline{\pi}^i_k}$, respectively, an upper bound can be constructed as
+\begin{align*}
+    \big|Q^i_{\pi^{-i}_k}-Q^i_{\overline{\pi}^{-i}_k}\big|_\infty=\big|F^i_{\pi^{-i}_k}(Q^i_{\pi^{-i}_k})-F^i_{\overline{\pi}^{-i}_k}(Q^i_{\overline{\pi}^{-i}_k})\big|_\infty&\leq\big|F^i_{\pi^{-i}_k}(Q^i_{\pi^{-i}_k})-F^i_{\overline{\pi}^{-i}_k}(Q^i_{\pi^{-i}_k})\big|_\infty+\big|F^i_{\overline{\pi}^{-i}_k}(Q^i_{\pi^{-i}_k})-F^i_{\overline{\pi}^{-i}_k}(Q^i_{\overline{\pi}^{-i}_k})\big|_\infty\\
+    &\leq \big(1-\prod_{j\neq i}(1-\rho^j)\big)\big|F^i_{\pi^{-i}_k}(Q^i_{\pi^{-i}_k})-F^i_{\phi^{-i}_k}(Q^i_{\pi^{-i}_k})\big|_\infty+\beta^i\big|Q^i_{\pi^{-i}_k}-Q^i_{\overline{\pi}^{-i}_k}\big|_\infty
+\end{align*}
+where $\phi^{-i}_k\in\Delta^{-i}$ is a convex combination of policies determined by $\pi_k$, $\{\rho^i\}_{i\in\mc{N}}$ and each of the $\nu^i$. The form of this policy is rather ponderous and thus omitted. The important fact is that there are a finite collection of pairs $(\pi^{-i}_k,\phi^{-i}_k)$, and so there exists a uniform bound $\overline{F}$ over these such that
+\[\big|Q_{\pi^{-i}_k}^i-Q^i_{\overline{\pi}^{-i}_k}\big|_\infty\leq\big(1-\prod_{j\neq i}(1-\rho^j)\big)\frac{\overline{F}}{1-\beta^i}. \tag*{$\qed$}\]
+Next, the maximum suboptimality tolerance $\overline{\delta}$ in assumption 2 is defined as
+\[\overline{\delta}:=\min_{\substack{i,x,v^i,\tilde{v}^i,\pi^{-i}\in\Pi^{-i} \\ Q^i_{\pi^{-i}}(x,v^i)\neq Q^i_{\pi^{-i}}(x,\tilde{v}^i)}}\big|Q^i_{\pi^{-i}}(x,v^i)-Q^i_{\pi^{-i}}(x,\tilde{v}^i)\big|\]
+the smallest nontrivial distance between any agent's optimal Q-factors corresponding to some state. But then lemma 3 says we can find a maximum experimentation probability $\overline{\rho}$ so that $\rho^i<\overline{\rho}$ $\forall i$ implies $|Q^i_{\pi^{-i}_k}-Q^i_{\overline{\pi}^{-i}_k}|_\infty<(1/2)\min\{\delta^i,\overline{\delta}-\delta^i\}$ for all $i,k$. This fact, in conjunction with lemma 2 yields lemma 4.\\[5pt]
+{\bf Lemma 4}\hspace{5pt} Suppose that $0<\rho^i<\overline{\rho}$ and $0<\delta^i<\overline{\delta}$ for all $i\in\mc{N}$. Then, $\forall\varepsilon>0$, $\exists\overline{T}<\infty$ so that if the $k$-th exploration phase has duration $T_k\geq \overline{T}$ then
+\[P\big(\big|Q^i_{t_{k+1}}-Q^i_{\pi^{-i}_k}\big|_\infty<\tfrac{1}{2}\min(\{\min(\delta^i,\overline{\delta}-\delta^i)\}_{i\in\mc{N}}),\;\forall i\big)\geq1-\varepsilon\tag{12}\]
+{\bf Proof} (sketch)\hspace{5pt}By the triangle inequality
+\[\big|Q^i_{t_{k+1}}-Q^i_{\pi^{-i}_k}\big|_\infty\leq \big|Q^i_{t_{k+1}}-Q^i_{\overline{\pi}^{-i}_k}\big|_\infty+\big|Q^i_{\overline{\pi}^{-i}_k}-Q^i_{\pi^{-i}_k}\big|_\infty\]
+so, provided both of the bounding terms are less than $(1/4)\min(\{\min(\delta^i,\overline{\delta}-\delta^i)\}_{i\in\mc{N}})$, the desired bound holds. But lemma 2 says we may find $0<\overline{T}<\infty$ so that the first bound holds $\forall i$ with arbitrarily high probability. Further, lemma 3 tells us the second term assumes the desired bound for sufficiently small experimentation probabilities, which proves the result.\hfill{$\qed$}\\[5pt]
+Thus, the Q-factor estimates obtained with experimentation can be made arbitrarily close to the optimal Q-factors for the baseline deterministic policy w.p. $1$. More consequential for the present analysis (and letting $E_k$ denote the event in (12) for the $k$-th policy update) we have that if $\omega\in E_k$, then in fact
+\[\Pi_{\pi_k}:=\prod_{i\in\mc{N}}\Pi^i_{\pi^{-i}_k}=\prod_{i\in\mc{N}}\Pi^i_k=:\Pi_k\tag{13}\]
+which says that the set of deterministic joint best replies found by algorithm 2 is equal to the true set of deterministic best replies. Thus (under assumption 2 and with sufficiently large $T_k$) the $k$-th policy update under algorithm 2 is identical to algorithm 1. Further, each singleton $\{\pi^\ast\}\subset\Pi_{eq}$ remains an absorbing set -- i.e.
+\[P\big(\pi_{k+1}=\pi_k|E_k,\;\pi_k\in\Pi_{eq}\big)=1.\tag{14}\]
+{\bf Proof (Theorem 1-i)}\hspace{5pt} Since $\mathfrak{G}$ is weakly acyclic, $\forall\pi\in\Pi$, $\exists L_\pi<\infty$ which is the shortest strict best reply path from $\pi$ to some $\pi^\ast\in\Pi_{eq}$. Because $\mathfrak{G}$ is finite,
+we may take $L:=\max_{\pi\in\Pi}L_\pi<\infty$. As explained at the beginning of the section, $\exists p_{min}\in(0,1)$ depending only on the inertias $\lambda^1,\dots,\lambda^N$ so that for any $k\geq 0$, 
+\[P(\pi_{k+L}\in\Pi_{eq}|E_k,\dots,E_{k+L-1},\pi_k\notin\Pi_{eq})\geq p_{min}\tag{15}\]
+where conditioning on the events $\{E_j\}_{j=k}^{k+L-1}$ ensures that algorithm 2 makes updates along a best reply path. Next, fix a constant $\tilde{\varepsilon}\in(0,\varepsilon)$ satisfying the following technical constraint:
+\[\bp{\frac{(1-\tilde{\varepsilon})p_{min}}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}-\tilde{\varepsilon}}(1-\tilde{\varepsilon})\geq 1-\varepsilon\tag{16}\]
+which will be used later to finalize the proof. Next, under assumption 2, lemma 4 guarantees existence of a finite integer $\overline{T}_j$ so that $T_j>\overline{T}_j$ implies that $P(E_j)\geq 1-L\tilde{\varepsilon}$ for $j=k,\dots,k+L-1$ (where the left hand side of (16) is decreasing in $\tilde{\varepsilon}$, so if $1-L\tilde{\varepsilon}$ would fall below zero we may simply reduce $\tilde{\varepsilon}$). Then, by the Frechet inequality
+\[P(E_k,\dots,E_{k+L-1})\geq\sum_{j=k}^{k+L-1}P(E_j)-(L-1)\geq L-\tilde{\varepsilon}-L+1=1-\tilde{\varepsilon}.\tag{17}\]
+Let us henceforth assume that $\min_j T_j\geq\max_\ell\overline{T}_\ell$ so that the above bound holds. Equipped with (14), (15) and (17), lower bounds are established on $P(\pi_{k+L}\in\Pi_{eq}|\pi_k\notin\Pi_{eq})$ and $P(\pi_{k+L}=\cdots=\pi_k|\pi_k\in\Pi_{eq})$ as follows:
+\begin{align*}
+    p_{min}\leq P(\pi_{k+L}\in\Pi_{eq}|E_k,\dots,E_{k+L-1},\pi_k\notin\Pi_{eq})&=\frac{P(\pi_{k+L}\in\Pi_{eq},E_k,\dots,E_{k+L-1}|\pi_k\notin\Pi_{eq})}{P(E_k,\dots,E_{k+L-1})}\\
+    &\leq \frac{P(\pi_{k+L}\in\Pi_{eq}|\pi_k\notin\Pi_{eq})}{1-\tilde{\varepsilon}}\tag{18}
+\end{align*}
+so that $P(\pi_{k+L}\in\Pi_{eq}|\pi_k\notin\Pi_{eq})\geq p_{min}(1-\tilde{\varepsilon})$. Next, we have
+\begin{align*}
+    P(\pi_{k+L}=\cdots=\pi_k|\pi_k\in\Pi_{eq})&\geq P(\pi_{k+L}=\cdots=\pi_k,E_k,\dots,E_{k+L-1}|\pi_k\in\Pi_{eq})\\
+    &=P(\pi_{k+L}=\cdots=\pi_k|E_k,\dots,E_{k+L-1},\pi_k\in\Pi_{eq})P(E_k,\dots,E_{k+L-1})\\
+    &\geq 1-\tilde{\varepsilon}\tag{19}
+\end{align*}
+since, conditioning on $E_k,\dots,E_{k+L-1}$, policies cannot update away from $\pi_k\in\Pi_{eq}$. Denoting $P(\pi_j\in\Pi_{eq})=:p_{j}$ for $j\in\mbb{Z}_+$, (18) and (19) can be used to construct the recurrence
+\begin{align*}
+    p_{(n+1)L}=P(\pi_{(n+1)L}\in\Pi_{eq})&=P(\pi_{(n+1)L}\in\Pi_{eq}|\pi_k\notin\Pi_{eq})(1-p_{nL})+P(\pi_{(n+1)L}\in\Pi_{eq}|\pi_k\in\Pi_{eq})p_{nL}\\
+    &\geq p_{min}(1-\tilde{\varepsilon})(1-p_{nL})+(1-\tilde{\varepsilon})p_{nL}\\
+    &=(1-\tilde{\varepsilon})[p_{nL}+p_{min}(1-p_{nL})].\tag{20}
+\end{align*}
+From the expression penultimate to (20), it is easy to see by direct computation that
+\[p_{(n+1)L}-p_{nL}\geq p_{min}(1-\tilde{\varepsilon})(1-p_{nL})-\tilde{\varepsilon}p_{nL}\geq -\tilde{\varepsilon}\tag{21}\]
+so that the marginal probabiliy of convergence to equilibrium cannot decrease by more than $\tilde{\varepsilon}$ over $L$ steps. However, a sharper lower bound for this expression is given by
+\begin{align*}
+    p_{(n+1)L}-p_{nL}\geq p_{min}(1-\tilde{\varepsilon})-p_{nL}p_{min}(1-\tilde{\varepsilon})-p_{nL}\tilde{\varepsilon}=(\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min})\bp{\frac{p_{min}(1-\tilde{\varepsilon})}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}-p_{nL}}\tag{22}
+\end{align*}
+wherefrom it can be seen that if $p_{nL}\leq\tfrac{(1-\tilde{\varepsilon})p_{min}}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}-\tilde{\varepsilon}$ one gets
+\begin{align*}
+    p_{(n+1)L-p_{nL}}\geq \tilde{\varepsilon}p_{min}\quad\Rightarrow\quad p_{(n+1)L}\geq p_{nL}+\tilde{\varepsilon}p_{min}\tag{23}
+\end{align*}
+by simply maximizing $p_{nL}$ under the constraint. Noting that $\tilde{\varepsilon}$ can be abitrarily close to zero and still satisfy (16), this in fact holds for $p_{nL}<\tfrac{(1-\tilde{\varepsilon})p_{min}}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}$ such that the probability of convergence will continue
+to increase (every $L$ steps, by at least a constant value) until it exceeds this threshold. Afterward, the probability cannot decrease by more than $\varepsilon$ every $L$ steps as per (21), and so it remains larger for all time. That is, $\exists\tilde{n}<\infty$ so that $n\geq\tilde{n}$ implies
+\[p_{nL}\geq\frac{(1-\tilde{\varepsilon})p_{min}}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}-\tilde{\varepsilon}.\]
+Finally, taking $n\geq\tilde{n}$ and $\ell\in\{1,\dots,L-1\}$ and using (19) followed by (16) we obtain
+\begin{align*}
+    P(\pi_{nL+\ell}\in\Pi_{eq})\geq P(\pi_{nL+\ell}=\pi_{nL+\ell-1}=\cdots\pi_{nL}\in\Pi_{eq})&=P(\pi_{nL+\ell}=\cdots=\pi_{nL}|\pi_{nL}\in\Pi_{eq})p_{nL}\\
+    \geq(1-\tilde{\varepsilon})\bp{\frac{(1-\tilde{\varepsilon})p_{min}}{\tilde{\varepsilon}+(1-\tilde{\varepsilon})p_{min}}-\tilde{\varepsilon}}\geq 1-\varepsilon.\tag*{$\qed$}
+\end{align*}
+So the policy iteration under algorithm 1 induces convergence to equilibrium in weakly acyclic finite discounted stochastic games w.p. $1$. We shall only skecth the proof of (iii), since it utilizes similar logic.\\[5pt]
+{\bf Proof (Theorem 1-ii)}\hspace{5pt} Fix a sequence $\{\tilde{\varepsilon}_n\}_{n\geq 0}$ with $\tilde{\varepsilon}_n>0$ for $n\geq 0$ satisfying $\sum_n(1-p_{min})^{-n}\tilde{\varepsilon}_n<\infty$. Just as was argued to obtain (17), lemma 4
+furnishes a sequence $\{\tilde{T}_n\}_{n\geq 0}$ of finite integers so that, with $L$ as before and $n\geq 0$,
+\[\tilde{T}_{nL},\dots,\tilde{T}_{(n+1)L -1}\geq\tilde{T}_n\quad\Rightarrow\quad P(E_{nL},\dots,E_{(n+1)L-1})\geq 1-\tilde{\varepsilon}_n\tag{24}\]
+so that, if any $L$ consecutive policy updates occur under assumption 2 and with sufficiently long exploration, then the probability that (13) holds for all $L$ updates can be made arbitrarily high. With this, and using (15) from the previous proof it can be shown that the recurrence inequality
+\[P(\pi_{(n+1)L}\notin\Pi_{eq})\leq(1-p_{min})P(\pi_{nL}\notin\Pi_{eq})+\tilde{\varepsilon}_n\tag{25}\]
+holds for all $n\geq 0$ (provided (24) holds for all $n$). Let $p_{n}:=P(\pi_{nL}\notin\Pi_{eq})$ for $n\geq 0$. Then iterating (25), one obtains
+\begin{align*}
+    p_{n+1}\leq (1-p_{min})p_n+\tilde{\varepsilon}_n\leq(1-p_{min})\big[(1-p_{min})p_{n-1}+\tilde{\varepsilon}_{n-1}\big]+\tilde{\varepsilon}_n\leq\dots&\leq (1-p_{min})^{n+1}p_0+\sum_{s=0}^n(1-p_{min})^s\tilde{\varepsilon}_{n-s}\\
+    &\leq(1-p_{min})^n\big[1+\sum_{s=0}^n(1-p_{min})^{-s}\tilde{\varepsilon}_s\big].\tag{26}
+\end{align*}
+Additionally, for $\ell\in\{0,\dots,L-1\}$, $P(\pi_{nL+\ell}\in\Pi_{eq})\geq (1-\tilde{\varepsilon}_n)P(\pi_{nL}\in\Pi_{eq})$, so $1-P(\pi_{nL+\ell}\in\Pi_{eq})\leq 1-P(\pi_{nL}\in\Pi_{eq})-\tilde{\varepsilon}_nP(\pi_{nL}\in\Pi_{eq})$ and thus there is a uniform bound for every $L$ consecutive policy updates
+\[P(\pi_{(n+1)L+\ell}\notin\Pi_{eq})\leq p_{n+1}+\tilde{\varepsilon}_{n+1}\leq(1-p_{min})^n\big[1+\sum_{s=0}^n(1-p_{min})^{-s}\tilde{\varepsilon}_s\big]+\tilde{\varepsilon}_{n+1}.\tag{27}\]
+Finally, the Borel-Cantelli lemma can be invoked by the bound
+\begin{align*}
+    \sum_{j\geq 1}P(\pi_j\notin\Pi_{eq})\leq L\sum_{n\geq 0}\bp{(1-p_{min})^n\big[1+\sum_{s=0}^n(1-p_{min})^{-s}\tilde{\varepsilon}_s\big]+\tilde{\varepsilon}_{n+1}}<\infty
+\end{align*}
+so that $P(\pi_j\notin\Pi_{eq}\;\text{infinitely often})=0$. Under (24) and using the hypothesis on $\{\tilde{\varepsilon}_n\}_{n\geq 0}$, it can also be shown by the Borel-Cantelli lemma that $P(\Omega\setminus E_j,\;\text{infinitely often})=0$. Thus, one can find finite minimum exploration phase durations so that under assumption 2 the joint policy converges almost surely to
+a Markov perfect equilibrium.\hfill{$\qed$}
+\addcontentsline{toc}{section}{Learning Under Alternative Notions of Weak Acyclicity}
+\section*{Learning Under Alternative Notions of Weak Acyclicity}
+In this section, we briefly review less restrictive notions of weak acyclicity and an alternative decentralized Q-learning algorithm for these described in [1]. Recalling the definition of $\Pi^i_{\pi^{-i}}$ for $i\in\mc{N}$, $\pi^{-i}\in\Delta^{-i}$ presented in (3), the set of deterministic {\it better} replies with respect to $\pi\in\Delta$ is given by
+\[\Upsilon^i_{\pi}:=\{\hat{\pi}^i\in\Pi^i:J^i(x,\hat{\pi}^i,\pi^{-i})\leq J^i(x,\pi^i,\pi^{-i}),\;\forall x\in\mbb{X}\}\tag{28}\]
+and any better reply $\hat{\pi}^i$ is strictly so iff $J^i(x,\hat{\pi}^i,\pi^{-i})<J^i(x,\pi^i,\pi^{-i})$ for some $x$. Corresponding definitions for strict better reply paths and weak acyclicity under strict better replies follow analogously to those presented in previous sections. Worthy of emphasis, however, is that any strict best reply path is
+also a strict better reply path, and in fact the class of games weakly acyclic under strict better replies is strictly larger than under strict best replies [1] (without proof). In algorithm 3 (Appendix A.1) we reiterate a Q-learning algorithm for this class of games presented in [1]. The procedure is very similar to algorithm 2, except that agents now maintain
+Q-factors over both a baseline policy and an experimental policy, chosen randomly from $\Pi^i$, and then updates its policy (with inertia, after exploration) to the better of the two. Thus, if learned Q-factors accurately reproduce (28) given the current joint policy, then
+the game will follow a strict better reply path and converge. Just as for algorithm 2, one can find maximum experimentation probabilities $\check{\rho}$ and sub-optimality tolerance $\check{\delta}$ so that the conclusions of theorem 1 hold for algorithm 3 under assumption 1 and supposing $0<\delta^i<\check{\delta}$, $0<\rho^i<\check{\rho}$ for all $i\in\mc{N}$. The logical form of the proof is very similar to that of theorem 1
+and is omitted.\\[5pt]
+The yet more general notion of multi-agent weak acyclicity follows this discussion closely, and is perhaps most germane to the setting of stochastic control. A progression of deterministic joint policies $\pi_0,\pi_1,\dots$ is called a multi-agent strict best (better) reply path if for $k\geq 0$, $\pi_k$ and $\pi_{k+1}$ differ in at least one $DM$ policy and every policy change is a strict best (better) reply with respect to $\pi_k$.
+Just as before, such a game is weakly acyclic under multi-agent strict best (better) replies if there is a path from every $\pi_0\in\Pi$ to an element of $\Pi_{eq}$ in the graph $\mc{G}_{masBR}=(\Pi,\mc{E}_{masBR})$. Clearly, every acyclic game in the classical sense is so under a multi-agent analogue, but in [1] an example of a 3-player single stage game where the only equilibrium policy can be reached if more than one agent is allowed to update their policy
+simultaneously. Algorithms 2 and 3 permit multi-agent updates, and so are compatible with the strictly larger class of games weakly acyclic under this notion.
+\addcontentsline{toc}{section}{Limitations and Application to Neuronal Networks}
+\section*{Limitations and Application to Neuronal Networks}
+A realm of application whereto decentralized learning/stochasic game theory has been largely unexplored is neuroscience, but a full review of the relevant biological principles is beyond the scope of this paper. It suffices to say that the human brain is composed of nearly 100 billion cells called neurons which are (at least in some regions) thought to be organized into functionally modular subnetworks where constituents need to be able to coordinate
+in response to a time-varying input and execute some unknown computation on this input via this coordination. Classical schools of thought hold that this coordination manifests through some top-down influence, and as such is generally modeled using recurrent/feedforward neural networks where learning occurs using gradient descent on a global objective function. However, it is widely believed that such a centralized learning scheme is unimplementable in the brain [10].\\[5pt]
+Instead, one may consider a model of a brain network constructed in the framework of stochastic games and decentralized control, and then study how information processing could be realized therein. As a (exceedingly reductive) first model, let us consider a network of $N$ neurons, indexed by $i\in\mc{N}=\{1,\dots,N\}$. Viewed as simple input/output units (akin to transistors) we may take $\mbb{U}^i=\{0,1\}$, so that at any time every unit is either 'on' or 'off', as selected by $\DM^i$'s control policy.
+Indeed, real neural codes have a binary character, where cell responses are highly stereotyped and temporally brief. 
+Assuming a closed network (there are no exogenous neurons applying their controls as input) a transition law could be defined on $\mbb{X}=\{0,1\}^N$ by $x_{t+1}=(p^1_tu^1_t,\dots,p^N_tu^N_t)$, where $p^i_t\sim\text{Bernoulli}(p^i)$, i.i.d., so that with some probability each $\DM$'s action fails to transmit to the population. However, real neural networks are sparsely connected, so that each $DM$ only has access to a small proportion of the other agents' actions. This necessitates a set of observation functions $y^i:\mbb{X}\rightarrow\mbb{R}$, $i\in\mc{N}$ to induce an interaction topology on the $\DM$s,
+rendering the model partially observable.
+To elaborate, real neurons have a complex, spatially-extended input apparatus which accepts the actions of a subset of the network and presents a (loosely-speaking) stochastic scalar transformation of these to the output generation segment of the cell. Further, this input transformation structure is known to alter itself to facilitate adaptive behaviors and learning, and is itself not observable by other network constituents. As such, neural systems are intrinsically partially observed by each agent.\\[5pt]
+Partial observability is entirely untouched by the work in [1] and it is not clear that any such extension has been made. In [22], a two agent zero sum partially observed stochastic game is studied, but this is clearly too simplistic for neuronal networks. To move past the issue, we could define a common observation function $\eta:\{0,1\}^N\rightarrow[0,1]$ (where we assume the biological input takes value in a compact subset of $\mbb{R}$) and a new state process by
+$y_{t+1}=\eta(x_{t})$. The implicit assumption here is that the network is densely connected and every $\DM$'s input apparatus is identical, both of which are patently untrue for biological networks.\\[5pt]
+A sensible collection of cost functions $\{c^i\}_{i\in\mc{N}}$ could be formulated in various ways. I propose a term depending on the dynamics, which enforces coherence of the actions with the system state, and a second term depending on the joint action which penalizes the simultaneous activation of units.
+Let the functions encoding these criteria be given by $C^i:[0,1]\times\{0,1\}\rightarrow\mbb{R}_+$, $D^i:\{0,1\}^N\rightarrow\mbb{R}_+$, with discounts $\{\beta^i\}_{i\in\mc{N}}\subset(0,1)$ so that for $\pi\in\Delta$:
+\[J^i(x,\pi^i,\pi^{-i})=\E^\pi_x\bp{\sum_{t=0}^\infty\beta^i\big[C^i(y_t,u^i_t)+D^i(u_t^i,u_t^{-i})\big]}\]
+is $\DM^i$'s discounted cost criterion. The motivation for the $C^i$ component is to model the tight dynamical coupling between inputs and activity in biological neurons (since this important constraint is otherwise absent from the model) and the $D^i$ component is an attempt to limit synchronization, which would reduce the representational capacity of the system [11].\\[5pt]
+As discussed in the first section, establishing the acyclicity of an arbitrary game is generally computationally intractable [14] and, even if we had an explicit form of the cost functions $c^i=C^i+D^i$ there would be no guarantee of the existence of a potential function, since these are reserved for systems where $\DM$ costs encode some strong cooperative alignment,
+in an abstract sense [12]. Further generalizations of weak acyclicity based on the theory of satisficing paths are available [24] but even sufficient conditions for inclusion into this larger class of games appear extremely challenging to verify in general.\\[5pt]
+It should be emphasized that the model described here is closed in the sense that the agents and the environment they are embedded in is not receiving any exogenous influence.
+In real neural systems, the milieu dynamics for a network are in constant flux due to the influence of other networks evolving concomitantly. If we are to associate policy equilibria with some (biologically) functionally significant mode of operation, then we should expect the set of such equilibria to itself be in constant flux. This perspective suggests that neurons, still viewed as independent agents with
+bounded rationality, can converge to satisfactory equilibria rapidly -- perhaps even on the scale of just milliseconds, considering how quickly brains are able to respond to novel stimuli. The work presented in [1] says nothing on rate of convergence, and it is interesting to consider if previous results on single agent asymptotic convergence rates [19] or alternative stochastic approximation
+algorithms guaranteeing faster convergence [2] would hold in the stochastic game setting. However, even if the learning of Q-factors was instantaneous, convergence to equilibrium may not be, since there is no bound on the number of exploration phases required for convergence. \\[5pt]
+This separation between individual learning (during exploration) and team learning (at synchronized policy updates) requires that either 1) agents across the population agree on when to update their policies {\it a priori} or 2) an exogenous agent/source induces a synchronized policy adjustment across the $\DM$s to mark the end of each exploration phase. The first of these is largely incompatible with the setting of independent learners, while the second
+limits the applicability of this algorithm when modeling natural decentralized systems. It turns out that an extension of this work exists which addresses precisely this limitation [23] presenting an algorithm with asynchronous updates and the same convergence guarantee as theorem 1-i presented here. It does lack the almost sure convergence presented here in theorem 1-ii, however.\\[5pt]
+In summary, application of this algorithm to neural systems is limited primarily by the partial observability inherent in neural systems and the difficulty in establishing weak acyclicity. Towards resolving the former, recent work has presented an alternative Q-learning algorithm for partially observed Markov decision processes utilizing only finite information history and which converges to near optimality under the assumption of filter stability [9].
+This presents a link between the present work for fully-observed decentralized learning and a possible solution for partially-observed decentralized learning, assuming that both filter stability and weak acyclicity can be established.  
+
+\newpage
+\addcontentsline{toc}{section}{Appendix}
+\section*{Appendix}
+{\bf A.1. Algorithms Presented in the Main Paper}\\[5pt]
+\hrule
+{\bf Algorithm 1.} Best reply process with inertia for $\mathbf{\DM^i}$
+\hrule
+\begin{lstlisting}[mathescape]
+INPUT: $\lambda_i\in(0,1)$
+INITIALIZE: $\pi^i_0\in\Pi^i$
+FOR $k = 0,1,2,\dots$:
+    IF $\pi^i_k\in\Pi^i_{\pi^{-i}_k}$:
+        $\pi^i_{k+1}\longleftarrow\pi^i_k$
+    ELSE:
+        $\pi^i_{k+1}\longleftarrow\begin{cases}
+            \pi^i_k\quad&w.p.\;\lambda^i\\
+            \pi^i\in\Pi^i_{\pi^{-i}_k}\quad& w.p. \;(1-\lambda^i) / |\Pi^i_{\pi^{-i}_k}|
+        \end{cases}$
+    END
+\end{lstlisting}
+\hrule
+{\bf Algorithm 2.} Decentralized Q-learning approximating best reply process with inertia for $\mathbf{\DM^i}$
+\hrule
+\begin{lstlisting}[mathescape]
+INPUT:
+    $\mbb{Q}^i\subset\mbb{R}^{|\mbb{X}\times\mbb{U}^i|}$, compact
+    $\{T_k\}_{k\geq 0}\subset\mbb{N}$, exploration phase durations
+    $\rho^i\in(0,1)$, experimentation probability
+    $\lambda_i\in(0,1)$, inertia
+    $\delta^i\in(0,\infty)$, sub-optimality tolerance
+    $\{\alpha_n^i\}_{n\geq 0}$, learning rates satisfying $\sum_n\alpha^i_n=\infty$, $\sum_n(\alpha^i_n)^2<\infty$ and $\alpha^i_n\in[0,1]$ $\forall n$
+INITIALIZE: $\pi^i_0\in\Pi^i$, $Q^i_0\in\mbb{Q}^i$
+REALIZE: $x_0$
+FOR $k = 0,1,2,\dots$:
+    FOR $t = t_k,t_k+1,\dots,t_{k+1}-1$:
+        $u^i_t\longleftarrow\begin{cases}
+            \pi^i_k(x_t)\quad&w.p.\;1-\rho^i\\
+            \text{any }u^i\in\mbb{U}^i\quad& w.p.\;\rho^i/|\mbb{U}^i|
+        \end{cases}$
+        COMPUTE: $c^i(x_t,u_t^i,u_t^{-i})$
+        REALIZE: $x_{t+1}\sim\mc{T}(\cdot|x_t,u^i_t,u^{-i}_t)$
+        COMPUTE: $n^i_t$, number of visits to $(x_t,u^i_t)$ in $k$-th exploration phase 
+        FOR $(x,u)\in\mbb{X}\times\mbb{U}^i$:
+            IF $(x,u)=(x_t,u^i_t)$:
+                $Q^i_{t+1}(x,u)\longleftarrow(1-\alpha^i_{n^i_t})Q^i_t(x,u)+\alpha^i_{n_t^i}\left[c^i(x,u,u^{-i}_t)+\beta^i\min_{v^i\in\mbb{U}^i}Q^i_t(x_{t+1},v^i)\right]$
+            ELSE:
+                $Q^i_{t+1}(x,u)\longleftarrow Q^i_t(x,u)$
+            END
+        END
+    END
+    $\Pi^i_{k+1}\longleftarrow\{\hat{\pi}^i\in\Pi^i:Q^i_{t_{k+1}}(x,\hat{\pi}^i(x))\leq\min_{v^i\in\mbb{U}^i}Q^i_{t_{k+1}}(x,v^i)+\delta^i,\;\forall x\in\mbb{X}\}$
+    IF $\pi^i_k\in\Pi^i_{k+1}$:
+        $\pi^i_{k+1}\longleftarrow\pi^i_k$
+    ELSE:
+        $\pi^i_{k+1}\longleftarrow\begin{cases}
+        \pi^i_k\quad&w.p.\;\lambda^i\\
+        \pi^i\in\Pi^i_{k+1}\quad& w.p. \;(1-\lambda^i) / |\Pi^i_{k+1}|
+        \end{cases}$
+    END
+    RESET $Q_{t_{k+1}}^i\in\mbb{Q}^i$ (via projection)
+END
+\end{lstlisting}
+\hrule
+\newpage
+\hrule
+{\bf Algorithm 3.} Decentralized Q-learning approximating better reply process with inertia for $\mathbf{\DM^i}$
+\hrule
+\begin{lstlisting}[mathescape]
+INPUT:
+    $\mbb{Q}^i\subset\mbb{R}^{|\mbb{X}\times\mbb{U}^i|}$, compact
+    $\{T_k\}_{k\geq 0}\subset\mbb{N}$, exploration phase durations
+    $\rho^i\in(0,1)$, experimentation probability
+    $\lambda_i\in(0,1)$, inertia
+    $\delta^i\in(0,\infty)$, sub-optimality tolerance
+    $\{\alpha_n^i\}_{n\geq 0}$, learning rates satisfying $\sum_n\alpha^i_n=\infty$, $\sum_n(\alpha^i_n)^2<\infty$ and $\alpha^i_n\in[0,1]$ $\forall n$
+INITIALIZE: $\pi^i_0,\hat{\pi}^i_0\in\Pi^i$, $Q^i_0,\hat{Q}^i_0\in\mbb{Q}^i$
+REALIZE: $x_0$
+FOR $k = 0,1,2,\dots$:
+    FOR $t = t_k,t_k+1,\dots,t_{k+1}-1$:
+        $u^i_t\longleftarrow\begin{cases}
+            \pi^i_k(x_t)\quad&w.p.\;1-\rho^i\\
+            \text{any }u^i\in\mbb{U}^i\quad& w.p.\;\rho^i/|\mbb{U}^i|
+        \end{cases}$
+        COMPUTE: $c^i(x_t,u_t^i,u_t^{-i})$
+        REALIZE: $x_{t+1}\sim\mc{T}(\cdot|x_t,u^i_t,u^{-i}_t)$
+        COMPUTE: $n^i_t$, number of visits to $(x_t,u^i_t)$ in $k$-th exploration phase 
+        FOR $(x,u)\in\mbb{X}\times\mbb{U}^i$:
+            IF $(x,u)=(x_t,u^i_t)$:
+                $Q^i_{t+1}(x,u)\longleftarrow(1-\alpha^i_{n^i_t})Q^i_t(x,u)+\alpha^i_{n_t^i}\left[c^i(x,u,u^{-i}_t)+\beta^iQ^i_t(x_{t+1},\pi^i_{k}(x_{t+1}))\right]$
+                $\hat{Q}^i_{t+1}(x,u)\longleftarrow(1-\alpha^i_{n^i_t})\hat{Q}^i_t(x,u)+\alpha^i_{n_t^i}\left[c^i(x,u,u^{-i}_t)+\beta^i\hat{Q}^i_t(x_{t+1},\hat{\pi}^i_{k}(x_{t+1}))\right]$
+            ELSE:
+                $Q^i_{t+1}(x,u)\longleftarrow Q^i_t(x,u)$
+                $\hat{Q}^i_{t+1}(x,u)\longleftarrow \hat{Q}^i_t(x,u)$
+            END
+        END
+    END
+    IF $\forall x\in\mbb{X},\;\hat{Q}^i_{t_{k+1}}(x,\hat{\pi}^i_k(x))\leq Q^i_{t_{k+1}}(x,\pi^i_k(x))+\delta^i$ AND $\exists x\in\mbb{X}\;s.t.\;\hat{Q}^i_{t_{k+1}}(x,\hat{\pi}^i_k(x))\leq Q^i_{t_{k+1}}(x,\pi^i_k(x))-\delta^i$:
+        $\pi^i_{k+1}\longleftarrow\begin{cases}
+        \pi^i_k\quad&w.p.\;\lambda^i\\
+        \hat{\pi}^i_k\quad& w.p.\;1-\lambda^i
+        \end{cases}$
+    ELSE:
+        $\pi^i_{k+1}\longleftarrow\pi^i_k$
+    END
+    $\hat{\pi}^i_{k+1}\longleftarrow\pi^i\in\Pi^i\setminus\{\pi^i_{k+1}\}$ equiprobabilistically
+    RESET $Q_{t_{k+1}}^i\in\mbb{Q}^i$ 
+END
+\end{lstlisting}
+\hrule
+\newpage
+\addcontentsline{toc}{section}{References}
+\section*{References}
+    \begin{enumerate}
+        \item G. Arslan and S. Y\"uksel, {\it Decentralized Q-learning for stochasic teams and games}, IEEE Trans. Automat. Contr. {\bf 62} (2017), no. 4, 1545-1558, 10.1109/TAC.2016.2598476.
+        \item A. Devraj and  S. Meyn, {\it Fastest convergence for Q-learning}, arXiv e-prints (2017), 10.48550/arXiv.1707.03770.
+        \item A. Fabrikant and A. Jaggard, {\it On the structure of weakly acyclic games}, Theory Comput. Syst. {\bf 53} (2013), 10.1007/s00224-013-9457-0.
+        \item A. Fink, {\it Equilibrium in a stochastic n-person game}, J. Sci. Hiroshima {\bf 28} (1964), no. 2, 89-93.
+        \item I. Gihman and A. Skorohod, {\it Controlled Stochastic Processes}, Springer-Verlag, New York, 1979.
+        \item A. Gupta, S Y\"uksel and T. Ba\c sar, {\it Existence of optimal strategies in a class of dynamic stochastic teams}, 53rd IEEE Conf. Decis. Contr. (2014), 1681-1686, 10.1109/CDC.2014.7039641.
+        \item A. Gupta, {\it Existence of team-optimal strategies in teams with countable observation spaces}, IEEE Trans. Automat. Contr. {\bf 66} (2021), no. 10, 4792-4798, 10.1109/TAC.2020.3037047.
+        \item E. Kalai and E. Lehrer, {\it Rational learning leads to Nash equilibrium}, Econometrica {\bf 61} (1993), 1019-1045.
+        \item A. Kara and S. Y\"uksel, {\it Convergence of finite memory Q-learning for POMDPs and near optimality of learned policies under filter stability}, Math. Oper. Res. {\bf 48} (2022), no. 4, 2066-2093, 10.1287/moor.2022.1331.
+        \item T. Lilicrap, A. Santoro, L. Marris, C. Akerman and G. Hinton, {\it Backpropagation and the brain}, Net. Rev. Neurosci. {\bf 21} (2020), 335-346, 10.1038/s41583-020-0277-3.
+        \item C. Lynn and D. Bassett, {\it The physics of brain network structure, function and control}, Nat. Rev. Physics {\bf 1} (2019), 318-332, 10.1038/s42254-019-0040-8.
+        \item J. Marden, G. Arslan and J. Shamma, {\it Cooperative control and potential games}, IEEE Trans. Syst. Man Cybern. Syst. {\bf 39} (2009), no. 6, 1393-1407, 10.1109/TSMCB.2009.2017273.
+        \item E. Maskin and J. Tirole, {\it Markov perfect equilibrium: I. Observable actions}, J.Econ Theory {\bf 100} (2001), no. 2, 191-219, 10.1006/jeth.2000.2785.
+        \item V. Mirrokni and A. Skopalik, {\it On the complexity of Nash dynamics and sink equilibria}, Proc. 10th ACM Conf. Elec. Commer. (2009), 1-10, 10.1145/1566374.1566376.
+        \item D. Monderer and L. Shapley, {\it Potential games}, Games Econ. Behav. {\bf 14} (1996), 124-143.
+        \item G. Schoenmakers, J. Flesch and F. Thuijsman, {\it Fictitious play in stochastic games}, Math. Meth. Oper. Res. {\bf 66} (2007), 315-325, 10.1007/s00186-007-0158-9.
+        \item L. Shapley, {\it Stochastic games}, Proc. Natl. Acad. Sci. U.S.A. {\bf 39} (1953), no. 10, 1095-1100, 10.1073/pnas.39.10.1095.
+        \item Y. Shoham, R. Powers and T. Grenager, {\it If multi-agent learning is the answer, what is the question?} Artif. Intell. {\bf 171} (2007), no. 7, 365-377, 10.1016/j.artint.2006.02.006.
+        \item C. Szepesv\'ari, {\it The asymptotic convergence-rate of Q-learning}, Proc. 10 Int. Conf. Neural Inf. Proc. Syst. (1997), 1064-1070.
+        \item J. Tsitsiklis, {\it Asynchronous stochastic approximation and Q-learning}, Mach. Learn. {\bf 16} (1994), 185-202.
+        \item L. Wang, Z. Yang, Z. Wang, {\it Breaking the curse of many agents: Provable mean embedding Q-iteration for mean-field reinforcement learning}, Proc. 37 Int. Conf. Mach. Learn. {\bf 119} (2020), 10092-10103.
+        \item R. Yan, G. Santos, G. Norman, D. Parker and M. Kwiatkowska, {\it Partially observable stochastic games with neural perception mechanisms}, arXiv e-prints (2023), 10.48550/arXiv.2310.11566.
+        \item B. Yongacoglu, G. Arslan and S. Y\"uksel, {\it Asynchronous decentralized Q-learning: Two timescale analysis by persistence}, arXiv e-prints (2023), 10.48550/arXiv.2308.03239.
+        \item B. Yongacoglu, G. Arslan, L. Pavel and S. Y\"uksel, {\it Generalizing better response paths and weakly acyclic games}, arXiv e-prints (2024), 10.48550/arXiv.2403.18086.
+    \end{enumerate}
+\end{document}

@@ -1,0 +1,91 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 4} \hfill {\bf Connor Braun} \hfill {\bf 2024-04-03}
+    \end{center}
+    \noindent{\bf Problem 3}\\[5pt]
+    Let $\hat{f}_h$ denote the kernel density estimator with bandwith parameter $h$. Define
+    \begin{align*}
+        J(h):=\int\hat{f}_h^2(x)dx-2\int\hat{f}_h(x)f(x)dx
+    \end{align*}
+    and
+    \begin{align*}
+        \hat{J}(h)=\int\hat{f}^2_h(x)dx-\frac{2}{n}\sum_{i=1}^nf_{-i,h}(X_i),
+    \end{align*}
+    where $\hat{f}_{-i,h}$ is the kernel density estimator without the $i$th observation. Show that $\E(\hat{J}(h))=\E(J(h))$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Let $X=(X_1,\dots,X_n)$ be an $\mbb{R}^n$-valued random variable with $X_1,\dots,X_n\overset{\text{i.i.d.}}{\sim}f$. Then we have
+    \begin{align*}
+        \frac{1}{2}\E_X\bp{J(h)-\hat{J}(h)}=\E_X\bp{\frac{1}{2}\bp{-2\int_\mbb{R}\hat{f}_h(x)f(x)dx+\frac{2}{n}\sum_{i=1}^nf_{-i,h}(X_i)}}=-\E_X\bp{\int_\mbb{R}\hat{f}_h(x)f(x)dx}+\E_X\bp{\frac{1}{n}\sum_{i=1}^nf_{-i,h}(X_i)}.\tag{1}
+    \end{align*}
+    Whence we compute each of the terms in the last expression individually. First, denoting $\mc{L}(X)$ the law of $X$, 
+    \begin{align*}
+        \E_X\bp{\int_\mbb{R}\hat{f}_h(x)f(x)dx}&=\E_X\bp{\E_X\bp{\hat{f}_h(X_1)}}\tag{since $X_1,\dots,X_n$ are i.i.d.}\\
+        &=\E_X\bp{\hat{f}_h(X_1)}\\
+        &=\frac{1}{nh}\sum_{i=1}^n\int_{\mbb{R}^n}K\bp{\frac{X_1-X_i}{h}}\mc{L}(X)(dX)\\
+        &=\frac{1}{nh}\sum_{i=1}^n\int_\mbb{R}\int_{\mbb{R}}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy\tag{2}\\
+        &=\frac{1}{h}\int_\mbb{R}\int_\mbb{R}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy\tag{3}
+    \end{align*}
+    where (2) holds by Fubini's theorem, since $\mc{L}(X)=\mc{L}(X_1)\times\mc{L}(X_2)\times\cdots\mc{L}(X_n)$ and each of the $\mc{L}(X_i)$ admit the same density $f$ with respect to the Lebesgue measure (the first equality in the chain holds by a similar reasoning applied in reverse).\\[5pt]
+    Next, with the same tricks, we compute
+    \begin{align*}
+        \E_X\bp{\frac{1}{n}\sum_{i=1}^nf_{-i,h}(X_i)}&=\E_X\bp{\frac{1}{n(n-1)h}\sum_{i=1}^n\sum_{j\neq i}K\bp{\frac{X_i-X_j}{h}}}\\
+        &=\frac{1}{n(n-1)h}\sum_{i=1}^n\sum_{j\neq i}\int_{\mbb{R}^n}K\bp{\frac{X_i-X_j}{h}}\mc{L}(X)(dX)\\
+        &=\frac{1}{n(n-1)h}\sum_{i=1}^n\sum_{j\neq i}\int_\mbb{R}\int_\mbb{R}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy\\
+        &=\frac{(n-1)}{n(n-1)h}\sum_{i=1}^n\int_\mbb{R}\int_\mbb{R}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy\\
+        &=\frac{n(n-1)}{n(n-1)h}\int_\mbb{R}\int_\mbb{R}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy\\
+        &=\frac{1}{h}\int_\mbb{R}\int_\mbb{R}K\bp{\frac{x-y}{h}}f(x)f(y)dxdy.\tag{4}
+    \end{align*} 
+    Observing that (3) and (4) are identical, and denoting this common expression with $\tilde{K}(h)$, we can return to (1) to find that
+    \begin{align*}
+        \frac{1}{2}\E\bp{J(h)-\hat{J}(h)}=\E_X\bp{\frac{1}{n}\sum_{i=1}^nf_{-i,h}(X_i)}-\E_X\bp{\int_\mbb{R}\hat{f}_h(x)f(x)dx}=\tilde{K}(h)-\tilde{K}(h)=0
+    \end{align*}
+    from which we obtain $\E(J(h))=\E(\hat{J}(h))$, as desired.\hfill{$\qed$}\\[5pt]
+\end{document}

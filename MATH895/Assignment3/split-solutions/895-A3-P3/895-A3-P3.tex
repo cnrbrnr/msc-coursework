@@ -1,0 +1,85 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \noindent{\bf Problem 3}\\[5pt]
+    Let $X$ be a real-valued random variable whose distribution function $F$ is continuous. Find the distribution function of $Y=F(X)$.\\[5pt]
+    {\bf Solution}\hspace{5pt} With $x<0$, we have $P(Y\leq x)=P(F(X)\leq x)=0$, since $F(t)\geq 0$ $\forall t\in\mbb{R}$. Similarly, when $1\leq x$, $P(Y\leq x)=P(F(X)\leq x)=1$.
+    More interesting is the case where $0\leq x<1$. For this, let $\mc{T}_x=\{t\in\mbb{R}:F(t)\leq x\}$ and $s_x=\sup\mc{T}_x$. Take $(t_n)_{n\geq 1}\subset\mc{T}_x$ with $t_n\rightarrow s_x$ as $n\rightarrow\infty$. Then
+    \[F(t_n)\leq x\quad\forall n\geq 1\quad\Rightarrow\quad\lim_{n\rightarrow\infty}F(t_n)=F(s_x)\leq x\tag{1}\]
+    since $F$ is continuous. That is, $s_x\in\mc{T}_x$. Further, if $t<s_x$, then $F(t)\leq F(s_x)\leq x$ since $F$ is monotonically increasing, so $t\in\mc{T}_x$. Thus, we have
+    $\mc{T}_x=(-\infty,s_x]$. This allows us to write
+    \[\{\omega\in\Omega:F(X(\omega))\leq x\}=\{\omega\in\Omega:X(\omega)\in\mc{T}_x\}=\{\omega\in\Omega:X(\omega)\in(-\infty,s_x]\}.\tag{2}\]
+    Now set $\{x_n\}_{n\geq 1}$ so that $x_n\searrow s_x$ and $\{x_n\}_{n\geq 1}\subset\mbb{R}\setminus\mc{T}_x$. We have
+    \[F(x_n)\geq x\quad\forall n\geq 1\quad\Rightarrow\quad\lim_{n\rightarrow\infty}F(x_n)=F(s_x)\geq x\]
+    since $F$ continuous. With this and (1), we obtain $F(s_x)=x$ and so
+    \begin{align*}
+        P(Y\leq x)=P(F(X)\leq x)&=P(X\leq s_x)\tag{by (2)}\\
+        &=F(s_x)\\
+        &=x.
+    \end{align*}
+    With this, we may write the distribution function of $Y$: 
+    \begin{align*}
+        P(Y\leq x)=\begin{cases}
+            0\quad&\text{if $x<0$}\\
+            x\quad&\text{if $0\leq x<1$}\\
+            1\quad&\text{if $1\leq x$}
+        \end{cases}
+    \end{align*}
+    which is precisely the distribution of a standard uniform random variable.\hfill{$\qed$}\\[5pt]
+\end{document}

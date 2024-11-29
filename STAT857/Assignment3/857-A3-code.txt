@@ -1,0 +1,164 @@
+##############################################################
+########## ASSIGNMENT 3: PROBLEMS 1a 1b 1c AND 3b ############
+##############################################################
+
+CONNOR BRAUN; 20425268
+
+# Problems were completed in both Python and R, necessitating 
+# this plain .txt file rather than a single .py or .r file.
+# I will make it as straightforward as possible to copy/paste
+# my work for grading purposes.
+
+##############################################################
+# PROBLEM 1a 1b AND 1c: R code
+##############################################################
+
+library(glmnet)
+library(bestglm)
+library(MASS)
+
+# Load the data
+data = read.csv('/content/Weekly.csv') 
+
+# Split the data into train and test sets based on time
+train_indices = which(data$Year < 2009)
+train = data[train_indices, ]
+test = data[-train_indices, ]
+
+# =================================================
+# ======== PROBLEM 1a: LOGISTIC REGRESSION ========
+# =================================================
+
+# Fit the model
+lr_fit = glm(as.factor(Direction) ~ Lag2, data=train, family=binomial)
+
+# Generate binary predictions
+lr_direction_pred = ifelse(predict(lr_fit, test, type='response') > 0.5, "Up", "Down")
+
+# Print confusion matrix and prediction accuracy
+lr_confusion_matrix = table(lr_direction_pred, test$Direction)
+lr_confusion_matrix
+lr_prop_corr_pred = sum(diag(lr_confusion_matrix)) / sum(lr_confusion_matrix)
+"Proportion of direction predictions correct using logistic regression:"; lr_prop_corr_pred
+
+# ======== OUTPUT: ========
+
+# CONFUSION MATRIX
+# lr_direction_pred Down Up
+#              Down    9  5
+#              Up     34 56
+
+# 'Proportion of direction predictions correct using logistic regression:'
+# 0.625
+
+# ==========================================================
+# ======== PROBLEM 1b: LINEAR DISCRIMINANT ANALYSIS ========
+# ==========================================================
+
+# Fit the model
+lda_fit = lda(Direction ~ Lag2, data = train)
+
+# Generate binary predictions
+lda_direction_pred = predict(lda_fit, test)$class
+
+# Print confusion matrix and prediction accuracy
+lda_confusion_matrix <- table(lda_direction_pred, test$Direction)
+lda_confusion_matrix
+lda_prop_corr_pred = sum(diag(lda_confusion_matrix)) / sum(lda_confusion_matrix)
+"Proportion of direction predictions correct using linear discriminant analysis:"; lda_prop_corr_pred
+
+# ======== OUTPUT: ========
+
+# CONFUSION MATRIX
+lda_direction_pred Down Up
+              Down    9  5
+              Up     34 56
+
+'Proportion of direction predictions correct using linear discriminant analysis:'
+0.625
+
+# =============================================================
+# ======== PROBLEM 1c: QUADRATIC DISCRIMINANT ANALYSIS ========
+# =============================================================
+
+# Fit the model
+qda_fit = qda(Direction ~ Lag2, data = train)
+
+# Generate binary predictions
+qda_direction_pred = predict(qda_fit, test)$class
+
+# Print confusion matrix and prediction accuracy
+qda_confusion_matrix <- table(qda_direction_pred, test$Direction)
+qda_confusion_matrix
+qda_prop_corr_pred = sum(diag(qda_confusion_matrix)) / sum(qda_confusion_matrix)
+"Proportion of direction predictions correct using quadratic discriminant analysis:"; round(qda_prop_corr_pred, 3)
+
+# ======== OUTPUT: ========
+
+# CONFUSION MATRIX
+qda_direction_pred Down Up
+              Down    0  0
+              Up     43 61
+
+'Proportion of direction predictions correct using quadratic discriminant analysis:'
+0.587
+
+##############################################################
+# PROBLEM 3b: Python; Newton-Raphson Algorithm
+##############################################################
+
+import numpy as np
+
+def newton_raphson(init_val, func, max_iter=1e3, epsilon=1e-3, tol=1e-10):
+
+    '''Find roots of univariate function using Newton-Raphson with forward finite difference estimate'''
+
+    x_new = init_val # Initialize estimate
+    n = 0 # iteration estimate
+
+    # Iterate until convergence to zero or max iteration allowance reached
+    while np.abs(func(x_new)) > tol and n < int(max_iter):
+
+        n += 1 # increment iteration counter
+        x_old = x_new # keep track of old estimate 
+
+        # Finite difference estimate for the derivative
+        tangent_ = (func(x_old + epsilon) - func(x_old)) / epsilon
+
+        # Newton-Raphson update
+        x_new = x_old - (func(x_old) / tangent_)
+    
+    # Indicate algorithm termination conditions
+    if n >= max_iter:
+        print("maximum iteration allowance {} reached".format(max_iter))
+    else:
+        print("estimate convergence with tolerance {} after {} steps".format(tol, n))
+
+    return x_new
+
+# Set task parameters
+init = 0 # Initialize estimate at zero
+func = lambda x: 6*(x - 1)**5 + 4*(x - 3)**3 + 2*(x - 5) # Find roots of derivative to optimize f
+N = 1e4 # Maximum iteration allowance
+h=1e-4 # Step size for estimating derivative
+tol=1e-12 # Specify how close estimate must be to terminate iterations
+
+# Run the algorithm
+x_est = newton_raphson(init, func, max_iter=N, epsilon=h, tol=tol)
+
+# Obtain the value of the derivative at the optimum
+deriv_at_est = np.abs(func(x_est))
+
+# Print output
+print("Minimizer estimate: {}\nDerivative at estimate: {}".format(x_est, deriv_at_est))
+
+# ======== OUTPUT: ========
+
+# Termination condition:
+estimate convergence with tolerance 1e-12 after 8 steps
+
+# Value of minimizer x^\ast:
+Minimizer estimate: 2.0826116322876858
+
+# Derivative at estimate |f(x^\ast)|:
+Derivative at estimate: 5.684341886080802e-14

@@ -1,0 +1,124 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 2} Each morning a student takes one of three books he owns from his shelf. The probability that he chooses book 1, 2, 3 is, respectively, $1/4$, $1/2$, $1/4$.
+    In the evening, with $90\%$ probability, he replaces the book in the middle of the two books on the shelf, and with $10\%$ probability, he sorts the books in the ordering $1,2,3$ from left to right.
+    Assume that the choices on successive days are independent, and denote by $X_n$ the ordering of the books from left to right at the end of day $n\geq 0$.\\[10pt]
+    {\bf a)} Identify the state space and transition probabilities for $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} For $i,j,k\in\{1,2,3\}$ distinct, let $(i,j,k)$ denote an ordering on the shelf, so that $X_n=(i,j,k)$ is the ordering on the shelf at the end of the $n$th day, $n\geq 0$.
+    Then the state space $S$ is the set of permutations of $\{1,2,3\}$, so $|S|=3!=6$. We depict the state transition diagram in figure 2 below. 
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=80mm]{855-A4-Q2-fig.png}}
+    \end{center}
+    {\bf Figure 2} State transition diagram for the take-a-book-leave-a-book process. Arrows indicate transitions with nonzero probability.
+    All states can transition to themselves in one step with nonzero probability (not shown).\\[10pt]
+    For the explicit transition probabilities, let $p_i$ be the probability of drawing the $i$th book on a given morning, so that 
+    \[p_1=1/4\quad p_2=1/2\quad\text{and}\quad p_3=1/4.\]
+    Every state can transition back to $(1,2,3)$ with probability $1/10$, since for $(i,j,k)\in S$,
+    \[\sum_{\ell\in S}p_\ell \cdot\frac{1}{10}=\frac{1}{10}\]
+    is the probability of choosing any of the three books, and then resorting them at the end of the day. Let $\mc{S}$ be an alternative state space for the process, defined by a map $\mu:S\rightarrow\mc{S}$ such that
+    \[\mu((1,2,3))=1,\quad\mu((1,3,2))=2,\quad\mu((3,1,2))=3,\quad\mu((3,2,1,))=4,\quad \mu((2,3,1))=5\quad\text{and}\quad\mu((2,1,3))=6\]
+    which allows us to more intuitively express the transition matrix for this system by 
+    \begin{align*}
+        P&=\begin{pmatrix}
+            (9/10)p_2+1/10 & (9/10)p_3 & 0 & 0 & 0 & (9/10)p_1\\
+            (9/10)p_2+1/10 & (9/10)p_3 & (9/10)p_1 & 0 & 0 & 0\\
+            1/10 & (9/10)p_3 & (9/10)p_1 & (9/10)p_2 & 0 & 0\\
+            1/10 & 0 & (9/10)p_1 & (9/10)p_2 & (9/10)p_3 & 0\\
+            1/ 10 & 0 & 0 & (9/10)p_2 & (9/10)p_3 & (9/10)p_1\\
+            (9/10)p_2+1/10 & 0 & 0 & 0 & (9/10)p_3 & (9/10)p_1
+        \end{pmatrix}\\
+        &=\begin{pmatrix}
+            22/40 & 9/40 & 0 & 0 & 0 & 9/40\\
+            22/40 & 9/40 & 9/40 & 0 & 0 & 0\\
+            4/40 & 9/40 & 9/40 & 18/40 & 0 & 0\\
+            4/40 & 0 & 9/40 & 18/40 & 9/40 & 0\\
+            4/40 & 0 & 0 & 18/40 & 9/40 & 9/40\\
+            22/40 & 0 & 0 & 0 & 9/40 & 9/40
+        \end{pmatrix}.\tag*{$\qed$}
+    \end{align*}
+    {\bf b)} Prove that $\{X_n,n\geq 0\}$ is irreducible and determine it's period.\\[10pt]
+    {\bf Solution} From figure 2 it is clear that the system is irreducible, since there is a path of nonzero probability from any state to any other. Additionally, for $i\in\mc{S}$ we have
+    $P_{i,i}>0$ so that $1\in\{n>0:(P^n)_{i,i}>0\}$, so
+    \[d_i=\gcd\{n>0:(P^n)_{i,i}>0\}=1.\]
+    But this was for arbitrary $i\in\mc{S}$, so we conclude that ever state of this process has period 1 -- that is, every state is aperiodic.\\[10pt]
+    {\bf c)} Compute the invariant distribution for $\{X_n,n\geq 0\}$ numerically.\\[10pt]
+    {\bf Solution} Please see Appendix A.2 for the code used to do this. Briefly, we seek the right eigenvector of $P^T$ corresponding to eigenvalue $1$. Denoting it $\pi=\{\pi_i,i\in\mc{S}\}$ we find\\[10pt]
+    {\bf Table 1} Invariant distribution computed numerically for the take-a-book-leave-a-book process with transition matrix as given above. See Appendix A.2 for the program used
+    to generate this result. Values are rounded up to five points of precision.
+    \begin{center}
+        \begin{tabular}{@{}lc|c|c|c|c|c@{}}\toprule
+                & $\pi_1$ & $\pi_2$ & $\pi_3$ & $\pi_4$ & $\pi_5$ & $\pi_6$\\
+                \midrule
+                &0.41889 & 0.14487 & 0.08013 & 0.13112 & 0.08013 & 0.14487\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    {\bf d)} Assuming the initial ordering is $(1,2,3)$ from left to right, what is the expected time that the ordering will return to this state?\\[10pt]
+    {\bf Solution} Our goal is to compute the expected value of the first passage time corresponding to the state $(1,2,3)\in S$. Let $T=\inf\{n>0:X_n=(1,2,3)\}$ be this passage time. 
+    Then we aim to compute $\mbb{E}_{(1,2,3)}[T]$. However, since $P$ is irreducible and has an invariant distribution $\pi$, we have the formula
+    \[\pi_i=\frac{1}{\mbb{E}_i[T_i^{(1)}]}\]
+    for $i\in S$, where $T_i^{(1)}=\inf\{n>0:X_n=i\}$. But then we can compute the result directly:
+    \[E_{(1,2,3)}[T]=\frac{1}{\pi_1}=2.38726,\quad\text{rounded to 5 points of precision.\tag*{$\qed$}}\]
+    {\bf\Large Appendix}\\[10pt]
+    {\bf A.2 Code used for problem 2c}
+    \begin{verbatim}
+        # Specify state transition probability matrix
+        P = np.array(
+            [
+                22/40, 9/40, 0, 0, 0, 9/40,
+                22/40, 9/40, 9/40, 0, 0, 0,
+                4/40, 9/40, 9/40, 18/40, 0, 0,
+                4/40, 0, 9/40, 18/40, 9/40, 0,
+                4/40, 0, 0, 18/40, 9/40, 9/40,
+                22/40, 0, 0, 0, 9/40, 9/40
+            ]
+        ).reshape((6,6))
+        print(P, '\n') # Print it to make sure the entries are correct
+
+        # Get left spectrum and eigenvectors
+        eigenvalues, eigenvectors = np.linalg.eig(P.T)
+
+        # Find an invariant eigenvector from the candidates
+        tol = 1e-13 # L1 norm tolerance for verifying invariance
+        D = [] # list to contain norms
+        for i in range(5):
+            # Compute distance between v^T and P^Tv^t for each eigenvector v
+            D.append(np.sum(np.abs(P.T @ eigenvectors[:, i] - eigenvectors[:, i])))
+
+        # Search for an approximately invariant vector w.r.t. tolerance
+        if np.amin(D) > tol:
+            raise Exception("No invariant eigenvectors") # Halt if no approximate invariance
+        else:
+            inv_ind = np.argmin(D) # index of invariant eigenvector
+
+            # Print spectrum and invariant eigenvector
+            print('Eigenvalues: {}'.format(eigenvalues))
+            print('Invariant Eigenvector: {}\n'.format(eigenvectors[:, inv_ind]))
+
+        # Extract and normalize the invariant measure to identify invariant distribution
+        pi = eigenvectors[:, 0] / np.sum(eigenvectors[:, 0])
+        print("Invariant distribution: {}\nSums to {}".format(pi, np.sum(pi)))
+    \end{verbatim}
+\end{document}

@@ -1,0 +1,87 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 2} Let $S\sim\text{Exp}(\lambda)$ and $T\sim\text{Exp}(\mu)$, with parameters $\lambda,\mu>0$ and such that $S\perp T$. Let $Z$ be another random variable, independent
+    of both $S$ and $T$.\\[10pt]
+    {\bf a)} Prove that as $h\downarrow 0$, $P(S<h,S+T>h)=\lambda h+o(h)$.\\[10pt]
+    {\bf Proof} Write $\mc{P}(h)=P(S<h,S+T>h)=P((T,S)\in\mc{A})$, where $\mc{A}=\{(x,y)\in\mbb{R}_{>0}^2:y<h\;\text{and}\;x+y>h\}$. By Fubini's theorem, we have
+    \begin{align*}
+        \mc{P}(h)=\int_\mc{A}f_{S,T}(x,y)dA&=\int_0^h\int_{h-y}^\infty f_{S,T}(x,y)dxdy\\
+        &=\int_0^h\int_{h-y}^\infty \lambda e^{-\lambda y}\mu e^{-\mu x}dxdy\tag{factorization theorem}
+    \end{align*}
+    where $f_{S,T}(x,y)$ is the joint density function of $S$ and $T$, which factorizes into the product of marginal density functions since $S\perp T$. We proceed by first evaluating this integral.
+    \begin{align*}
+        \mc{P}(h)=\int_0^h\int_{h-y}^\infty \lambda e^{-\lambda y}\mu e^{-\mu x}dxdy
+        &=\lambda\int_0^he^{-\lambda y}\left(-\frac{\mu}{\mu}e^{-\mu x}\right)\bigg|_{h-y}^\infty dy\\
+        &=\lambda\int_0^he^{-\lambda y}e^{-\mu(h-y)}dy\\
+        &=\lambda e^{-\mu h}\int_0^he^{-(\lambda-\mu)y}dy.\tag{1}
+    \end{align*}
+    We arrive at a crossroads, since (1) evaulates differently depending on if $\lambda$ and $\mu$ are equal. Suppose first that they are. Then (1) can be evaulated
+    \begin{align*}
+        \mc{P}(h)=\lambda e^{-\mu h}(y)\bigg|^h_0=\lambda e^{-\lambda h}h.
+    \end{align*}
+    Define $f(x)=\lambda xe^{-\lambda x}$. Then, by Taylor's theorem, we have
+    \[f(h)=f(0)+f^\prime(0)h+o(h)=(\lambda e^{-\lambda x}-\lambda^2xe^{-\lambda x})\bigg|_{x=0}h+o(h)=\lambda h+o(h)\]
+    as desired. Alternatively, suppose that $\mu\neq \lambda$. Then we can reevaluate (1) as
+    \begin{align*}
+        \mc{P}(h)=\frac{\lambda e^{-\mu h}}{\lambda-\mu}\left(e^{-(\lambda-\mu)y}\right)\bigg|_{h}^0=\frac{\lambda e^{-\mu h}}{\lambda-\mu}\left(1-e^{-(\lambda-\mu)h}\right)=\frac{\lambda e^{-\mu h}-\lambda e^{-\lambda h}}{\lambda - \mu}.
+    \end{align*}
+    Now, redefine $f(x)=(\lambda e^{-\mu x}-\lambda e^{-\lambda x})/(\lambda - \mu)$. By Taylor's theorem, we find
+    \[f(h)=f(0)+f^\prime(0)h+o(h)=\frac{\lambda-\lambda}{\lambda-\mu}+\left(\frac{\lambda^2 e^{-\lambda x}-\mu\lambda e^{-\mu x}}{\lambda-\mu}\right)\bigg|_{x=0}h+o(h)=\frac{\lambda^2-\mu\lambda}{\lambda-\mu}h+o(h)=\lambda h+o(h)\]
+    so that, in either case, $\mc{P}(h)=\lambda h +o(h)$ as $h\downarrow 0$.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Fix $z\in\mbb{R}$; assume $P(Z<z)>0$. Denote $X=S-(z-Z)$. Compute $P(X>x|Z<z,Z+S>z)$ for each $x>0$.\\[10pt]
+    {\bf Solution} Denoting the probability of interest with $\mc{P}(x)$, we see it can be rewritten as 
+    \begin{align*}
+        \mc{P}(x)=P(X>x|Z<z,Z+S>z)&=P(S+Z-z>x|Z<z,Z+S>z)\\
+        &=\frac{P(S>X+z-Z,Z<z, S>z-Z)}{P(Z<z,S>z-Z)}.
+    \end{align*}
+    Now, noticing $\{S>X+z-Z\}\subseteq\{S>z-Z\}$, we further simplify the above to find
+    \begin{align*}
+        \mc{P}(x)=\frac{P(S>x+z-Z,Z<z)}{P(Z<z,S>z-Z)}
+    \end{align*}
+    and we proceed by computing the numerator and denominator of these separately. For an arbitrary pair of random variables $A$ and $B$, let $f_A$ and $f_{A,B}$ denote the marginal
+    density function of $A$ and the joint density function of $A$ and $B$ respectively. Then we find
+    \begin{align*}
+        P(S>x+z-Z,Z<z)&=P((S,Z)\in\mc{W})\tag{$W=\{(u,v)\in\mbb{R}^2:u>x+z-v,v<z\}$}\\
+        &=\int_{\mc{W}}f_{S,Z}(u,v)dudv\\
+        &=\int_{-\infty}^z\int_{x+z-v}^\infty f_Z(v)f_S(u)dudv\tag{since $S\perp Z$}\\
+        &=\int_{-\infty}^z\int_{x+z-v}f_Z(v)\lambda e^{-\lambda u}dudv\\
+        &=\int_{-\infty}^zf_Z(v)\left(e^{-\lambda u}\right)\bigg|_{\infty}^{x+z-v}dv\\
+        &=e^{-\lambda x}\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv.
+    \end{align*}
+    The denominator can be worked out similarly:
+    \begin{align*}
+        P(Z<z,S>z-Z)&=P((S,Z)\in\mc{U})\tag{$\mc{U}=\{(u,v)\in\mbb{R}^2:u>z-Z,v<z\}$}\\
+        &=\int_{\mc{U}}f_{S,Z}(u,v)dudv\\
+        &=\int_{-\infty}^z\int_{z-v}^\infty f_Z(v)\lambda e^{-\lambda u}dudv\\
+        &=\int_{-\infty}^zf_Z(v)\left(e^{-\lambda u}\right)\bigg|_{\infty}^{z-v}dv\\
+        &=\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv
+    \end{align*}
+    which yields the desired probability
+    \begin{align*}
+        \mc{P}(x)=\frac{e^{-\lambda x}\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv}{\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv}=e^{-\lambda x}
+    \end{align*}
+    for any $x>0$.\hfill{$\qed$}\\[10pt]
+\end{document}

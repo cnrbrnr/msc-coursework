@@ -1,0 +1,108 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 6.} Prove the following.\\[10pt]
+    {\bf a)} Let $\{A_n:n=1,2,\dots\}$ be a sequence of events. Then
+    \[P\left(\limsup_{n\rightarrow\infty}A_n\right)=1-\lim_{n\rightarrow\infty}P\left(\bigcap_{m=n}^\infty A_m^c\right).\]
+    {\bf Proof.} The result follows the definition of the set $\limsup$, the axioms of probability and DeMorgan's Law for countable unions/intersections.
+    \begin{align*}
+        P\left(\limsup_{n\rightarrow\infty}A_n\right)&=P\left(\bigcap_{k=1}^\infty\bigcup_{n\geq k}A_n\right)\\
+        &=1-P\left(\left(\bigcap_{k=1}^\infty\bigcup_{n\geq k}A_n\right)^c\right)\tag{axiom of probability}\\
+        &=1-P\left(\bigcup_{k=1}^\infty\left(\bigcup_{n\geq k}A_n\right)^c\right)\tag{DeMorgan's law for countable intersection}\\
+        &=1-P\left(\bigcup_{k=1}^\infty\bigcap_{n\geq k}A_n^c\right).\tag{DeMorgan's law for countable union}
+    \end{align*}
+    Next, defining $B_k=\cap_{n\geq k}A_n^c$, $\{B_k\}\nearrow$ since if $x\in B_k$ for some $k$, then $x\in A_n^c$ for all $n\geq k$, so $x\in \cap_{n\geq k+1}A_n^c=B_{k+1}$ 
+    and moreover $B_k\subseteq B_{k+1}$ for all $k\geq 1$. But then we have
+    \begin{align*}
+        P\left(\limsup_{n\rightarrow\infty}A_n\right)&=1-P\left(\bigcup_{k=1}^\infty\bigcap_{n\geq k}A_n^c\right)\\
+        &=1-\lim_{k\rightarrow\infty}P\left(\bigcap_{n=k}^\infty A_n^c\right)
+    \end{align*}
+    as desired.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Suppose that $\{A_n:n=1,2,\dots\}$ are independent events and $\sum_{n=1}^\infty P(A_n)=\infty$. Then, for all $n$, 
+    \[P\left(\bigcap_{m=n}^\infty A_m^c\right)=0\quad\text{and further}\quad P\left(\limsup_{n\rightarrow\infty}A_n\right)=1.\]
+    {\bf Proof.} Let $n,N\in\mbb{N}$. Then we have
+    \begin{align*}
+        P\left(\bigcap_{m=n}^NA_m^c\right)&=\prod_{m=n}^NP(A_m^c)\tag{since $A_i\perp A_j$ for $i\neq j$}\\
+        &=\prod_{m=n}^N(1-P(A_m))\\
+        &\leq\prod_{m=n}^Ne^{-P(A_m)}\tag{since $(1-x)\leq e^{-x}$ $\forall x\in\mbb{R}$}\\
+        &=e^{-\sum_{m=n}^NP(A_m)}.\tag{2}
+    \end{align*}
+    Now define $B_j=\cap_{m=n}^j A_m^c$, where $j\geq n$. Then $B_j\searrow$, since if $x\in B_{j+1}$, then $x\in A_m^c$ for $n\leq m\leq j+1$, so $x\in A_m^c$ for $1\leq m\leq j$, so $x\in B_j$.
+    In other words, $B_j\supseteq B_{j+1}$ for any $j\geq n$. This allows us to evoke the continuity of probability in the following argument.
+    \begin{align*}
+        &0\leq P\left(\cap_{m=n}^N A_m^c\right)\leq e^{-\sum_{m=n}^NP(A_m)}\\
+        \Rightarrow\qquad&\lim_{N\rightarrow\infty}0\leq\lim_{N\rightarrow\infty}P(B_N)\leq\lim_{N\rightarrow\infty}e^{-\sum_{m=n}^NP(A_m)}\\
+        \Rightarrow\qquad&0\leq P(\cap_{N=n}^\infty B_N)\leq \lim_{N\rightarrow\infty}e^{-\sum_{m=1}^NP(A_m)+\sum_{m=1}^{n-1}P(A_m)}\tag{by the continuity of probability}\\
+        \Rightarrow\qquad&0\leq P(\cap_{N=n}^\infty (\cap_{m=n}^NA_m^c))\leq\left(\lim_{N\rightarrow\infty}e^{-\sum_{m=1}^\infty P(A_m)}\right)\left(e^{\sum_{m=1}^{n-1}P(A_m)}\right)\\
+        \Rightarrow\qquad&0\leq P((\cap_{m=n}^n A_m^c)\cap(\cap_{m=n}^{n+1}A_m^c)\cap(\cap_{m=n}^{n+2}A_m^c)\cap\dots)\leq \alpha e^{-\infty}\tag{where $\alpha=e^{\sum_{m=1}^{n-1}P(A_m)}$}\\
+        \Rightarrow\qquad&0\leq P(\cap_{m=n}^\infty A_m^c)\leq 0\tag{since $\alpha$ is finite}
+    \end{align*}
+    and thus $P(\cap_{m=n}^\infty A_m^c)=0$ $\forall n\in\mbb{N}$. But then, by the previous result, under the current hypotheses we get
+    \[P\left(\limsup_{n\rightarrow\infty}A_n\right)=1-\lim_{n\rightarrow\infty}P\left(\bigcap_{m=n}^\infty A_m^c\right)=1-\lim_{n\rightarrow\infty}0=1\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf c)} If $X_n$, $n=1,2,\dots$ is a sequence of independent Bernoulli random variables such that
+    \[P(X_n=0)=1-\frac{1}{n},\qquad P(X_n=1)=\frac{1}{n}\]
+    then $P(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty X_n=1})=1$.\\[10pt]
+    {\bf Proof.} Let $\Omega$ be the sample space for process $\{X_n\}_{n\geq 1}$ with $A_n\subset\Omega$ the event that $X_n=1$ for $n=1,\dots$. That is,
+    if $\omega\in A_n$, then $X_n(\omega)=1$. It follows that if instead $\omega\in A_n^c$ we get $X_n(\omega)=0$. Then $\forall n\in\mbb{N}$ we have
+    \[\frac{1}{n}=P(X_n=1)=P(\{\omega\in\Omega:X_n(\omega)=1\})=P(A_n)\]
+    and
+    \[1-\frac{1}{n}=P(X_n=0)=P(\{\omega\in\Omega: X_n(\omega)=0\})=P(A_n^c)\]
+    so that
+    \begin{align*}
+        \sum_{n=1}^\infty P(A_n)=\sum_{n=1}^\infty\frac{1}{n}=\infty\quad\text{and}\quad\sum_{n=1}^\infty P(A_n^c)=\sum_{n=1}^\infty(1-1/n)=\infty
+    \end{align*}
+    where the latter diverges by the divergence test (i.e., $\lim_{n\rightarrow\infty}(1-1/n)=1\neq0$). But then, by the theorem in {\bf b)} and since the $A_n$ are independent for $n=1,2,\dots$ we have
+    \[P(\limsup_{n\rightarrow\infty}A_n)=1\quad\text{and}\quad P(\limsup_{n\rightarrow\infty}A_n^c)=1.\tag{3}\]
+    The significance of which is clarified in the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} For a sequence of events $\{B_n\}_{n=1}^\infty$, we have
+            \[\limsup_{n\rightarrow\infty}B_n=\{\omega\in\Omega:\omega\in B_m\text{ for infinitely many $m$}\}.\]
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    So now (3) says that {{\it w.p.}} 1, there will be index sets $\mc{I}$ and $\mc{J}$ (of course, with $\mc{I}\cap\mc{J}=\emptyset$) both infinite so that
+    $X_i=1$ $\forall i\in\mc{I}$ and $X_j=0$ $\forall j\in\mc{J}$. But then {\it w.p.} 1,
+    \[\limsup_{n\rightarrow\infty}X_n=\lim_{n\rightarrow\infty}\sup\{X_m\}_{m\geq n}=1\]
+    since if this weren't the case, then there would be some finite index $N$ so that $X_m=0$ $\forall m>N$. Similarly, and again {\it w.p.} 1 we have
+    \[\liminf_{n\rightarrow\infty}X_n=\lim_{n\rightarrow\infty}\inf\{X_m\}_{m\geq n}=0\]
+    since otherwise we would once more have some finite index $M$ so that $X_m=1$ $\forall m>M$. We need one final rudimentary lemma to complete the proof.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} Let $A,B$ be two events with $P(A)=1$ and $P(B)=1$. Then $P(A\cap B)=1$.\\[10pt]
+            {\bf Proof.} The result follows directly from, DeMorgan's law, finite subadditivity and elementary properties of probability measures.
+            \begin{align*}
+                P(A\cap B)&=1-P(A^c\cup B^c)\tag{DeMorgan's law}\\
+                &\geq1-P(A^c)-P(B^c)\tag{finite subadditivity}\\
+                &=1-(1-1)-(1-1)\\
+                &=1
+            \end{align*}
+            so $1\leq P(A\cap B)\leq 1\Rightarrow P(A\cap B)=1$.\hfill{$\qed$}
+        \end{minipage}\vspace{10pt}
+    \end{center}
+    With this, the joint probability of interest is found to be
+    \[P(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty}X_n=1)=1\]
+    since both events occur {\it w.p.} 1.\hfill{$\qed$}
+    
+\end{document}

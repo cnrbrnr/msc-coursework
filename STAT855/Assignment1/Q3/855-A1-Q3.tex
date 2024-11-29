@@ -1,0 +1,83 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 3.} An urn contains $n$ red and $m$ blue balls that are removed randomly one at a time until the urn is empty. For each pair of nonnegative integers $(n,m)$, compute the probability that the 
+    number of red balls in the urn is never strictly less than the number of blue.\\[10pt]
+    {\bf Solution.} Letting $m$,$n\in\mbb{N}$ be the number of blue and red balls in the urn respectively at some moment, and $\mc{A}$ the event that the number of red is always at least the number of blue, define the probability of interest
+    \[P(\mc{A}|(m,n))=:P_{m,n}\]
+    then
+    \[P_{m,n}=\begin{cases}
+        \frac{n-m+1}{n+1},\quad\text{if $n\geq m$}\\
+        0,\quad\text{if $n<m$}
+    \end{cases}.\]
+    {\bf Proof.} We begin by defining some useful notation. For $m,n\in\mbb{N}$, where $m$ is the number of blue balls and $n$ the number of red (and $\max\{m,n\}>0$), define $P_r(m,n)$ the probability of drawing a red ball and 
+    $P_b(m,n)$ the probability of drawing blue. Since we assume each ball is equally likely to be drawn, these are given by uniform probabilities
+    \[P_r(m,n)=\frac{n}{n+m}\quad\text{and}\quad P_b(m,n)=\frac{m}{n+m}.\]
+    Now, by the definition of $\mc{A}$, whenever $j<i$ we have $P_{i,j}=0$. Further, we know $P_{0,0}=1$, since then the urn is empty for all time, and so the number of red balls is always greater than or equal to the number of blue. Letting $j=i=0$, we get
+    \[P_{i,j}=P_{0,0}=1=\frac{0-0+1}{0+1}=\frac{j-i+1}{j+1}.\]
+    Now suppose that for some $j\geq 0$, we have $P_{0,j}=\frac{j-0+1}{j+1}=1$.  Then, by the law of total probability we get
+    \[P_{0,j+1}=P_r(0,j+1)P(\mc{A}|(0,j))=\frac{j+1}{j+1}P_{0,j}=\frac{j-0+1}{j+1}=1\]
+    so that, by the principle of mathematical induction, we have $P_{0,n}=1=\frac{n-0+1}{n+1}$ for all $n\in\mbb{N}$. We begin another round of induction by now setting $j=i=1$. Then, once more by the law of total probability,
+    \[P_{i,j}=P_{1,1}=P_r(1,1)P_{1,0}+P_b(1,1)P_{0,1}=\frac{1}{2}0+\frac{1}{2}1=\frac{1}{2}=\frac{1-1+1}{1+1}=\frac{j-i+1}{j+1}.\]
+    For the inductive step, suppose that for some $j\geq 1$ we have $P_{1,j}=\frac{j-1+1}{j+1}$. Then we have
+    \[P_{1,j+1}=P_r(1,j+1)P_{1,j}+P_b(1,j+1)P_{0,j+1}=\frac{j+1}{j+1+1}\frac{j-1+1}{j+1}+\frac{1}{j+1+1}=\frac{(j+1)-1+1}{(j+1)+1}\]
+    so that, by the principle of mathematical induction, we have $P_{1,n}=\frac{n-1+1}{n+1}$ for all $n\in\mbb{N}$, $n\geq 1$. \\[10pt]
+    Next, suppose that for some $i-1\geq 0$, we have $P_{i-1,n}=\frac{n-(i-1)+1}{n+1}$ for all $n\geq i-1$. Under this hypothesis (denote it by $IH_1$), we aim to show that $P_{i,j}=\frac{j-i+1}{j+1}$ holds for all $j\geq i$. First, we have
+    \[P_{i,i}=P_r(i,i)P_{i,i-1}+P_b(i,i)P_{i-1,i}=\frac{1}{2}0+\frac{1}{2}\frac{i-(i-1)+1}{i+1}=\frac{1}{i+1}=\frac{i-i+1}{i+1}.\]
+    With this as a basis, we introduce an additional hypothesis: suppose that for some $k\geq i$, we have $P_{i,k}=\frac{k-i+1}{k+1}$ (denote this $IH_2$). We wish to show that $P_{i,k+1}=\frac{k-i+2}{k+2}$. 
+    \begin{align*}
+        P_{i,k+1}&=P_r(i,k+1)P_{i,k}+P_b(i,k+1)P_{i-1,k+1}\\
+        &=\frac{k+1}{k+1+i}\frac{k-i+1}{k+1}+\frac{i}{k+1+i}P_{i-1,k+1}\tag{$IH_2$}\\
+        &=\frac{k+1}{k+1+i}\frac{k-i+1}{k+1}+\frac{i}{k+1+i}\frac{k+1-i+1+1}{k+1+1}\tag{$IH_1$}\\
+        &=\frac{k-i+1}{k+1+i}+\frac{i}{k+1+i}\frac{k+3-i}{k+2}\\
+        &=\frac{1}{k+1+i}\left(k-i+1+i\left(\frac{k+3-i}{k+2}\right)\right)\\
+        &=\frac{1}{k+1+i}\left(k+1+i\left(\frac{k+3-i}{k+2}-1\right)\right)\\
+        &=\frac{1}{k+1+i}\left(k+1+i\left(\frac{1-i}{k+2}\right)\right)\\
+        &=\frac{(k+1)(k+2)+i-i^2}{(k+1+i)(k+2)}\\
+        &=\frac{k^2+3k+2+i-i^2}{(k+1+i)(k+2)}\\
+        &=\frac{k^2+k-ik+k+k+1-i+1+ik+i-i^2+i}{(k+1+i)(k+2)}\\
+        &=\frac{(k+1+i)(k+1-i+1)}{(k+1+i)(k+2)}\\
+        &=\frac{k-i+2}{k+2}.
+    \end{align*}
+    Which, by the principle of mathematical induction, tells us that for all $n\in\mbb{N}$, $n\geq i$, $P_{i,n}=\frac{n-i+1}{n+1}$. Finally, and once more by the 
+    principle of mathematical induction, for $m,n\in\mbb{N}$ with $n\geq m\geq 1$ we get $P_{m,n}=\frac{n-m+1}{n+1}$.\\[10pt]
+    Summarizing what was done:
+    \begin{enumerate}
+        \item We showed that $P_{0,n}=1=\frac{n-0+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq 0$ by induction.
+        \item Using (1), we showed $P_{1,n}=\frac{n-1+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq 1$ by induction.
+        \item Using (2) as a basis, we entered an inductive step under $IH_1$; supposing that for some $i-1\geq 0$, $P_{i-1,n}=\frac{n-(i-1)+1}{n+1}$ for all $n\in\mbb{N}$ with $n\geq i-1$.
+        \item Using $IH_1$, we proved a new basis $P_{i,i}=\frac{1}{i+1}$.
+        \item Using (4) as a basis, we entered a new (nested) inductive step under $IH_2$; supposing that for some $k\geq i$ we have $P_{i,k}=\frac{k-i+1}{k+1}$.
+        \item We exited the nested inductive step, concluding that $P_{i,n}=\frac{n-i+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq i$.
+        \item We exited out of the outer inductive step, concluding that $\forall m,n\in\mbb{N}$ with $n\geq m\geq 1$, $P_{m,n}=\frac{n-m+1}{n+1}$, as desired.
+    \end{enumerate}
+    Thus we have shown that for all $n,m\in\mbb{N}$
+    \begin{align*}
+        P_{m,n}=\begin{cases}
+            \frac{n-m+1}{n+1},\quad\text{if $n\geq m$}\\
+            0,\quad\text{if $n<m$.}
+        \end{cases}
+    \end{align*}
+    where $P_{m,n}$ is the probability of drawing balls from the urn until it is empty, with the number of red balls never being strictly less than the number of blue balls.\hfill{$\qed$}\\[10pt]
+\end{document}

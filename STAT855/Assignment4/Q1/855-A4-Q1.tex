@@ -1,0 +1,157 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 1} Let $\mc{S}$ and $\mc{U}$ be finite sets, referred to as the state and action space respectively.
+    For each action $u\in\mc{U}$, it is associated with a transition matrix $P^{(u)}=\{P_{i,j}^{(u)}:i,j\in\mc{S}\}$. A policy is a mapping
+    $\mu:\mc{S}\rightarrow\mc{U}$ from the state to the action space.\\[10pt]
+    Fix a policy $\mu(\cdot)$. Consider the stochastic process ${(X_n,U_n):n\geq 0}$ with $X_n\in\mc{S}$ and $U_n\in\mc{U}$ for all $n\geq 0$.
+    Specifically, for $n\geq 0$
+    \[U_n=\mu(X_n)\]
+    and moreover, for $n\geq 1$ and $i_0,i_1,\dots,i_{n+1}\in\mc{S}$,
+    \[P(X_{n+1}=i_{n+1}|X_n=i_n,\dots,X_0=i_0)=P^{(u)}_{i_n,i_{n+1}},\quad\text{with $u=\mu(i_n)$}.\tag{1}\]
+    Next, let $c:\mc{S}\times\mc{U}\rightarrow\mbb{R}$ be a cost function and define the average cost function as 
+    \[V^\mu(i)=\limsup_{N\rightarrow\infty}\frac{1}{N}\mbb{E}\left[\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right],\quad\text{for $i\in \mc{S}$.}\]
+    We use limsup since, in general, the limit may not exist. Assume for simplicity that under the policy $\mu(\cdot)$, $\{X_n,n\geq 0\}$ is an irreducible
+    Markov chain with invariant distribution $\pi$.\\[10pt]
+    {\bf a)} Express $V^\mu$ in terms of the cost function, policy and invariant distribution.\\[10pt]
+    {\bf Solution} Since the process is irreducible, has an invariant distribution (call it $\pi=\{\pi_i:i\in\mc{S}\}$) and $c(\cdot,\cdot)$ is bounded (by the finiteness of $\mc{S}$)
+    we have
+    \[\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,U_n)=\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,\mu(X_n))=\sum_{i\in \mc{S}}c(i,\mu(i))\pi_i\quad\text{{\it w.p.} 1}\] 
+    by the ergodic theorem. Letting $j\in\mc{S}$, the average cost function simplifies as
+    \begin{align*}
+        V^\mu(i)=\limsup_{N\rightarrow\infty}\frac{1}{N}\mbb{E}\left[\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right]&=\mbb{E}\left[\limsup_{N\rightarrow\infty}\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,U_n)\bigg|X_0=i\right]\\
+        &=\mbb{E}\left[\sum_{k\in\mc{S}}c(k,\mu(k))\pi_k\bigg|X_0=i\right]\\
+        &=\sum_{k\in\mc{S}}c(k,\mu(k))\pi_k\tag{{\it w.p. $1$}}
+    \end{align*}
+    where the interchange of the expectation and the limit was implicitly justified by the dominated convergence theorem, and the expectation of the deterministic sum is just the sum itself.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $\mc{S}=\{1,2,3\}$, $\mc{U}=\{1,2\}$. Further, let
+    \begin{align*}
+        P^{(1)}=\begin{pmatrix}
+            1/2 & 1/4 & 1/4\\
+            1/4 & 1/2 & 1/4\\
+            1/4 & 1/4 & 1/2
+        \end{pmatrix},\quad\text{and}\quad P^{(2)}=\begin{pmatrix}
+            1/3 & 1/3 & 1/3 \\
+            1/3 & 1/3 & 1/3\\
+            1/3 & 1/3 & 1/3
+        \end{pmatrix}
+    \end{align*}
+    and $c(s,u)=su$ $\forall s\in\mc{S},\;u\in\mc{U}$. Consider the following policy:
+    \[\mu(1)=1,\quad\mu(2)=2,\quad\mu(3)=1.\]
+    Compute $V^\mu$ numerically.\\[10pt]
+    {\bf Solution} Rather than find the invariant distribution and use the formula above, we simulate the process and rely on the ergodic theorem. See Appendix A.1 for the code used to do this.
+    We simply report the result here. For any $i\in\mc{S}$, we find that
+    \[V^\mu(i)=\sum_{k\in\mc{S}}\pi_kc(k,\mu(k))\approx\frac{1}{N}\sum_{n=0}^{N-1}c(X_n,\mu(X_n))\]
+    provided $N$ is sufficiently large. Simulating fifty realizations of the process for $10^3$ steps, we obtain a running estimate of the average cost function:
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=100mm]{many_MDP_output.png}}
+    \end{center}
+    {\bf Figure 1} Running estimate of the average cost function over fifty realizations of the decision process, each simulated for $10^3$ steps. Initial state $X_0$ was selected with uniform probability on $\mc{S}$ for each realization.\\[10pt]
+    From figure 1, we can see that the estimate appears to converge rapidly. Letting $\{x_k\}_{k=0}^{999}$ denote one of these realizations, which happens to have $X_0=1$, we find
+    \[V^\mu(i)=V^\mu(1)\approx \frac{1}{1000}\sum_{k=0}^{999}c(x_k, \mu(x_k))=2.589.\tag*{$\qed$}\]
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Code used for problem 1b}
+    \begin{verbatim}
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        def sim_MDP(x_0, T, S, kernel):
+            '''
+            Simulate MDP with specified policy and transition kernel.
+            '''
+            T = int(T) # Number of iterations
+            mu = [0, 1, 0] # Fixed policy
+
+            # Initialize
+            u = mu[x_0] # action
+            x = x_0 # state
+            res = np.zeros((T, 2)) # empty array to contain process data
+            res[0, :] = np.array([x, u]) # include initial values in output
+
+            # Iterate
+            for i in range(1, T):
+
+                # Update state variables
+                x = np.random.choice(S, p=kernel[x, :, u])
+                u = mu[x]
+
+                # Store output
+                res[i, :] = np.array([x, u])
+
+            return res
+
+        def estimate_avg_cost(data):
+            '''
+            Compute cumulative estimate of average cost over MDP process
+            '''
+            N = data.shape[0] # Number of data points
+
+            # The running estimate vector
+            est = (1 / np.cumsum(np.ones((N,)))) * np.cumsum((data[:, 0] + 1) * (data[:, 1] + 1))
+
+            return est
+
+        # Process Parameters
+        S = np.array([0, 1, 2]) # State space
+        U = np.array([0, 1]) # Action space
+
+        # Action-specific transition matrices
+        P_1 = np.array([1/2, 1/4, 1/4, 1/4, 1/2, 1/4, 1/4, 1/4, 1/2]).reshape((3, 3, -1))
+        P_2 = np.array([1/3 for i in range(9)]).reshape((3, 3, -1))
+
+        # Concatenate transition matrices to be indexed by action
+        kernel = np.concatenate((P_1, P_2), axis=2)
+
+
+        # Simulation Parameters
+        T = 1e3 # number of time steps
+        x_0 = 1 # initial state
+        realizations = 50 # number of process realizations to simulate
+
+        # Initialize cost function output array
+        avg_cost_est_ = np.zeros((realizations, int(T)))
+
+        for j in range(realizations):
+            
+            init_ = np.random.choice(S) # equiprobable initial states
+
+            data_ = sim_MDP(init_, T, S, kernel) # simulate process
+            avg_cost_est_[j, :] = estimate_avg_cost(data_) # store running estimate of cost
+
+        # Plot the running estimates from all realizations
+        fig, ax = plt.subplots()
+
+        # L-axes
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+
+        # Plot every realization
+        for j in range(realizations):
+            ax.plot(np.linspace(1, T, num=int(T)), avg_cost_est_[j, :], linewidth=0.9)
+
+        # Set axes labels
+        ax.set_xlabel('Iterate')
+        ax.set_ylabel('Average Cost Function Estimate')
+    \end{verbatim}
+\end{document}

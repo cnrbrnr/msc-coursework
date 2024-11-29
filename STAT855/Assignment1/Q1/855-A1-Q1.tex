@@ -1,0 +1,114 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    {\noindent \bf Problem 1.} Suppose a gambler initially has 5 dollars and repeatedly places bets until he has 0 dollars. For each bet the probability
+    of winning is $p$ while the probability of losing is $1-p$. Assume that the outcomes of the bets are independent. Let $T$ be
+    the number of bets until they are ruined, and $M$ be the maximal amount of money they have between starting and ruin. Further, define
+    \[\mu_1(p)=\mbb{E}[T],\quad\mu_2(p)=\mbb{E}[M],\quad\mu_3(p)=P(M\geq 10).\]
+    Use the Monte Carlo method to estimate $\mu_1(p), \mu_2(p)$ and $\mu_3(p)$ for $p\in\{0.4, 0.45, 0.48\}$. The number of Monte Carlo repeats should
+    be at least $10^5$. Report estimates and associated estimated standard deviation.\\[10pt]
+    {\bf Solution.} Let $\hat{\mu}_i(p)$ be our estimate of $\mu_i(p)$ under probability of winning $p$ for $i=1,2,3$. Under the Monte Carlo method,
+    we proceed by simulating the gambler's run a prescribed $R=10^5$ times for $p\in\{0.4, 0.45, 0.48\}$. This generates an {\it i.i.d.} sample of stopping times $\{T_i\}_{i=1}^R$ and 
+    and an {\it i.i.d.} sample of maximum fortunes $\{M_i\}_{i=1}^R$. Then, by the strong law of large numbers, we have that 
+    \[\frac{1}{N}\sum_{i=1}^NT_i\longrightarrow \mbb{E}[T],\quad\frac{1}{N}\sum_{i=1}^N\mathbbm{1}_{\{M_i\geq 10\}}\longrightarrow P(M\geq 10),\quad \text{and}\quad\frac{1}{N}\sum_{i=1}^N M_i\longrightarrow\mbb{E}[M]\]
+    all {\it w.p.} 1 as $N\rightarrow\infty$. Note that the second of these holds because
+    \[\frac{1}{N}\sum_{i=1}^N\mathbbm{1}_{\{M_i\geq 10\}}\overset{w.p.\,1}{\longrightarrow}\mbb{E}[\mathbbm{1}_{\{M\geq 10\}}]\]
+    and
+    \[\mbb{E}[\mathbbm{1}_{\{M\geq 10\}}]=\sum_{j\in\{0, 1\}}jP(\mathbbm{1}_{\{M\geq 10\}} = j)=0P(\mathbbm{1}_{\{M\geq 10\}} = 0)+P(\mathbbm{1}_{\{M\geq 10\}}=1)=P(M\geq 10).\]
+    By the above, and since we consider $R=10^5$ large, we take
+    \[\hat{\mu}_1(p)=\frac{1}{R}\sum_{i=1}^RT_i,\quad,\hat{\mu}_2(p)=\frac{1}{R}\sum_{i=1}^RM_i,\quad\text{and}\quad\hat{\mu}_3(p)=\frac{1}{R}\sum_{i=1}^R\mathbbm{1}_{\{M\geq 10\}}\]
+    where, letting $\bs{T}=(T_1,T_2,\dots,T_R)^T$, $\bs{M}=(M_1,M_2,\dots,M_R)^T$ and $\bs{I}=(\mathbbm{1}_{\{M_1\geq 10\}},\mathbbm{1}_{\{M_2\geq 10\}},\dots,\mathbbm{1}_{\{M_R\geq 10\}})^T$ be our simulated data, we have
+    \[SD(\hat{\mu}_1(p))=SD(\bs{T})/\sqrt{R},\quad SD(\hat{\mu}_2(p))=SD(\bs{M})/\sqrt{R}\quad\text{and}\quad SD(\hat{\mu}_3(p))=SD(\bs{I})/\sqrt{R}\]
+    for $p\in\{0.4, 0.45, 0.48\}$.\\[10pt] 
+    {\bf Table 1.} Empirical estimates of $\mu_1(p)$, $\mu_2(p)$ and $\mu_3(p)$ and their standard deviations obtained by simulating the Gambler's ruin problem $R=10^5$ times for each of $p\in\{0.4, 0.45, 0.48\}$.
+    Reported values have been rounded to three decimal places.
+    \begin{center}
+        \begin{tabular}{@{}l|rrrrrrrrr@{}}\toprule
+                & \multicolumn{3}{c}{$p=0.4$} & \multicolumn{3}{c}{$p=0.45$} & \multicolumn{3}{c}{$p=0.48$}\\
+            \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+                & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ \\\midrule
+            Value & 25.055 & 6.833 & 0.118 & 49.940 & 8.443 & 0.266 & 124.200 & 11.329 & 0.400 \\ 
+            SD & 0.078 & 0.008 & 0.001 & 0.224 & 0.014 & 0.001 & 0.873 & 0.029 & 0.002\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Simulation code and output for problem 1}
+    \begin{verbatim}
+        gr_run <- function(p, init){
+            # Simulate gambler's run once, returning stopping time and maximal fortune
+            T = 0 # initialize number of bets
+            fortune = init # initialize fortune
+            M = fortune # initialize maximal fortune
+            while(fortune > 0){
+                fortune = fortune + (2 * rbinom(1, 1, p) - 1) # +1 w.p. p, -1 w.p. (1-p)
+                if(fortune > M){
+                    M = fortune # update maximal fortune 
+                }
+                T = T + 1 # increment number of bets
+            }
+            return(c(T, M))
+        }
+
+        set.seed(196883)
+        p_vals = c(0.4, 0.45, 0.48) # win probabilities to check
+        R = 10^5 # number of Monte Carlo repeats
+        init = 5 # initial fortune
+        for(p in p_vals){
+            res = matrix(0, R, 2) # matrix to store results
+            for(r in 1:R){
+                res[r, ] = gr_run(p, init) # simulate, sample T_i and M_i
+            }
+            # Report E[T], E[M] along with SDs
+            cat(
+                '\np=', p,
+                '\nE[T]=', mean(res[,1]), ', SD(T)=', sd(res[,1])/sqrt(R),
+                '\nE[M]=', mean(res[,2]), ', SD(M)=', sd(res[,2])/sqrt(R)
+            )
+
+            # Report P(M \geq 10) estimated by E[1_{M \geq 10}] along with SD
+            cat(
+                '\nE[1_{M >= 10}]=', mean(res[,2] >= 10), ', SD(1_{M >= 10})=',
+                sd(res[,2] >= 10)/sqrt(R), '\n'
+            )
+        }
+    \end{verbatim}
+    The above program generates the following output:
+    \begin{verbatim}
+        p= 0.4 
+        E[T]= 25.05532 , SD(T)= 0.07834284 
+        E[M]= 6.83297 , SD(M)= 0.007445553
+        E[1_{M >= 10}]= 0.11749 , SD(1_{M >= 10})= 0.001018269 
+
+        p= 0.45 
+        E[T]= 49.93986 , SD(T)= 0.2238829 
+        E[M]= 8.44308 , SD(M)= 0.01393472
+        E[1_{M >= 10}]= 0.26554 , SD(1_{M >= 10})= 0.001396533 
+
+        p= 0.48 
+        E[T]= 124.2002 , SD(T)= 0.8726408 
+        E[M]= 11.32942 , SD(M)= 0.02864537
+        E[1_{M >= 10}]= 0.40036 , SD(1_{M >= 10})= 0.001549433 
+    \end{verbatim}
+\end{document}

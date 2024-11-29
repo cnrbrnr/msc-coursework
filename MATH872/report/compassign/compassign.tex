@@ -1,0 +1,1347 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+\usepackage{array, booktabs, ragged2e}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+\setcounter{MaxMatrixCols}{20}  % Permits more columns in amsmath matrices
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+\DeclareMathOperator{\argmin}{arg\,min}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 872: OPTIM \& CONTR STOCH SYST}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Computational Report}\hfill {\bf Connor Braun} \hfill {\bf 2024-03-30}
+    \end{center}
+    {\bf Problem 1: Value Iteration, Policy Iteration and Q-Learning}\\[5pt]
+    Let $\mbb{X}=\{B,G\}$, $\mbb{U}=\{0,1\}$, where the state indicates whether a fading channel is in a good state
+    ($x=G$) or a bad state ($x=B$). There exists an encoder who can either try to use the channel ($u=1$) or not use the channel ($u=0$).\\[5pt]
+    The goal of the encoder is to send information over the channel. The encoder's per-state cost is given by
+    \[c(x,u)=-\1{(x=G,u=1)}+\eta u\]
+    for some $\eta\in\mathbb{R}$ to be specified. When a channel is good and the input is active, information is transmitted.\\[5pt]
+    For many channels with memory, the input also impacts the channel state. Suppose the transition kernel is given by the state transition matrices $P:\mbb{U}\rightarrow\mbb{R}^{2\times 2}$:
+    \begin{align*}
+        \mbb{P}(0)=\begin{pmatrix}
+            0.5 & 0.5\\
+            0.1 & 0.9
+        \end{pmatrix}\quad \mbb{P}(1)=\begin{pmatrix}
+            0.2 & 0.8\\
+            0.9 & 0.1
+        \end{pmatrix}.
+    \end{align*}
+    With $\beta\in(0,1)$ we consider the discounted and average cost criteria
+    \begin{align*}
+        \inf_{\gamma\in\Gamma_A}J_\beta(x,\gamma)=\inf_{\gamma\in\Gamma_A}\E^\gamma_x\bp{\sum_{t=0}^\infty\beta^tc(x_t,u_t)},\qquad
+        \inf_{\gamma\in\Gamma_A}J(x,\gamma)=\inf_{\gamma\in\Gamma_A}\limsup_{T\rightarrow\infty}\frac{1}{T}\E^\gamma_x\bp{\sum_{t=0}^{T-1}c(x_t,u_t)}
+    \end{align*}
+    respectively. We will implement various algorithms to estimate the optimal costs and corresponding optimal policies for these problems.\\[5pt]
+    {\bf Value Iteration and Policy Iteration}\\[5pt]
+    Fix $\beta=0.9$. We will estimate the optimal discounted cost and find the optimal policy for $\eta\in\{0.01,0.7,0.9\}$ using first value iteration (VI), then policy iteration (PI), comparing the results obtained.
+    Programs were implemented in Python 3.11, and code can be found in Appendix A.2.\\[5pt]
+    Let $\hat{J}^\ast_\beta:\mbb{X}\rightarrow\mbb{R}$ denote an estimate of the optimal discounted cost.
+    Iterations for both algorithms continued until the squared Euclidean distance between consecutive estimates fell below $10^{-12}$.
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Table 1.} Estimated optimal discounted cost using the value iteration (VI) and policy iteration (PI) algorithms at each $\eta\in\{0.01, 0.7, 0.9\}$. Fixing any $\eta$, the two
+            methods agree to at least three points of precision. The code producing this data can be found in Appendix A.3.
+        \end{minipage}
+    \end{center}
+    \begin{center}
+        \begin{tabular}{@{}l|rrrr@{}}\toprule
+                & \multicolumn{2}{c}{VI} & \multicolumn{2}{c}{PI}\\
+            \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+                & $\hat{J}^\ast_\beta(B)$ & $\hat{J}^\ast_\beta(G)$ & $\hat{J}^\ast_\beta(B)$ & $\hat{J}^\ast_\beta(G)$ \\\midrule
+            $\eta=0.9$ & $-0.33087287$ & $-0.40440228$ & $-0.33088235$ & $-0.40441176$\\ 
+            $\eta=0.7$ & $-0.9926186$ & $-1.21320684$ & $-0.99264706$ & $-1.21323529$\\
+            $\eta=0.01$ & $-4.31705573$ & $-4.93055266$ & $-4.31717791$ & $-4.93067485$\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    The estimated optimal cost is increasing with $\eta$, and is always lower when the process begins with a good channel state. Further, the optimal policies obtained using either algorithm agree at all values of $\eta$ tested. In particular when $\eta\in\{0.7,0.9\}$, the optimal policy $\gamma^\ast$ is such that
+    \[\gamma^\ast(G)=1,\qquad\gamma^\ast(B)=0\]
+    which, perhaps predictably, says that the encoder should only use the channel at those moments when the channel condition is good -- the state-action pair corresponding to the smallest possible value of $c$ over $\mbb{X}\times\mbb{U}$.\\[5pt]
+    Somewhat more surprisingly is the case when $\eta=0.01$. In this setup, the optimal policy $\gamma^\ast$ was found to be (by both VI and PI)
+    \[\gamma^\ast(G)=1,\qquad\gamma^\ast(B)=1\]
+    so the encoder will attempt to use the channel at every step. Looking at $\mbb{P}(1)$, we see that under this policy the channel is most likely to alternate
+    between $G$ and $B$ at each step. Still, the penalty for using the channel (while positive) is sufficiently small such that the benefit of a successful transmission outweighs it, at least in the short-term. In fact, under this policy we can compute the invariant measure $\pi=(\pi_0,\pi_1)$ of the process:
+    \begin{align*}
+        \pi \mbb{P}(1)=\pi\quad\Rightarrow\quad\pi=(9/17,8/17)
+    \end{align*}
+    which says that, in the long run, the channel will be in the $B$ state the majority of the time under this policy. Of course, the discounted cost criterion is not sensitive to these long-run consequences.\\[5pt]
+    We can also simulate the Markov decision process (MDP) corresponding to this problem under the optimal policies obtained and estimate the expected discounted cost from a large number of realizations. That is, with $M$ state-action sample paths of length $T$ denoted by
+    $\{\{(x^i_t,u^i_t)\}_{1\leq t\leq T}\}_{1\leq i\leq M}$, all of which begin at some fixed initial state in $x_0\in\mbb{X}$ we compute
+    \begin{align*}
+        \tilde{J}_\beta^\ast(x_0):=\frac{1}{M}\sum_{i=1}^M\bp{\sum_{t=0}^T\beta^tc(x^i_t,\gamma^\ast(x^i_t))}.
+    \end{align*}
+    To contrast these values, we will also compute estimates $\tilde{J}_\beta$ according to the same expression, but using sample path data where the $i$th sample path is generated under a randomized policy $\gamma^i$ such that $P^\gamma(u^i_t=1)=p^i$, $P^\gamma(u^i_t=0)=1-p^i$ , $t=1,\dots, T$ where $p^i$ are $\iid$ standard uniform random variables for $i=1,\dots, M$. We take $T=1000$ and $M=100$, and summarize the results in Table 2.
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+           {\bf Table 2.} Empirically estimated discounted cost criteria under the optimal policies (corresponding to a particular value of $\eta$) obtained using VI/PI, and (random) randomized policies. Estimates were obtained by averaging over $M=100$ sample paths, each of duration $T=1000$.
+           The code used to produce this data can be found in Appendix A.3.
+        \end{minipage}
+    \end{center}
+    \begin{center}
+        \begin{tabular}{@{}l|rrrr@{}}\toprule
+                & $\tilde{J}^\ast_\beta(B)$ & $\tilde{J}^\ast_\beta(G)$ & $\tilde{J}_\beta(B)$ & $\tilde{J}_{\beta}(G)$ \\\midrule
+            $\eta=0.9$ & $-0.31461982$ & $-0.36369360$ & $1.90367589$ & $0.42651636$\\ 
+            $\eta=0.7$ & $-0.98811628$ & $-1.08640956$ & $1.44742314$ & $1.04660565$ \\
+            $\eta=0.01$ & $-4.19776234$ & $-4.36828021$ & $-3.79414518$ & $-2.50743063$\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    In all cases, the empirical optimal discounted costs are slightly higher than those estimated by VI or PI, but are still quite close -- differing by no more than 5.04\% when $x_0=B$ and 12.1\% when $x_0=G$. The tight agreement between optimal costs estimated with VI/PI supports the notion that the error may be on the side of the empirical estimates -- perhaps due to finite size effects. Despite the discrepancy, the randomized policies performed markedly worse than the putative optimal policies at all values of $\eta$, as anticipated.\\[5pt]
+    {\bf Q-Learning}\\[5pt]
+    Maintaining $\beta=0.9$, we now consider only $\eta=0.7$. For Q-learning, we simulate a Markov decision process (MDP) under some explorative control policy, which here we take to be the randomized exploration policy $\gamma_E(u|x):=P^{\gamma_E}(u|x)=0.5$ for $u\in\mbb{U}$ and $x\in\mbb{X}$. The cost realizations over the sample path
+    are used to update $Q$-values over $\mbb{X}\times\mbb{U}$, and ultimately arrive at the optimal policy. Code for the Q-learning agent class can be found in Appendix A.4., and for the MDP simulation (and other supporting code) in Appendix A.1.\\[5pt]
+    As recommended, we adopt the conventional formula for the learning rate coefficients $\alpha_t:\mbb{X}\times\mbb{U}\rightarrow[0,1]$
+    \begin{align*}
+        \alpha_t(x, u)=\begin{cases}
+            \frac{1}{1+\sum_{k=0}^t\1{(x_k=x,u_k=u)}},\quad&\text{if $(x_t,u_t)=(x,u)$}\\
+            0,\quad&\text{o.w.}
+        \end{cases}
+    \end{align*}
+    Now, since the state and action spaces are finite, let $C$ be the cost matrix, $Q_t$ the $Q-$matrix and $\mc{A}_t$ the learning rate matrix (the latter two at time $t$) so that
+    \begin{align*}
+        C=\begin{pmatrix}
+            0 & 0.7\\
+            0 & -0.3
+        \end{pmatrix},\quad Q_t=\begin{pmatrix}
+            Q_t(B, 0) & Q_t(B, 1)\\
+            Q_t(G, 0) & Q_t(G, 1).
+        \end{pmatrix},\quad\text{and}\quad\mc{A}_t=\begin{pmatrix}
+            \alpha_t(B, 0) & \alpha_t(B, 1)\\
+            \alpha_t(G, 0) & \alpha_t(G, 1)
+        \end{pmatrix}
+    \end{align*}
+    At each iteration, we update the $Q$-matrix
+    \begin{align*}
+        Q_{t+1}=Q_t + \mc{A}_t\odot\bp{C+\bp{\beta\min_{u\in\{0,1\}}Q_t(X_{t+1},u)\ominus Q_t}}
+    \end{align*}
+    with $\odot$, $\ominus$ denoting the Hadamard (elementwise) matrix product and minus operation with array broadcasting, respectively. The $X_{t+1}$ is obtained as the next realized value in the MDP state process $\{X_t\}_{t=1}^N$, with $N$ the maximum number of iterations.\\[5pt]
+    In figure 1 we depict the timecourse of the $Q$-values over $100$ MDP sample path realizations.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=100mm]{fig1.png}}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+           {\bf Figure 1.} Timecourse of $Q$-values over a $100$ MDP sample-path realizations, each of $1000$ steps. Legend indicates the state-action pair to which the data correspond.
+           Code used to produce these data can be found in Appendix A.4.
+        \end{minipage}
+    \end{center}
+    Averaging the final $Q$-matrix values across these realizations, we have the average $Q$-matrix $\hat{Q}$ given by
+    \begin{align*}
+        \hat{Q}=\begin{pmatrix}
+            -0.96318162 & -0.32576676\\
+            -1.04142613 & -1.1833189
+        \end{pmatrix}
+    \end{align*}
+    furnishing the optimal policy $\gamma^\ast$ given by
+    \[\gamma^\ast(G)=\argmin_{u\in\mbb{U}}\hat{Q}(G, u)=1\quad\text{and}\quad\gamma^\ast(B)=\argmin_{u\in\mbb{U}}\hat{Q}(B, u)=0\]
+    which is precisely the same optimal policy as was obtained using VI and PI at $\eta=0.7$. Note that based on Figure 1, even without averaging the $Q$-matrices
+    over multiple realizations we would nearly always have the same 'optimal' policy. A small proportion of realizations might yield a policy where the encoder never acts,
+    evinced by the proximity of the red and green paths.\\[5pt]
+    {\bf Problem 2: Linear Programming for Average Cost Stochastic Control}\\[5pt]
+    For the same model as in problem 1, consider the average cost criterion, stated above. Apply the convex analytic method, solving the corresponding linear program to find the optimal policy.\\[5pt]
+    Let $\mc{G}=\{\nu\in\mc{P}(\mbb{X}\times\mbb{U}):\nu(z,\mbb{U})=\sum_{(x,u)\in\mbb{X}\times\mbb{U}}\nu(x,u)\mc{T}(z|x,u)\}$ where $\mc{T}$ is the MDP transition kernel defined according to the state-transition matrices $\mbb{P}(u)$ for $u\in\mbb{U}$. We seek to solve the linear program
+    \begin{align*}
+        \min_{\nu\in\mc{G}}\sum_{(x,u)\in\mbb{X}\times\mbb{U}}c(x,u)v(x,u)
+    \end{align*}
+    where in our case we can specify the linear constraints
+    \begin{align*}
+        \begin{pmatrix}
+            1 - (\mbb{P}(0))_{0,0} & 1 - (\mbb{P}(1))_{0,0} & -(\mbb{P}(0))_{1,0} & -(\mbb{P}(1))_{1,0}\\
+            -(\mbb{P}(0))_{0,1} & -(\mbb{P}(1))_{0,1} & 1-(\mbb{P}(0))_{1,1} & 1-(\mbb{P}(1))_{1,1}\\
+            1 & 1 & 1 & 1
+        \end{pmatrix}\begin{pmatrix}
+            \nu(0,0)\\
+            \nu(0,1)\\
+            \nu(1,0)\\
+            \nu(1,1)
+        \end{pmatrix}=\begin{pmatrix}
+            0\\0\\1
+        \end{pmatrix}\quad\text{and}\quad\begin{pmatrix}
+            1 & 0 & 0 & 0\\
+            0 & 1 & 0 & 0\\
+            0 & 0 & 1 & 0\\
+            0 & 0 & 0 & 1
+        \end{pmatrix}\begin{pmatrix}
+            \nu(0,0)\\
+            \nu(0,1)\\
+            \nu(1,0)\\
+            \nu(1,1)
+        \end{pmatrix}\succcurlyeq\begin{pmatrix}
+            0\\0\\0\\0
+        \end{pmatrix}
+    \end{align*}
+    to encode the membership of $\nu\in\mc{G}$. After obtaining $\nu^\ast:=\argmin_{\nu\in\mc{G}}\sum_{\mbb{X}\times\mbb{U}}c(x,u)\nu(x,u)$, we construct the optimal policy
+    \[\gamma^\ast(u|x)=\frac{\nu^\ast(x,u)}{\sum_{u^\prime\in\mbb{U}}\nu^\ast(x,u^\prime)}.\tag{1}\]
+    The code for this problem can be found in Appendix A.5. In table 3 we report $\hat{J}^\ast$, the estimated optimal average cost for $\eta\in\{0.01,0.7,0.9\}$.
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Table 3.} Estimated optimal average cost and the corresponding $\nu^\ast\in\mc{G}$ using the convex analytic technique at each $\eta\in\{0.01,0.7,0.9\}$. 
+            Code used to produce these data can be found in Appendix A.5.
+        \end{minipage}
+    \end{center}
+    \begin{center}
+        \begin{tabular}{@{}l|rrrrr@{}}\toprule
+                & $\hat{J}^\ast$ & $\nu^\ast(0,0)$ & $\nu^\ast(0,1)$ & $\nu^\ast(1, 0)$ & $\nu^\ast(1, 1)$ \\\midrule
+            $\eta=0.9$ & $-0.03571428$ & $0.64285714$ & $0$ & $0$ & $0.35714286$\\ 
+            $\eta=0.7$ & $-0.10714285$ & $0.64285714$ & $0$ & $0$ & $0.35714286$\\
+            $\eta=0.01$ & $-0.46058823$ & $0$ & $0.52941176$ & $0$ & $0.47058824$\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    Thus, by computing (1) with the $\nu^\ast$ described in table 1, the resulting optimal policies are deterministic and for each $\eta$ prescribe precisely the same state-action mappings as were found using value and policy iteration algorithms. That is, the encoder is always active when $\eta=0.01$, 
+    and is otherwise only active when the channel is in good condition for $\eta\in\{0.7,0.9\}$. Interestingly, we have that the policy whereby the encoder is always active is not just an artefact of a near-sighted controller given a discounted cost,
+    but in fact remains optimal when the discount vanishes.\\[5pt]
+    We proceed to verify these results empirically, just as was done for the VI and PI algorithms. That is, we simulate the MDP for this problem under both the optimal policies (corresponding to a choice of $\eta$) and a (random) randomized control policy.\\[5pt]
+    Let $\gamma^\ast=(\gamma_i^\ast)_{i=1}^M$ and $\gamma^{\text{rand}}=(\gamma_i^{\text{rand}})_{i=1}^M$ where $M$ is the number of sample paths to simulate, and each of the $\gamma^\ast_i$ are identical, optimal stationary policies given a fixed value of $\eta$ obtained above. On the other hand, the $\gamma^{\text{rand}}_i$ are parameterized
+    by an $\iid$ Bernoulli process $\{p_i\}_{i=1}^M$ as described in problem 1 when estimating optimal costs empirically. Initializing the state $x_0\in\mbb{X}$, we obtain $M$ sample path realizations of length $T$ under either $\gamma^\ast$ or $\gamma^\text{rand}$ and with these compute
+    the empirical estimate
+    \[\tilde{J}(x_0,\gamma)=\frac{1}{M}\sum_{i=1}^M\bp{\sum_{t=0}^Tc(x^i_t,\gamma_i(x^i_t))}.\]
+    The results of this procedure are summarized in table 4.
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Table 4.} Empirically estimated average cost criteria under the optimal policies (corresponding to a particular choice of $\eta$) obtained by the convex analytic method and (random) randomized policies.
+            Estimates were obtained by averaging over $M=100$ sample paths, each of duration $T=1000$. Code used to produce these data can be found in Appendix A.5.
+        \end{minipage}
+    \end{center}
+    \begin{center}
+        \begin{tabular}{@{}l|rr@{}}\toprule
+                & $\tilde{J}(x_0,\gamma^\ast)$ & $\tilde{J}(x_0, \gamma^{\text{rand}})$ \\\midrule
+            $\eta=0.9$ & $-0.03562599$ & $0.42098900$ \\ 
+            $\eta=0.7$ & $-0.10711200$ & $0.03378599$ \\
+            $\eta=0.01$ & $-0.46141000$ & $-0.24341610$ \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    The empirically-estimated average cost critera agree to at least two points of precision with those estimated using the convex analytic method. Additionally, the randomized policies were noticeably suboptimal, as anticipated.\\[5pt]
+    {\bf Problem 3: The Kalman Filter}\\[5pt]
+    Let a linear system driven by Gaussian noise be given by the following:
+    \begin{align*}
+        \begin{cases}
+            x_{t+1}=Ax_t+w_t\\
+            y_t=Cx_t+v_t
+        \end{cases},\quad\text{where}\quad
+        A=\begin{pmatrix}
+          2 & 1 & 0 & 0\\
+          0 & 2 & 1 & 0\\
+          0 & 0 & 2 & 1\\
+          0 & 0 & 0 & 4  
+        \end{pmatrix}\quad\text{and}\quad C=\begin{pmatrix}
+            2 & 0 & 0 & 0
+        \end{pmatrix}\tag{$\ast$}
+    \end{align*}
+    such that $w_t\overset{\iid}{\sim}\mc{N}(0,\mbb{I})$, $v_t\overset{\iid}{\sim}\mc{N}(0,1)$ $\forall t\geq 0$. Further, the initial state $x_0\sim\mc{N}(0,\mbb{I})$ and $\Sigma_{0|-1}=\mbb{I}$.\\[5pt]
+    {\bf a)}\hspace{5pt} Write down the Kalman filter update equations.\\[5pt]
+    We initialize the Kalman filter covariance matrix $\Sigma_{0|-1}=\E(x_0x_0^T)=\mbb{I}$ and mean $\tilde{m}_t=\E(x_0)=0$. Then the conditional mean process is defined by the recursion
+    \begin{align*}
+        \tilde{m}_t&=\E(x_t|y_{[0,t]},u_{[0,t-1]})\\
+        &=A\tilde{m}_{t-1}+\Sigma_{t|t-1}C^T(C\Sigma_{t|t-1}C^T+V)^{-1}(y_t-CA\tilde{m}_{t-1})\tag{2}
+    \end{align*}
+    where $V:=\E(v_tv_t^T)=\mbb{I}$, $\forall t\geq 0$. Then with $m_t=\E(x_t|y_{[0,t-1]},u_{[0,t-1]})$, the conditional covariance matrix is updated recursively according to
+    \begin{align*}
+        \Sigma_{t+1|t}=\E((x_{t+1}-m_{t+1})(x_{t+1}-m_{t+1})^T|y_{[0,t]},u_{[0,t]})&=\E((x_{t+1}-m_{t+1})(x_{t+1}-m_{t+1})^T)\\
+        &=A\Sigma_{t|t-1}A^T+W-A\Sigma_{t|t-1}C^T(C\Sigma_{t|t-1}C^T+V)^{-1}C\Sigma_{t|t-1}A^T.\tag{3}
+    \end{align*}
+    where again we define $W:=\E(w_tw_t^T)$, $\forall t\geq 0$.\\[5pt]
+    {\bf b)}\hspace{5pt} By simulating the above system, run the Kalman filter from $t=0$ to $T=1000$. Plot $x_t$, $\tilde{m}_t$ and $x_t-\tilde{m}_t$.\\[5pt]
+    See Appendix A.6. for the simulation code. The state $\{x_t\}_{t\geq 0}$ and conditional expectation $\{\tilde{m}_t\}_{t\geq 0}$ processes diverge exponentially fast in simulation, resulting in a numerical overflow after just $206$ iterations. As such, figures will only include iterates up to the $206$-th
+    timestep.\\[5pt]
+    Let us first examine the state and conditional expectation processes, denoting $x_t=(x_1(t),x_2(t),x_3(t),x_4(t))^T$ and $\tilde{m}_t=(\tilde{m}_1(t),\tilde{m}_2(t), \tilde{m}_3(t), \tilde{m}_4(t))^T$.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=180mm]{fig2.png}}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Figure 2.} A single sample path realization of the process $\{x_t\}_{t=0}^{206}$ (black, solid) and corresponding conditional mean process $\{\tilde{m}_t\}_{t=0}^{206}$ (red, dotted) generated according to ($\ast$) and (2), respectively.
+            Both processes are plotted componentwise, and on a logarithmic scale in amplitude. Code used to generate this figure and the underlying data can be found in Appendix A.6.
+        \end{minipage}
+    \end{center}
+    Both processes exhibit linear growth on a logarithmic scale, evincing their instability. However, both processes appear to coincide closely over the timecourse presented which
+    we confirm in figure 3.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=180mm]{fig3.png}}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Figure 3.} The error processes $\tfrac{x_i(t)-\tilde{m}_i(t)}{x_i(t)}$, $i=1,2,3,4$ (componentwise relative change) for the same sample path as depicted in figure 2. The red dotted line indicates the zero function. Code used
+            to generate these figures and the underling data can be found in Appendix A.6.
+        \end{minipage}
+    \end{center}
+    From figure 3, we see that after a brief transient the error process converges on a fixed, positive value, indicating that the error $x_i(t)-\tilde{m}_i(t)$ is growing at the same rate as $x_i(t)$ $\forall i$; exponentially fast. One could describe the conditional mean as 'chasing' the state process
+    as it diverges, but it is unable to catch up.\\[5pt] 
+    {\bf c)} Do the Riccati recursions converge to a limit; is the limit unique? Explain why or why not. Verify your answer programmatically.\\[5pt]
+    The solution is obtained as a corollary of the following theorem:
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Theorem 1.}\hspace{5pt} Let $A\in\mbb{R}^{n\times n}$, $B\in\mbb{R}^{n\times m}$, $R\in\mbb{R}^{m\times m}$ and $Q=C^TC\in\mbb{R}^{p\times p}$ with $C\in\mbb{R}^{p\times n}$. Define the Riccati recursions
+            \[P_t=Q+A^TP_{t+1}A-A^TP_{t+1}B(B^TP_{t+1}B+R)^{-1}B^TP_{t+1}A.\]
+            If $(A,B)$ is controllable, then there exists a fixed point solution $P$ to these recursions, and if further we have $(A,C)$ observable then $P$ is positive definite, unique and $\lim_{t\rightarrow-\infty}P_t=P$.\\[5pt]
+        \end{minipage}
+    \end{center}
+    Examining the recursions for the Kalman filter covariance process $\{\Sigma_{t|t-1}\}_{t\geq 0}$ in (3), we see that the theorem guarantees us a fixed point solution $\Sigma$ provided $(A^T,C^T)$ is controllable. By a duality, this is equivalent to establishing observability of the pair $(A,C)$. For this, let us now compute the observability matrix of the pair $(A,C)$, denoted $\mc{O}_{A,C}$.
+    \begin{align*}
+        \mc{O}_{A,C}=\begin{pmatrix}
+            C\\
+            \hline
+            CA\\
+            \hline
+            CA^2\\
+            \hline
+            CA^3
+        \end{pmatrix}=\begin{pmatrix}
+            2 & 0 & 0 & 0\\
+            4 & 2 & 0 & 0\\
+            8 & 8 & 2 & 0\\
+            16 & 24 & 12 & 2
+        \end{pmatrix}.
+    \end{align*}
+    Since $\mc{O}_{A,C}$ is lower triangular, its spectrum consists of its diagonal entries which are all nonzero. Thus, the nullspace of $\mc{O}_{A,C}$ is trivial, $\mc{O}_{A,C}$ has full rank by the rank-nullity theorem, and we conclude that the pair $(A,C)$ is observable.\\[5pt]
+    Similarly, taking $W=\mbb{I}=\mbb{I}\mbb{I}^T$, theorem 1 guarantees uniqueness and convergence of the recursions (3) to $\Sigma$ provided $(A^T,\mbb{I}^T)$ is observable, which by duality is equivalent to $(A,\mbb{I})$ being controllable. With $\mc{C}_{A,\mbb{I}}$ the controllability matrix of this pair, we compute
+    \begin{align*}
+        \mc{C}_{A,\mbb{I}}&=
+        \begin{pmatrix}
+            \mbb{I} & \vline & A & \vline & A^2 & \vline & A^3
+        \end{pmatrix}=
+        \begin{pmatrix}
+                1 & 0 & 0 & 0 & 2 & 1 & 0 & 0 & 4 & 4 & 1 & 0 & 8 & 12 & 6 & 1\\
+                0 & 1 & 0 & 0 & 0 & 2 & 1 & 0 & 0 & 4 & 4 & 1 & 0 & 8 & 12 & 8\\
+                0 & 0 & 1 & 0 & 0 & 0 & 2 & 1 & 0 & 0 & 4 & 6 & 0 & 0 & 8 & 28\\
+                0 & 0 & 0 & 1 & 0 & 0 & 0 & 4 & 0 & 0 & 0 & 16 & 0 & 0 & 0 & 64   
+        \end{pmatrix}
+    \end{align*}
+    where $\text{rank}\,(\mc{C}_{A,B})=4$ since the first four columns are linearly independent. Thus the pair $(A,\mbb{I})$ is controllable and theorem 1 guarantees the convergence of the Riccati recursions in (3) to a unique fixed point solution.\\[5pt]
+    Let us now verify this programmatically; the code can be found at the end of Appendix A.6. To do this, we will simulate the Kalman filter covariance process for system ($\ast$) $M=5000$ times, each of duration $T=200$. Let $\{\{\Sigma^m_{t|t-1}\}_{t=0}^{T}\}_{m=1}^{M}$ be the complete set of $M$ realizations obtained. Each realization differs only in its initial state $\Sigma^m_{0|-1}$, where
+    the entries are i.i.d. random variables $(\Sigma^m_{0|-1})_{i,j}\sim\mc{N}(5\times10^5, (5/3\times 10^5)^2)$, $m=1,\dots, M$, $1\leq i,j\leq 4$. The resulting data are depicted in figure 4.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=120mm]{fig4.png}}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-5cm}
+            {\bf Figure 4.} Time course of the components of $\Sigma^m_{t|t-1}$ for $1\leq m\leq M$ and $0\leq t\leq T$, where initialized entries are  i.i.d. Gaussian with mean and variance as above. Covariances are plotted on a logarithmic scale,
+            and have the same colour across the $M$ realizations. That is, fixing $1\leq i,j\leq 4$, $(\Sigma_{t|t-1}^m)_{i,j}$ is plotted in the same colour for $t=0,\dots,T $ and $m=1,\dots, M$. The y-axis limits were set to capture all data at the last timestep.
+            Code used to generate this figure and the data can be found in Appendix A.6.
+        \end{minipage}
+    \end{center}
+    Despite the dramatic variation in initial conditions tested here, we see that (after a brief transient) all entries across all realizations of the filter covariance process converge to some value. Some converge to values very close to one another, which is why only nine
+    values are clearly discernable in the figure. To verify that these conclusions are justified, we computed the following quantity:
+    \[\max_{1\leq k,\ell\leq M}\sum_{1\leq i,j\leq 4}\left|(\Sigma^k_{T|T-1})_{i,j}-(\Sigma^\ell_{T|T-1})_{i,j}\right|^2=0\]
+    which confirms what figure 4 appears to show: that indeed the Kalman filter covariance matrix converges to a unique fixed point solution, as promised by the preceding analysis.
+    \newpage
+    \noindent{\Large\bf Appendix}\\[10pt]
+    {\bf A.1. Boilerplate Code: Imports and General Function/Class Definitions}\\[5pt]
+    Executing the following code is necessary and sufficient for the rest of the code presented to function as intended.
+    \begin{verbatim}
+# ====== Import Statements ======
+# Python standard library
+import copy
+
+# Third party libraries
+import control as ct
+import matplotlib.pyplot as plt
+import numba as nb
+import numpy as np
+from scipy.optimize import linprog, minimize
+from tqdm import tqdm
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Helper Functions, Main Class Definitions ======
+@np.vectorize(otypes=['float']) # vectorize for evaluation over arrays
+def cost(state, action, eta):
+    '''Compute the problem 1 cost function given a state-action pair and value of eta'''
+    if action == 1:
+        if state == 1:
+            return  eta - 1 
+        else:
+            return eta 
+    elif action != 1:
+        return 0
+
+def discount_cost_criterion(costs, beta):
+    '''Compute empirical discounted cost given an MDP cost history'''
+    n = costs.size # time horizon
+    discount_vector = (beta * np.ones((n, ))) ** np.arange(n) # increasing powers of beta
+    return np.sum((costs.flatten()) * discount_vector) 
+
+def average_cost_criterion(costs):
+    '''Compute empirical average cost given an MDP cost history'''
+    n = costs.size # time horizon
+    return np.sum((costs.flatten())) * (1/n)
+
+def check_func_equiv(func_1, func_2, dom):
+    '''Check that two functions are equal on a specified set'''
+    for x in dom:
+        if func_1(x) != func_2(x):
+            return False
+    return True
+
+class TransitionKernel:
+    '''
+    Compute expectations, transition probabilities given action-associated transition kernels
+    Attributes
+        trans_mat: list of transition probability matrices, indexed by action
+    Methods
+        __call__(state, action):
+            return vector of transition probabilities given of state-action pair
+        expectation_kernel(state, actions):
+            return array of transition probabilities across different actions (row-wise)
+        policy_expectation(states, policy):
+            return array of transition probabilities across different states given a policy (row-wise)
+    '''
+    def __init__(self, transition_matrices):
+        self.trans_mat = transition_matrices
+    
+    def __call__(self, state, action):
+        return self.trans_mat[action][state, :]
+    
+    def expectation_kernel(self, state, actions):
+            return np.concatenate([self(state, u).reshape((1, -1)) for u in actions], axis=0)
+    
+    def policy_expectation_kernel(self, states, policy):
+        return np.concatenate([self(x, policy(x)).reshape((1, -1)) for x in states], axis=0)
+
+class MarkovDP:
+    '''
+    Simulate arbitrary Markov Decision Process (MDP)
+    Attributes
+        state_space_idx: indices over finite state space
+        axtion_space_idx: indices over finite action space
+        state_space: unaltered state space for cost function evaluation
+        action_space: unaltered action space for cost function evaluation
+        kernel: TransitionKernel class instance
+        cost: vectorized cost function with signature cost(state, action, *args) returning a scalar
+        cost_params: *args passed to cost function calls
+        policy: function with signature policy(state, action, action_space, *args)
+        policy_params: *args passed to policy function calls
+        state: ndarray of shape (2, 1) with current state, action index in first and second row resp.
+        steps: integer number of steps taken so far
+        cost_history: ndarray of shape (N, 1) containing costs computed over N-step simulation
+        history: ndarray of shape (N, 2) containing (state, action) pairs over N-step simulation
+    Methods
+        step()
+            statefully advance the MDP by one time increment
+        compute_cost()
+            return cost associated to current state
+        init_history(max_iter)
+            initialize history matrices for storing process variables
+        simulate(max_iter, erase_history=True)
+            advance MDP by max_iter steps, tracking states and costs
+
+    '''
+    def __init__(self, X, U, c, T, policy, max_iter=1000):
+
+        self.state_space_idx = np.arange(np.array(X).size)
+        self.action_space_idx = np.arange(np.array(U).size)
+        self.state_space = np.array(X)
+        self.action_space = np.array(U)
+        self.kernel = T
+        self.cost = c
+        self.cost_params = []
+        self.policy = policy
+        self.policy_params = []
+
+        self.state = np.array([np.random.choice(X), np.random.choice(U)]).reshape((2, 1))
+        self.steps = 0
+
+        self.cost_history = np.empty((max_iter, 1))
+        self.history = np.empty((max_iter, 2))
+
+    def step(self):
+
+        trans_probs = self.kernel( # row of probabilities for (x, u) pair
+            self.state[0, 0],
+            self.state[1, 0]
+        ) 
+        self.state[0, 0] = np.random.choice(self.state_space_idx, p=trans_probs) # randomly select next state
+
+        # Select next action according to current policy
+        self.state[1, 0] = self.policy(
+            self.state_space_idx[self.state[0, 0]],
+            self.action_space_idx[self.state[1, 0]],
+            self.action_space,
+            *self.policy_params
+        )
+
+    def compute_cost(self):
+
+        return self.cost(
+            self.state_space[self.state[0, 0]],
+            self.action_space[self.state[1, 0]],
+            *self.cost_params
+        )
+    
+    def init_history(self, max_iter):
+        
+        # Initialize storage arrays 
+        self.cost_history = np.empty((max_iter, 1))
+        self.history = np.empty((max_iter, 2))
+
+    def simulate(self, max_iter, erase_history=True):
+
+        # Overwrite process history and initialize
+        if erase_history == True:
+            self.init_history(max_iter)
+            
+        self.steps = 0
+
+        while self.steps < max_iter:
+
+            self.history[self.steps, :] = self.state[:, 0] # save the current state
+            self.cost_history[self.steps, :] = self.compute_cost() # compute the current cost
+            self.step() # advance the state
+            self.steps += 1 # increment counter
+    \end{verbatim}
+    {\bf A.2. Value Iteration and Policy Iteration Algorithms}\\[5pt]
+    Function definitions for both algorithms.
+    \begin{verbatim}
+# ====== Value Iteration ======
+def value_iteration(
+        beta, state_space, action_space,
+        cost_func, kernel, cost_params=[],
+        tol=1e-12, max_iter=100, verbose=True
+    ):
+    '''
+    Value iteration algorithm to estimate state values and optimal stationary policy.
+    arguments
+        beta: (0,1)-valued discount parameter
+        state_space: 0 dimensional numpy ndarray
+        action_space: 0 dimensional numpy ndarray
+        cost_func: function accepting (x, u, *args), where x is in state_space, u is in
+            action_space and *args are passed in cost_params as a list
+        kernel: TransitionKernel instance with expectation_kernel method
+        cost_params: list *args for cost_func
+        tol: float iterations terminate when two consecutive iterates differ in squared
+            Eucidean norm by less than tol
+        max_iter: int iterations terminate when this many iterations have completed
+        verbose: Boolean print algorithm summary to console
+    returns
+        V: 1 dimensional numpy ndarry indicating estimated state-value estimates
+        state_action_mappings: list matching state space indices to optimal action
+    '''
+
+    # Initializations
+    V = np.zeros((np.array(state_space).size, 1)) # state-value estimates
+    TV = np.zeros((np.array(state_space).size, 1)) # HJB backstep
+    delta = tol + 1 # consecutive iterate squared Euclidean distance
+
+    u_opt = [[] for x in state_space] # optimal state-action mappings at each iteration
+
+    state_idx = np.arange(np.array(state_space).size) # state space indices
+    action_idx = np.arange(np.array(action_space).size) # action space indices
+
+    # Main loop
+    for i in range(max_iter): # before exceeding iteration allowance
+        if delta >= tol: # before consecutive iterations have stabilized
+            for x in state_idx: # Fix the state
+
+                # Compute c(x, u) + B*( E(v(x_1) |x_0=x, u_0=u) ) for each u in action_space as a vector
+                action_vals = cost(
+                    state_space[x],
+                    action_space,
+                    *cost_params).reshape((-1, 1)) \
+                        + beta * (kernel.expectation_kernel(state_space[x], action_space) @ V)
+
+                u_opt[x].append(np.argmin(action_vals)) # index of minimum is optimal in action_space
+                TV[x, 0] = np.amin(action_vals) # minimum is value of fixed state in state_space
+
+            delta = np.sum((V - TV) ** 2) # compute the stopping criterion
+            V[:, 0] = TV[:, 0] # update the state-value estimates
+        else:
+            break
+    
+    # Construct the optimal policy
+    state_action_mappings = [u_opt[x][-1] for x in state_idx]
+
+    # Print summary, if requested
+    if verbose == True:
+        print('''
+            \nValue iteration terminated at step {} with delta {}\n\tDiscount factor: {}; Cost Params:
+            {}\n\tOptimal policy map: X{} --> U{}'
+            '''.format(i, delta, beta, cost_params, state_space, state_action_mappings)
+        )
+    return V, state_action_mappings
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Policy Iteration ======
+def policy_iteration(
+        beta, state_space, action_space,
+        cost_func, kernel, cost_params=[],
+        max_iter=1000, verbose=True
+    ):
+    '''
+    Policy iteration algorithm to estimate state values and optimal stationary policy.
+    arguments
+        beta: (0,1)-valued discount parameter
+        state_space: 0 dimensional numpy ndarray
+        action_space: 0 dimensional numpy ndarray
+        cost_func: function accepting (x, u, *args), where x is in state_space, u is in
+            action_space and *args are passed in cost_params as a list
+        kernel: TransitionKernel instance with policy_expectation_kernel method
+        cost_params: list *args for cost_func
+        max_iter: int iterations terminate when this many iterations have completed
+        verbose: Boolean print algorithm summary to console
+    returns
+        W: 1 dimensional ndarray indicating estimated state-value estimates
+        u_opt: 0 dimensional ndarray matching state space indices to optimal action
+    '''
+
+    # Initializations
+    state_idx = np.arange(np.array(state_space).size) # state space indices
+    action_idx = np.arange(np.array(action_space).size) # action space indices
+    dim = state_idx.size # Dimension of state space
+
+    # State-action mappings for defining policies; these are mutable, functions are not
+    u_opt = np.zeros((dim,), dtype=int) # For defining the behavior of the policy updates
+    u_opt_copy = copy.deepcopy(u_opt) # For defining the behavior of the old policy
+
+    # Policy functions
+    gamma_old = lambda x_idx: u_opt_copy[x_idx]
+    gamma_new = lambda x_idx: u_opt[x_idx]
+    
+    # Compute 'naive' optimal equation under gamma_old:
+    # w(x) = (I - B*P(x_1|x_0=x, u_0=gamma_old(x)) )^{-1}c(x, \gamma_old(x))
+    W = np.linalg.inv(np.identity(dim) \
+        - (beta * kernel.policy_expectation_kernel(state_space, gamma_old))) \
+        @ (cost_func(state_space, gamma_old(state_space), *cost_params)).reshape((-1, 1))
+
+    # Main loop
+    for i in range(max_iter): # before exceeding iteration allowance
+        for x in state_idx: # Fix the state
+
+            # Compute c(x, u) + B*( E(w(x_1) |x_0=x, u_0=u) ) for each u in action_space as a vector
+            action_vals = cost(state_space[x], action_space, *cost_params).reshape((-1, 1)) \
+                + beta * (kernel.expectation_kernel(state_space[x], action_space) @ W)
+
+            # index of minimum is optimal in action space;
+            # this update changes the immutable lambda function behavior
+            u_opt[x] = np.argmin(action_vals) 
+
+        # Update 'naive' optimal equation under gamma_new:
+        # w(x) = (I - B*P(x_1|x_0=x, u_0=gamma_old(x)) )^{-1}c(x, \gamma_old(x))
+        W[:, :] = np.linalg.inv(np.identity(dim) \
+            - (beta * kernel.policy_expectation_kernel(X, gamma_new))) \
+            @ (cost_func(state_space, gamma_new(state_space), *cost_params)).reshape((-1, 1)) 
+        
+        # If the latest iteration induced no change on the policy then terminate
+        if check_func_equiv(gamma_old, gamma_new, state_idx):
+            break
+        else:
+            u_opt_copy[:] = u_opt # Otherwise update the old lambda function for the next iteration
+
+    # Print summary, if requested
+    if verbose == True:
+        print('''
+        \nPolicy iteration terminated at step {}\n\tDiscount factor: {}; Cost Params: {}\n\tOptimal
+        policy map: X{} --> U{}
+        '''.format(i, beta, cost_params, state_space, u_opt)
+        )
+    
+    return W, u_opt
+    \end{verbatim}
+    {\bf A.3. Empirical Estimation of Discounted Cost Under Various Policies}\\[5pt]
+    Code used to generate data presented in table 1 and table 2.
+    \begin{verbatim}
+# ====== Find Optimal Policy and State Values by Value Iteration (Table 1) ======
+beta = 0.9 # discount parameter 
+eta = 0.01 # cost parameter determining how harshly we penalize channel usage
+tolerance = 1e-12 # value iteration termination criterion
+
+X = [0, 1] # state space: B=0, G=1 
+U = [0, 1] # action space: use=1, dont use=0
+
+# Transition probability matrices corresponding to each action
+trans_mat_1 = np.array([
+    [0.5, 0.5],
+    [0.1, 0.9]
+]) # If we don't use the channel
+
+trans_mat_2 = np.array([
+    [0.2, 0.8],
+    [0.9, 0.1]
+]) # If we do use the channel
+trans_mat = [trans_mat_1, trans_mat_2]
+
+# Create transition kernel and MDP instances
+kernel = TransitionKernel(trans_mat)
+
+# Obtain value estimates and optimal policy by value iteration
+vals, state_action_mappings = value_iteration(
+    beta,
+    X,
+    U,
+    cost,
+    kernel,
+    cost_params=[eta],
+    tol=tolerance,
+    max_iter=100
+)
+
+opt_policy = lambda x_idx: state_action_mappings[x_idx]
+print('\nState-value mapping estimate:\n\t{}-->{}'.format(X, vals.flatten()))
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Find Optimal Policy and State Values by Policy Iteration (Table 1) ======
+beta = 0.9 # discount parameter 
+eta = 0.01 # cost parameter determining how harshly we penalize channel usage
+
+X = [0, 1] # state space: B=0, G=1 
+U = [0, 1] # action space: use=1, dont use=0
+
+# Transition probability matrices corresponding to each action
+trans_mat_1 = np.array([
+    [0.5, 0.5],
+    [0.1, 0.9]
+]) # If we don't use the channel
+
+trans_mat_2 = np.array([
+    [0.2, 0.8],
+    [0.9, 0.1]
+]) # If we do use the channel
+trans_mat = [trans_mat_1, trans_mat_2]
+
+# Create transition kernel and MDP instances
+kernel = TransitionKernel(trans_mat)
+
+# Obtain value estimates and optimal policy by value iteration
+naive_vals, u_opt = policy_iteration(
+    beta, 
+    X,
+    U,
+    cost,
+    kernel,
+    cost_params=[eta],
+    max_iter=100
+)
+
+opt_policy = lambda x_idx: u_opt[x_idx]
+print('\nState-naive value mapping estimate:\n\t{}-->{}'.format(X, naive_vals.flatten()))
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Empirically Estimate Discounted Cost Under Various Policies (Table 2) ======
+
+# Simulation parameters
+M = 100 # number of realizations to simulate
+N = 1000 # duration of each  MDP realization
+x = 1 # initial state
+eta = 0.7 # action penalty
+
+X = [0, 1] # state space: B=0, G=1 
+U = [0, 1] # action space: use=1, dont use=0
+
+# Transition probability matrices corresponding to each action
+trans_mat_1 = np.array([
+    [0.5, 0.5],
+    [0.1, 0.9]
+]) # If we don't use the channel
+
+trans_mat_2 = np.array([
+    [0.2, 0.8],
+    [0.9, 0.1]
+]) # It we do use the channel
+trans_mat = [trans_mat_1, trans_mat_2]
+
+# Create transition kernel and MDP instances
+kernel = TransitionKernel(trans_mat)
+
+# Randomized policy to generate putatively suboptimal paths
+def rand_pol(x, u, action_space, prob):
+    return np.random.choice(action_space, p=[prob, 1 - prob])
+
+# Optimal policy as found by some other method
+def optimal_policy(x, u, action_space):
+    return opt_policy(x)
+
+# Array to store discounted costs across realizations
+disc_costs = np.empty((2, M))
+
+# Initialize the suboptimal MDP
+mdp_rand = MarkovDP(X, U, cost, kernel, rand_pol, max_iter=N)
+mdp_rand.cost_params = [eta] # include cost parameters for given cost functional
+mdp_rand.policy = rand_pol
+mdp_rand.policy_params = []
+
+# Initialize the optimal MDP
+mdp_opt = MarkovDP(X, U, cost, kernel, rand_pol, max_iter=N)
+mdp_opt.cost_params = [eta] # include cost parameters for given cost functional
+mdp_opt.policy = optimal_policy
+mdp.policy_params = []
+
+for j in tqdm(range(M)):
+
+    randomized_pol_param = np.random.uniform() # sample a new policy parameter
+    mdp_rand.policy_params = [randimized_pol_param]
+
+    # Simulate the random policy MDP and compute path discounted cost
+    mdp_rand.state = np.array([x, 0]).reshape((-1, 1))
+    mdp_rand.simulate(N)
+    disc_costs[0, j] = discount_cost_criterion(mdp_rand.cost_history, beta)
+
+    # Simulate the optimal policy MDP and compute path discounted cost
+    mdp_opt.state = np.array([x, 0]).reshape((-1, 1))
+    mdp_opt.simulate(N)
+    disc_costs[1, j] = discount_cost_criterion(mdp_opt.cost_history, beta)
+
+# Compute average of discounted costs across realizations
+rand_pol_exp_disc_cost = (1 / M) * (np.sum(disc_costs[0, :]))
+opt_pol_exp_disc_cost = (1 / M) * (np.sum(disc_costs[1, :]))
+
+# Print the result to console
+print('''
+\nExpected discounted cost estimate under (random) randomized policy: {}
+\nExpected discounted cost estimate under optimal policy {}
+'''.format(rand_pol_exp_disc_cost, opt_pol_exp_disc_cost)
+)
+    \end{verbatim}
+    {\bf A.4. Q-Learning Algorithm}\\[5pt]
+    Implementation of Q-Learning agent class along with code used to generate figure 1 and the corresponding average
+    Q-values.
+    \begin{verbatim}
+# ====== Q-Learning Algorithm ======
+class QAgent:
+    '''
+    Class built around MarkovDP and TransitionKernel classes to implement Q-Learning algorithm
+    attributes
+        mdp: MarkovDP class instance
+        state_space: indexed state space inherited from MarkovDP
+        action_space: indexed action space inherited from MarkovDP
+        state_dim: int number of elements in state_space
+        action_dim: int number of elements in action_space
+        beta: (0,1)-valued discount parameter
+        gamma: exploration policy with signature gamma(state, action)
+        cost_table: 2d ndarray of costs over all (state, action) pairs
+        state_counts: 2d ndarray of number of visits to all (state, action) pairs
+        Q_table: 2d ndarray of Q-values over all (state, action) pairs
+        Q_history: 3d ndarray of all Q_tables over simulation extent
+        alpha_table: 2d ndarray of learning rates over all (state, action) pairs
+    methods
+        simulation_init(max_iter):
+            initialize (state, action) tables and Q_table history array
+        update_alpha():
+            increment the learning rate according to the MDP realization
+        iterate_Q():
+            update the Q_table
+        simulate(max_iter=1000, tol=1e-12, init=True, verbose=True):
+            simulate the MDP and apply Q-learning
+    '''
+    def __init__(self, mdp, discount, exploration_policy):
+
+        self.mdp = mdp # MarkovDP class instance
+        self.state_space = mdp.state_space_idx 
+        self.action_space = mdp.action_space_idx
+
+        self.state_dim = self.state_space.flatten().size
+        self.action_dim = self.action_space.flatten().size
+
+        self.beta = discount
+        self.gamma = exploration_policy
+    
+    def simulation_init(self, max_iter):
+
+        self.mdp.policy = self.gamma
+        self.cost_table = self.mdp.cost(
+            *np.meshgrid(self.state_space, self.action_space),
+            *self.mdp.cost_params).T
+        
+        self.state_counts = np.ones(
+            (self.state_dim, self.action_dim),
+            dtype=float
+        )
+        self.Q_table = (-1) * np.ones((self.state_dim, self.action_dim), dtype=float)
+        self.Q_history = np.empty((max_iter, self.state_dim, self.action_dim))
+
+    def update_alpha(self):
+        
+        # Set all entries to zero
+        self.alpha_table = np.zeros((self.state_dim, self.action_dim), dtype=float)
+
+        # Increment count at current state
+        self.state_counts[self.mdp.state[0, 0], self.mdp.state[1, 0]] += 1
+
+        # Set learning rate at current state to non-zero value
+        self.alpha_table[
+            self.mdp.state[0, 0],
+            self.mdp.state[1, 0]
+        ] = (self.state_counts[self.mdp.state[0, 0], self.mdp.state[1, 0]] ** -1)
+
+    def iterate_Q(self):
+
+        min_Q = np.amin(self.Q_table[self.mdp.state[0, 0], :])
+        return self.Q_table + (self.alpha_table * (self.cost_table + (self.beta * min_Q) - self.Q_table))
+
+    def simulate(self, max_iter=1000, tol=1e-12, init=True, verbose=True):
+
+        if init == True:
+            self.simulation_init(max_iter)
+        
+        delta = tol + 1
+
+        for i in range(max_iter):
+
+            self.update_alpha() # update learning rates
+
+            # Record old state and take a step in both state and action
+            self.mdp.simulate(1, erase_history=False) 
+            self.next_Q_table = self.iterate_Q()
+            self.Q_history[i, :, :] = self.next_Q_table
+
+            # Update change between adjacent Q-tables
+            self.delta = np.sum((self.next_Q_table - self.Q_table) ** 2)
+            self.Q_table[:, :] = self.next_Q_table
+
+        # Print summary, if requested
+        if verbose == True:
+            print('''
+            \nQ-learning iterations terminated at step {} with delta: {}
+            \n\tDiscount factor: {}; Cost Params: {}\nQ-Table:\n{}
+            '''.format(i, delta, self.beta, self.mdp.cost_params, self.Q_table)
+            )
+
+        return np.amin(self.Q_table, axis=1), np.argmin(self.Q_table, axis=1)
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Test Q-Learning Over Many Realizations for Convergence ====== 
+eta = 0.7 # action penalty
+beta = 0.9 # discount parameter
+N = 1000 # duration of each realization
+M = 100 # number of realizations
+
+X = [0, 1] # state space: B=0, G=1
+U = [0, 1] # action space: use=1, dont use=0
+
+# Transition probability matrices corresponding to each action
+trans_mat_1 = np.array([
+    [0.5, 0.5],
+    [0.1, 0.9]
+]) # If we don't use the channel
+
+trans_mat_2 = np.array([
+    [0.2, 0.8],
+    [0.9, 0.1]
+]) # If we do use the channel
+trans_mat = [trans_mat_1, trans_mat_2]
+
+# Policy for state/action space exploration in Q-learning algo
+def exploration_policy(x, u, action_space):
+    return np.random.choice(action_space)
+
+# Create transition kernel and MDP instances
+kernel = TransitionKernel(trans_mat)
+mdp = MarkovDP(X, U, cost, kernel, unif_rand_pol, max_iter=N)
+mdp.cost_params = [eta] # include cost parameters for given cost functional
+
+# ====== Run Simulations and Plot Results ======
+fig, ax = plt.subplots()
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+X_label_list = ['B', 'G']
+U_label_list = ['0', '1']
+
+# Initialize
+count =0
+running_Q = np.zeros((2, 2))
+
+for j in tqdm(range(M)):
+    agent = QAgent(mdp, beta, exploration_policy) # create agent
+    q_vals, q_pol = agent.simulate(max_iter=N, tol=tol, init=True, verbose=False) 
+
+    running_Q += agent.Q_table # accumulate Q-values
+
+    for x in X:
+        for u in U:
+            label = '$Q_t$(${}$,${}$'.format(X_label_list[x], U_label_list[u])
+            if x == 0 and u == 0:
+                ax.plot(np.linspace(0, N-1, num=N), agent.Q_history[:, x, u], color='blue', linewidth=0.1)
+            if x == 0 and u == 1:
+                ax.plot(np.linspace(0, N-1, num=N), agent.Q_history[:, x, u], color='black', linewidth=0.1)
+            if x == 1 and u == 0:
+                ax.plot(np.linspace(0, N-1, num=N), agent.Q_history[:, x, u], color='green', linewidth=0.1)
+            if x == 1 and u == 1:
+                ax.plot(np.linspace(0, N-1, num=N), agent.Q_history[:, x, u], color='red', linewidth=0.1)
+
+
+ax.set_xlabel('Timestep', fontsize='large')
+ax.set_ylabel('Q-Values', fontsize='large')
+
+fig.legend(frameon=False)
+
+print(running_Q / M)
+    \end{verbatim}
+    {\bf A.5. The Convex Analytic Technique}\\[5pt]
+    Algorithm for finding optimal policy and optimal average cost by linear programming, plus the code used to generate
+    table 3 and table 4 using this algorithm.
+    \begin{verbatim}
+# ====== Convex Analytic Technique ======
+def convex_analytic_average_cost(state_space, action_space, cost_func, kernel, cost_params, verbose=True):
+    '''
+    Convex analytic method to compute optimal cost and find optimal policy for the average cost problem.
+    arguments
+        state_space: iterable of system states
+        action_space: iterable of available actions
+        cost_func: function accepting (x, u, *args), where x is in state_space, u is in action_space and
+            *args are passed in cost_params as a list
+        kernel: TransitionKernel instance
+        cost_params: list *args for cost_func
+        verbose: Boolean print algorithm summary to console
+    returns
+        rand_pol_kernel: 2d array with state-action selection probabilities
+        res.fun: optimal cost under the average cost criterion, assuming successful optimization
+    '''
+
+    # Initialize
+    state_dim = np.array(state_space).size 
+    action_dim = np.array(action_space).size
+    state_space_idx = np.arange(state_dim) # index state space
+    
+    # Linear objective coefficients for minimizing expected cost over X x U
+    # (0, 0), (0, 1),..., (1, 0), (1, 1),...
+    cost_vec = np.array([cost_func(x, u, *cost_params) for x in state_space for u in action_space]) 
+
+    # Construct constraint arrays:
+    # equalities encode invariance and summing-to-one, inequalities non-negativity
+
+    # Corresponds to ordering prescribed by cost_vec
+    probs = [[kernel(x, u)[z] for x in state_space for u in action_space] for z in state_space_idx]
+
+    offsets = np.array(
+        [
+            [1 if j*action_dim <= i and i < (j+1)*action_dim else 0 for i in range(state_dim * action_dim)]
+        for j in range(state_dim)
+        ]
+    ).reshape((state_dim, -1))
+    eq_constraint_mat = np.concatenate(
+        (offsets - probs, np.ones((state_dim * action_dim,)).reshape((1, -1))
+    ), axis=0)
+    ineq_constraint_mat = np.identity(action_dim * state_dim) * (-1)
+
+    # scipy.optimize linear programming
+    res = linprog(
+        cost_vec,
+        A_ub=ineq_constraint_mat,
+        b_ub=np.zeros(action_dim * state_dim),
+        A_eq=eq_constraint_mat,
+        b_eq=np.array([0 if i < state_dim else 1 for i in range(state_dim + 1)])
+    )
+
+    # Check execution status before attempting to access result attributes
+    if res.status < 2:
+        if verbose == True:
+            print(
+                '''
+                Linear program terminated after {} iterations with status {}: {}
+                \n\tPrimal optimum: {}\n\tMinimizing measure: {}
+                '''.format(res.nit, res.status, res.message, res.fun, res.x)
+            )
+    
+    # Terminate program and print status if the optimization was cancelled
+    else:
+        raise Exception('Linear program terminated with status: {}: {}'.format(res.status, res.message))
+
+    # Obtain policy kernel from the optimal invariant measure
+    rand_pol_kernel = res.x.reshape((state_dim, -1))
+    rand_pol_kernel[:, :] /= np.sum(rand_pol_kernel, axis=1).reshape((-1, 1))
+    
+    # The optimal policy is deterministic if the smallest nonzero entry is one
+    if np.amin(rand_pol_kernel[np.where(rand_pol_kernel != 0)]) >= 1:
+        print('\tNote: OPTIMAL POLICY IS DETERMINISTIC\n')
+
+    return rand_pol_kernel, res.fun
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Compute Optimal Average Cost and Corresponding Optimal Stationary Policy (Table 3) ======
+eta = 0.01 # action penalty
+
+X = [0, 1] # state space: B=0, G=1
+U = [0, 1] # action space: use=1, dont use=0
+
+# Transition probability matrices corresponding to each action
+trans_mat_1 = np.array([
+    [0.5, 0.5],
+    [0.1, 0.9]
+]) # If we don't use the channel
+
+trans_mat_2 = np.array([
+    [0.2, 0.8],
+    [0.9, 0.1]
+]) # If we do use the channel
+trans_mat = [trans_mat_1, trans_mat_2]
+
+kernel = TransitionKernel(trans_mat)
+
+opt_policy_kernel, avg_cost = convex_analytic_average_cost(X, U, cost, kernel, [eta])
+
+def avg_cost_optimal_policy(x, u, action_space):
+    return np.random.choice(U, p=opt_policy_kernel[x, :])
+
+print('Optimal average cost {}\nAchieved via policy kernel:\n{}'.format(avg_cost, opt_policy_kernel))
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Empirically Estimate Average Cost Under Various Policies (Table 4) ======
+M = 100 # number of realizations to simulate
+N = 1000 # duration of each realization
+x = 1 # initial state for the MDP
+
+# Suboptimal policy
+def rand_pol(x, u, action_space, prob):
+    return np.random.choice(action_space, p=[prob, 1 - prob])
+
+# Initialize array to contain average costs at each realization
+avg_costs = np.empty((2, M))
+
+# Instantiate the suboptimal MDP
+mdp_rand = MarkovDP(X, U, cost, kernel, rand_pol, max_iter=N)
+mdp_rand.cost_params = [eta] # include cost parameters for given cost functional
+mdp_rand.policy = rand_pol
+
+# Instantiate the optimal MDP
+mdp_opt = MarkovDP(X, U, cost, kernel, rand_pol, max_iter=N)
+mdp_opt.cost_params = [eta] # include cost parameters for given cost functional
+mdp_opt.policy = avg_cost_optimal_policy
+mdp.policy_params = []
+
+for j in tqdm(range(M)):
+
+    randomized_pol_param = np.random.uniform() # randomly select a new suboptimal policy parameter
+    mdp_rand.policy_params = [randimized_pol_param] 
+    mdp_rand.state = np.array([x, 0]).reshape((-1, 1))
+    mdp_rand.simulate(N)
+    avg_costs[0, j] = average_cost_criterion(mdp_rand.cost_history)
+
+    mdp_opt.state = np.array([x, 0]).reshape((-1, 1))
+    mdp_opt.simulate(N)
+    avg_costs[1, j] = average_cost_criterion(mdp_opt.cost_history)
+
+# Compute average costs across realizations 
+rand_pol_avg_cost = (1 / M) * (np.sum(avg_costs[0, :]))
+opt_pol_avg_cost = (1 / M) * (np.sum(avg_costs[1, :]))
+
+print(
+    '''
+    \nExpected average cost estimate under (random) randomized policy: {}
+    \nExpected average cost estimate under optimal policy {}
+    '''.format(rand_pol_avg_cost, opt_pol_avg_cost)
+)
+    \end{verbatim}
+    {\bf A.6. The Kalman Filter}\\[5pt]
+    First, we simulate the state process and corresponding Kalman filter process, then present code used to generate
+    figure 2 and figure 3. Finally, we present the code used to generate the data and visualization in figure 4.
+    \begin{verbatim}
+# ====== Simulate the State and Kalman Filter Processes ======        
+system_dim = 4 # system dimension
+T = 206 # duration to simulate (206 is maximum without overflow)
+state_noise_var = 1 # variance of state noise in each mode
+obs_noise_var = 1 # variance of observation noise in each mode
+
+# State evolution matrix
+A = np.array([
+    [2, 1, 0, 0],
+    [0, 2, 1, 0],
+    [0, 0, 2, 1],
+    [0, 0, 0, 4]
+])
+C = np.array([2, 0, 0, 0]).reshape((1, -1)) # observation matrix
+
+# Arrays for containing state and Kalman filter process data
+x = np.zeros((T+1, system_dim, 1)) # state
+y = np.zeros((T+1, C.shape[0], 1)) # observation
+m = np.zeros((T+1, system_dim, 1)) # conditional mean
+sig = np.zeros((T+1, system_dim, system_dim)) # covariance
+
+# Set initial states for all processes
+x[0] = np.random.normal(0, 1, size=(system_dim, 1))
+y[0] = C @ x[0] + np.random.normal(0, obs_noise_var)
+m[0] = np.zeros((system_dim, 1))
+sig[0] = np.identity(system_dim)
+
+for i in tqdm(range(T)):
+
+    x[i + 1] = (A @ x[i]) + np.random.normal(0, state_noise_var, size=(system_dim, 1))
+    y[i + 1] = (C @ x[i]) + np.random.normal(0, obs_noise_var, size=(C.shape[0], 1))
+
+    sig[i + 1] = (A @ sig[i] @ A.T) \
+            + (state_noise_var * np.identity(system_dim)) \
+            - (A @ sig[i] @ C.T) @ np.linalg.inv(C @ sig[i] \
+            @ C.T + (np.identity(C.shape[0]))) \
+            @ (C @ sig[i] @ A.T)
+    
+    m[i + 1] = (A @ m[i]) \
+            + (sig[i + 1] @ C.T) @ np.linalg.inv(C @ sig[i + 1] @ C.T \
+            + (obs_noise_var * np.identity(C.shape[0]))) @ (y[i + 1] - (C @ (A @ m[i])))
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Plot the Components of the State and Conditional Mean Processes (Figure 2) ======
+fig, axes = plt.subplots(2, 2, sharey=False, sharex=True, figsize=(12, 4))
+fig.tight_layout()
+
+ylabels = [
+    r'$x_1(t)$ vs. $\tilde{m}_1(t)$',
+    r'$x_2(t)$ vs. $\tilde{m}_2(t)$',
+    r'$x_3(t)$ vs. $\tilde{m}_3(t)$',
+    r'$x_4(t)$  vs. $\tilde{m}_4(t)$'
+]
+for i in range(system_dim):
+    j = i % 2
+    k = i // 2
+    axes[k, j].spines['top'].set_visible(False)
+    axes[k, j].spines['right'].set_visible(False)
+
+    if i // 2 > 0:
+        axes[k, j].set_xlabel('Timestep (t)')
+    axes[k, j].set_ylabel(ylabels[i])
+
+    axes[k, j].plot(
+        np.linspace(0, T, num=T+1),
+        x[:, i, 0],
+        color='black',
+        linewidth=1.1,
+        alpha=0.7
+    )
+    axes[k, j].plot(
+        np.linspace(0, T, num=T+1),
+        m[:, i, 0],
+        color='red',
+        linestyle=':',
+        linewidth=1.5,
+        zorder=-1
+    )
+    axes[k, j].set_yscale('log')
+
+plt.show()
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Plot the Relative Difference Between the Conditional Mean and State Processes (Figure 3) ======         
+fig, axes = plt.subplots(2, 2, sharey=True, sharex=True, figsize=(12, 4))
+fig.tight_layout()
+colors = ['#929292', '#626262', '#3a3a3a', '#000000']
+ylabels = [
+    r'$[x_1(t) - \tilde{m}_1(t)]\;/\;x_1(t)$',
+    r'$[x_2(t) - \tilde{m}_2(t)]\;/\;x_2(t)$',
+    r'$[x_3(t) - \tilde{m}_3(t)]\;/\;x_3(t)$',
+    r'$[x_4(t) - \tilde{m}_4(t)]\;/\;x_4(t)$'
+]
+for i in range(system_dim):
+    j = i % 2
+    k = i // 2
+    axes[k, j].spines['top'].set_visible(False)
+    axes[k, j].spines['right'].set_visible(False)
+
+    if i // 2 > 0:
+        axes[k, j].set_xlabel('Timestep (t)')
+    axes[k, j].set_ylabel(ylabels[i])
+
+    axes[k, j].plot(
+        np.linspace(0, T, num=T+1),
+        (x[:, i, 0] - m[:, i, 0]) / m[:, i, 0],
+        color='black',
+        linewidth=1.1,
+        alpha=1
+    )
+    axes[k, j].hlines(0, -100, 1000, color='red', linestyle=':')
+    axes[k, j].set_xlim(-10, 210)
+    #axes[k, j].set_yscale('log')
+plt.show()
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Simulate the Kalman Filter Covariance Process With Random Initial Conditions (Figure 4) ======
+M = 5000 # number of realizations
+T = 200 # duration of each realization
+
+# state dynamics array
+A = np.array([
+    [2, 1, 0, 0],
+    [0, 2, 1, 0],
+    [0, 0, 2, 1],
+    [0, 0, 0, 4]
+])
+C = np.array([2, 0, 0, 0]).reshape((1, -1)) # observation matrix
+
+# Initialize the array to contain the process realizations
+kf_cov = np.zeros((M, T + 1, system_dim, system_dim))
+
+# Randomly initialize each process as a matrix of i.i.d. Gaussian random variables 
+kf_cov[:, 0] = np.random.normal(5e5, (5e5 /3 )**2, size=(M, 4,4)) 
+
+# Simulate the covariance process in isolation from the state and conditional mean processes
+for k in range(M):
+    for i in range(T):
+        kf_cov[k, i + 1] = (A @ kf_cov[k, i] @ A.T) \
+            + (np.identity(system_dim)) \
+            - (A @ kf_cov[k, i] @ C.T) \
+            @ np.linalg.inv(C @ kf_cov[k, i] \
+            @ C.T + (np.identity(C.shape[0]))) \
+            @ (C @ kf_cov[k, i] @ A.T)
+    \end{verbatim}
+    \begin{verbatim}
+# ====== Plot Components of the Filter Covariance Process With Random Initial Conditions (Figure 4) ======
+fig, ax = plt.subplots(figsize=(8,4))
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+color_mat = [
+    ['#CC0000', '#CC0033', '#CC0066', '#CC0099'],
+    ['#990099', '#660099', '#330099', '#000099'],
+    ['#003399', '#006699', '#009999', '#009966'],
+    ['#009933', '#009900', '#339900', '#669900']
+]
+for k in range(M):
+    for i in range(system_dim):
+        for j in range(system_dim):
+
+            ax.plot(np.linspace(0, T, num=T + 1), kf_cov[k, :, i, j], linewidth=0.4, color=color_mat[i][j])
+
+ax.set_yscale('log')
+ax.set_ylim(1e2, 5e7)
+ax.set_xlabel('Timestep ($t$)')
+ax.set_ylabel(r'$\mathbb{E}[(x_i(t)-\tilde{m}_i(t))(x_k(t)-\tilde{m}_k(t))]$, $1\leq i,k\leq 4$')
+plt.show()
+        
+    \end{verbatim}
+\end{document}

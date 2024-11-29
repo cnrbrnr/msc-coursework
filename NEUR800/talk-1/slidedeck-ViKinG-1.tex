@@ -1,0 +1,124 @@
+\documentclass{beamer}
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{transparent}
+
+% Theme settings
+\usetheme{default}
+\setbeamercolor{normal text}{fg=white,bg=black}
+\setbeamercolor{structure}{fg=white} % Adjust the color of structural elements (like titles and bullet points)
+
+% Remove navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+% Font setup (you can adjust the font packages as needed)
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Command for including an image with 50% transparency
+\newcommand{\transparentincludegraphics}[2][]{%
+  \begingroup%
+  \transparent{0.5}%
+  \includegraphics[#1]{#2}%
+  \endgroup%
+}
+
+\setbeamertemplate{footline}[frame number]{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+\title{Game-Theoretic Neuroscience}
+\author{Connor Braun}
+\date{}
+
+\begin{document}
+
+{
+    \setbeamertemplate{background}{\transparentincludegraphics[width=\the\paperwidth, height=\the\paperheight]{./images/neurons-bkgd.png}}
+    \begin{frame}
+        \begin{center}
+            \Large{Game-Theoretic Brain Modelling}\\\vspace{5pt}
+            \large{(Prospective PhD Work)}\\\vspace{30pt}
+            \small{Connor Braun}
+        \end{center}
+    \end{frame}
+}
+\begin{frame}[t]{Personal Introduction}
+  \vspace{10pt}
+  \pause
+  \begin{tabular}{ll}
+
+    \begin{tabular}{l}
+      \includegraphics[width=60pt]{./images/uofc.png}
+    \end{tabular}
+
+    \begin{tabular}{l}
+      \parbox{0.9\linewidth}{
+        {\bf University of Calgary}\\
+        \hspace{10pt}- BSc Mathematics\\
+        \hspace{10pt}- BSc Neuroscience
+        }
+    \end{tabular}
+  \end{tabular}
+  \pause
+
+  \begin{tabular}{ll}
+
+    \begin{tabular}{l}
+      \includegraphics[width=60pt]{./images/wilten.jpg}
+    \end{tabular}
+
+    \begin{tabular}{l}
+      \parbox{0.9\linewidth}{
+      {\bf Wilten Nicola}\\
+      Dynamical Systems/Reservoir Computing\\
+      Mechanisms of Learning in Hippocampus
+      }
+    \end{tabular}      
+  \end{tabular}\pause
+
+  \begin{tabular}{l}
+    \begin{tabular}{l}
+      \includegraphics[width=200pt]{./images/cpub1.png}
+    \end{tabular}\\
+    \pause
+    \begin{tabular}{l}
+      \includegraphics[width=200pt]{./images/cpub2.png}
+    \end{tabular}
+  \end{tabular}
+
+\end{frame}
+
+\begin{frame}[t]{Personal Introduction}
+
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \setbeamercovered{transparent}{%
+      \begin{block}<2->{left  block}
+        Should be visible on slide 2 and greyed out on slide 3
+      \end{block}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \setbeamercovered{transparent}{%
+      \begin{block}<3->{right block}
+        Should only be visible only on slide 3
+      \end{block}}
+    \end{column}
+  \end{columns}
+\end{frame}
+\begin{frame}
+  \begin{center}
+    \begin{tabular}{c|c|c|c}
+      \textbf{Pros} & \textbf{Cons} & \textbf{Pros} & \textbf{Cons} \\
+      \hline
+      Row 1, Cell 1 & Row 1, Cell 2 & Row 1, Cell 3 & Row 1, Cell 4 \\
+      \hline
+      Row 2, Cell 1 & Row 2, Cell 2 & Row 2, Cell 3 & Row 2, Cell 4 \\
+      \hline
+      Row 3, Cell 1 & Row 3, Cell 2 & Row 3, Cell 3 & Row 3, Cell 4 \\
+      \hline
+      Row 4, Cell 1 & Row 4, Cell 2 & Row 4, Cell 3 & Row 4, Cell 4 
+    \end{tabular}
+  \end{center}
+\end{frame}
+\end{document}

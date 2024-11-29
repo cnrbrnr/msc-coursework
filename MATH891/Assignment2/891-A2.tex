@@ -1,0 +1,380 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Analysis I: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1} Find the critical points of $f(x,y)=x^3+y^3-3x-12y+20$ and determine if the function attains
+    a local maximum, a local minimum or else is a saddle point at each.\\[10pt]
+    {\bf Solution} A critical point $(x_0,y_0)\in\mbb{R}^2$ of $f$ is one where the gradient $\nabla f(x_0,y_0)$ vanishes, or else is
+    not defined. Taking the domain of $f$ to be all of $\mbb{R}^2$ so that there are no boundary points in the domain, we see that $\nabla f$
+    is also defined -- and in fact continuous -- on $\mbb{R}^2$. To see this, consider the following simple lemma.
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma} Suppose $n\geq 0$ and let $g:\mbb{R}^2\rightarrow\mbb{R}$ be an $n$th degree real polynomial in variables $x$ and $y$ with no cross terms. That is, $g$ is given by
+            $g(x,y)=\alpha_nx^n+\alpha_{n-1}x^{n-1}+\dots\alpha_1x+\alpha_0+\beta_ny^n+\beta_{n-1}y^{n-1}+\dots\beta_1y+\beta_0$ with real coefficients $\alpha_i,\beta_i\in\mbb{R}$, $i=1,2,\dots,n$.
+            Then $g_x$ and $g_y$ exist and are continuous.\\[10pt]
+            {\bf Proof} Let $(x,y)\in\mbb{R}^2$ be fixed. We shall compute $g_x$, but the proof is identical for $g_y$. We have
+            \begin{align*}
+                \lim_{h\rightarrow0}\frac{g(x+h,y)-g(x,y)}{h}&=\lim_{h\rightarrow0}\frac{\sum_{k=0}^n\alpha_k(x+h)^k+\beta_ky^k-\sum_{k=0}^n\alpha_kx^k+\beta_ky^k}{h}\\
+                &=\lim_{h\rightarrow0}\frac{\sum_{k=1}^n\alpha_k((x+h)^k-x^k)}{h}\\
+                &=\lim_{h\rightarrow0}\frac{\sum_{k=1}^n\alpha_k\left(\left(\sum_{m=0}^k {k\choose m}x^{k-m}h^m\right)-x^k\right)}{h}\\
+                &=\lim_{h\rightarrow0}\frac{\sum_{k=1}^n\alpha_k\sum_{m=1}^k {k\choose m}x^{k-m}h^m}{h}\\
+                &=\lim_{h\rightarrow0}\frac{h\left(\sum_{k=1}^n\alpha_k{k\choose 1}x^{k-1}+\sum_{m=2}^k{k\choose m}x^{k-m}h^{m-1}\right)}{h}\\
+                &=\lim_{h\rightarrow0}\sum_{k=1}^n\alpha_kkx^{k-1}+h\sum_{m=2}^k{k\choose m}x^{k-m}h^{m-2}\\
+                &=\sum_{k=1}^n\alpha_kkx^{k-1}
+            \end{align*}
+            where since the limit exists we have $g^\prime(x,y)=\sum_{k=1}^n\alpha_kkx^{k-1}$. This is easily seen to be a univariate polynomial, which is thus again differentiable, and furthermore continuous.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    This lemma establishes our claim that $\nabla f$ exists on $\mbb{R}^2$, so we are only concerned with points where the gradient vanishes.\\[10pt]
+    The gradient of $f$ is given by 
+    \[\nabla f(x,y)=(f_x(x,y),f_y(x,y))=(3x^2-3,3y^2-12)\]
+    where now a critical point $(x_0,y_0)$ is one which satisfies
+    \[\nabla f(x_0,y_0)=0\quad\Leftrightarrow\quad(3x_0^2-3,3y_0^2-12)=(0,0)\quad\Leftrightarrow\quad 3x_0^2-3=0\;\;\;\text{and}\;\;\;3y_0^2-12=0.\]
+    Whence we can obtain a set of critical points
+    \begin{align*}
+        &3x_0^2-3=0\quad\Rightarrow\quad x_0^2-1=0\quad\Rightarrow\quad (x_0-1)(x_0+1)=0\\
+        &3y_0^2-12=0\quad\Rightarrow\quad y_0^2-4=0\quad\Rightarrow\quad (y_0-2)(y_0+2)=0
+    \end{align*}
+    so that $\mc{C}(f)=\{(x,y)\in\mbb{R}^2:\nabla f(x,y)=(0,0)\}=\{(-1, -2),(-1, 2), (1, -2), (1,2)\}$ are the crticial points of $f$ on $\mbb{R}^2$.
+    To determine the nature of these points, we consider the Hessian of $f$ given by
+    \[H(f)=\begin{pmatrix}
+        f_{xx} & f_{xy}\\
+        f_{yx} & f_{yy}
+    \end{pmatrix}=\begin{pmatrix}
+        6x & 0 \\
+        0 & 6y
+    \end{pmatrix}.\]
+    First taking the determinant of $H(f)$ at $(-1, -2)$ and $(1,2)$ we find
+    \[\det H(f)\big|_{(x,y)=(-1,-2)}=\begin{array}{|cc|}
+        -6 & 0 \\
+        0 & -12
+    \end{array}=72>0\qquad\text{and}\qquad \det H(f)\big|_{(x,y)=(1,2)}=\begin{array}{|cc|}
+        6 & 0\\
+        0 & 12
+    \end{array}=72>0\]
+    where $f_{xx}(-1, -2)<0$ and $f_{xx}(1, 2)>0$, so $(-1, -2)$ is a local maximum and $(1,2)$ is a local minimum. For the remaining two points we get
+    \[\det H(f)\big|_{(x,y)=(-1,2)}=\begin{array}{|cc|}
+        -6 & 0 \\
+        0 & 12
+    \end{array}=-72\neq0\qquad\text{and}\qquad \det H(f)\big|_{(x,y)=(1,-2)}=\begin{array}{|cc|}
+        6 & 0\\
+        0 & -12
+    \end{array}=-72\neq0\]
+    and furthermore, for $e_1=(1,0)$ and $e_2=(0,1)$ the standard basis in $\mbb{R}^2$, we see that
+    \begin{align*}
+        e_1^TH(f)\big|_{(x,y)=(-1,2)}e_1=\begin{pmatrix}
+            1 & 0
+        \end{pmatrix}\begin{pmatrix}
+            -6 & 0\\
+            0 & 12
+        \end{pmatrix}\begin{pmatrix}
+            1\\
+            0
+        \end{pmatrix}=-6<0
+    \end{align*}
+    and
+    \begin{align*}
+        e_2^TH(f)\big|_{(x,y)=(-1,2)}e_2=\begin{pmatrix}
+            0 & 1
+        \end{pmatrix}\begin{pmatrix}
+            -6 & 0\\
+            0 & 12
+        \end{pmatrix}\begin{pmatrix}
+            0\\
+            1
+        \end{pmatrix}=12>0
+    \end{align*}
+    so the Hessian evaluated at $(-1, 2)$ is neither positive nor negative definite, so $(-1, 2)$ is a saddle point. Identically,
+    \begin{align*}
+        e_1^TH(f)\big|_{(x,y)=(1,-2)}e_1=\begin{pmatrix}
+            1 & 0
+        \end{pmatrix}\begin{pmatrix}
+            6 & 0\\
+            0 & -12
+        \end{pmatrix}\begin{pmatrix}
+            1\\
+            0
+        \end{pmatrix}=6>0
+    \end{align*}
+    and
+    \begin{align*}
+        e_2^TH(f)\big|_{(x,y)=(1,-2)}e_2=\begin{pmatrix}
+            0 & 1
+        \end{pmatrix}\begin{pmatrix}
+            6 & 0\\
+            0 & -12
+        \end{pmatrix}\begin{pmatrix}
+            0\\
+            1
+        \end{pmatrix}=-12<0
+    \end{align*}
+    so the Hessian evaluated at $(1, -2)$ is neither positive nor negative definite, so $(1, -2)$ is a saddle point as well.
+    Having classified all points in $\mc{C}(f)$ the set of critical points of $f$, we are done.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 2} If $T:\mbb{R}^m\rightarrow\mbb{R}^n$ is a linear transformation, show that $\exists M\in\mbb{R}$ so that 
+    \[\|T(h)\|\leq M\|h\|\]
+    where $M$ is independent of $h$.\\[10pt]
+    {\bf Proof} Take $h\in\mbb{R}^m$, and notice
+    \[h=\|h\|\frac{h}{\|h\|}\quad\text{and}\quad\left\|\frac{h}{\|h\|}\right\|=\frac{\|h\|}{\|h\|}=1\] 
+    furthermore, we have
+    \[\|T(h)\|=\left\|T\left(\|h\|\frac{h}{\|h\|}\right)\right\|=\|h\|\left\|T\left(\frac{h}{\|h\|}\right)\right\|\]
+    where in the last equality we used the linearity of $T$ followed by the absolute homogeneity of the norm. Setting $v=h/\|h\|$, if we prove
+    \[\|T(v)\|\leq M\|v\|=M\tag{1}\]
+    for some $M$, then
+    \[\|h\|\|T(v)\|=\|T(h)\|\leq M\|h\|\]
+    where $\|h\|<\infty$. Thus we aim to show the inequality in (1). Let $\{e_1,e_2,\dots,e_m\}$ be the standard basis in $\mbb{R}^m$. Then
+    we can write $v=\sum_{i=1}^mc_ie_i$ for some $c_i\in\mbb{R}$, $i=1,2\dots,m$. This implies that $|c_i|\leq 1$ for $i=1,2,\dots m$, which
+    we make apparent in the following lemma.
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma} Let $x\in\mbb{R}^m$ admitting representation $x=\sum_{i=1}^m\alpha_ie_i$, where $e_i$ is the $i$th standard basis element in $\mbb{R}^m$ and
+            $\alpha_i\in\mbb{R}$ for $i=1,2,\dots,m$. Further, suppose $\mbb{R}^m$ is equipped with the $p$-norm, where $p\in\mbb{N}\cup\{\infty\}$, so that
+            \[\text{if $p<\infty$, then}\quad\|x\|_p=\left(\sum_{i=1}^m|\alpha_i|^p\right)^{1/p}\quad\text{otherwise}\quad\|x\|_\infty=\max_{1\leq i\leq m}|\alpha_i|.\]
+            If $\|x\|_p=1$, then $|\alpha_i|\leq 1$ for $i=1,2,\dots,m$.\\[10pt]
+            {\bf Proof.} First, suppose $p<\infty$, but assume for the purpose of deriving a contradiction that $\alpha_j>1$ for some $j$. Then
+            \[1=\|x\|_p=(|\alpha_1|^p+|\alpha_2|^p+\dots+|\alpha_j|^p+\dots+|\alpha_m|^p)^{1/p}\geq (|\alpha_j|^{p})^{1/p}=|\alpha_j|>1\]
+            a contradiction. Under the same assumption but for $p=\infty$, we have
+            \[1=\|x\|_\infty=\max_{1\leq i\leq m}|\alpha_i|\geq|\alpha_j|>1\]
+            again, a contradiction. To resolve this, it must be that $|\alpha_i|\leq 1$ for $i=1,2,\dots,m$.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    So, without loss of generality, we continue under the assumption that $\|\cdot\|$ denotes the Euclidean norm. Then we have
+    \begin{align*}
+        \|T(v)\|&=\left\|T\left(\sum_{i=1}^mc_ie_i\right)\right\|\leq\sum_{i=1}^m|c_i|\|T(e_i)\|
+    \end{align*}
+    using the linearity of $T$, the absolute homogeneity of the norm and then the triangle inequality. Defining $M^\prime=\max_{1\leq i\leq m}\|T(e_i)\|<\infty$, which is independent of $h$, we get
+    \[\|T(v)\|\leq\sum_{i=1}^m|c_i|\|T(e_i)\|\leq M^\prime\sum_{i=1}^m|c_i|\leq mM^\prime\]
+    where now defining $M=mM^\prime$ we have precisely the desired inequality given in (1).\hfill{$\qed$}\\[10pt]
+    {\bf Problem 3} Let $f:\mbb{R}\rightarrow\mbb{R}$ be differentiable such that $f^\prime(a)\neq 0$ $\forall a\in\mbb{R}$. Show that $f$ is injective on $\mbb{R}$.\\[10pt]
+    {\bf Proof} Let $x,y\in\mbb{R}$ and suppose that $x\neq y$. Without loss of generality, we can assume that $x<y$. Then $f$ is differentiable on $[x,y]$, but in particular $f$ is
+    continuous on $[x,y]$ and differentiable on $(x,y)$. Then, by the mean value theorem, $\exists\xi\in(x,y)$ so that
+    \[f(y) - f(x)=f^\prime(\xi)(y-x)\]
+    however, the right hand side cannot be zero, since $f^\prime(\xi)\neq 0$ and $y\neq x\Rightarrow y-x\neq 0$. Thus, $f(y)-f(x)\neq 0$ so $f(y)\neq f(x)$. We have
+    shown that $f$ maps any two distinct points in its domain to distinct elements in $\mbb{R}$, so $f$ is injective.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 4} Let $f:\mbb{R}^2\rightarrow\mbb{R}^2$ be given by $f(x,y)=(e^x\cos y,e^x\sin y)$. Show that $f$ is invertible in a neighborhood of each point of $\mbb{R}^2$ but does not have a
+    global inverse. That is, there is no function $g:\mbb{R}^2\rightarrow\mbb{R}^2$ so that $g(f(x))=x$.\\[10pt]
+    {\bf Proof} Clearly, $f$ is continuously differentiable since each of its components is continuously differentiable. That is, denoting the components of $f$ with $f_1(x,y)=e^x\cos y$ and $f_2(x,y)=e^x\sin y$, we see that
+    \[D_1f_1(x,y)=e^x\cos y,\quad D_2f_1(x,y)=-e^x\sin y,\quad D_1f_2(x,y)=e^x\sin y\quad\text{and}\quad D_2f_2(x,y)=e^x\cos y\]
+    are all continuous on $\mbb{R}^2$. Thus, $Df$ exists, is continuous on all of $\mbb{R}^2$ and is given by the Jacobian
+    \[Df(x,y)=\begin{pmatrix}
+        e^x\cos y & -e^x\sin y\\
+        e^x\sin y & e^x\cos y
+    \end{pmatrix}\quad\text{with}\quad \det(Df)(x,y)=e^{2x}(\cos^2y+\sin^2y)=e^{2x}>0\;\;\;\forall (x,y)\in\mbb{R}^2.\]
+    Thus, fixing any point $\alpha=(x_0,y_0)\in\mbb{R}^2$, by the inverse function theorem $\exists V_{\alpha}\subseteq\mbb{R}^2$ open with $\alpha\in V$ and 
+    $\exists W_\alpha\subseteq\mbb{R}^2$ open with $f(\alpha)\in W_\alpha$ so that $f:V_\alpha\rightarrow W_\alpha$ has a local continuous inverse $f^{-1}:W_\alpha\rightarrow V_\alpha$. Informally,
+    $f$ is locally invertible in some neightborhood of any point in $\mbb{R}^2$.\\[10pt]
+    Now assume for the purpose of deriving a contradiction that $\exists g:\mbb{R}^2\rightarrow\mbb{R}^2$ so that $g(f(x))=x$ $\forall x\in\mbb{R}^2$. Then, for
+    $x_1=(0, 0)$ and $x_2=(0, 2\pi)$ we have
+    \[g(f(0,0))=g(1,0)=(0,0)\quad\text{and}\quad g(f(0,2\pi))=g(1,0)=(0,2\pi)\]
+    so $g$ cannot be a function, since it maps the point $(1,0)\in\mbb{R}^2$ to distinct elements of its codomain. Thus, there is no global inverse of $f$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 5} Let $A$ be the $n\times n$ symmetric matrix with real entries $a_{ij}$ so that $a_{ij}=a_{ji}$. Show that the global maximum of the quadratic form 
+    \[\sum_{i,j=1}^na_{i,j}x_ix_j\]
+    subject to the constraint 
+    \[x_1^2+x_2^2+\dots+x_n^2=1\]
+    is equal to the largest eigenvalue of $A$ and the global minimum of the quadratic form subject to the same constraint is the smallest eigenvalue of $A$.\\[10pt]
+    {\bf Proof} First, define functions $f:\mbb{R}^n\rightarrow\mbb{R}$ and $g:\mbb{R}^n\rightarrow\mbb{R}$ so that for $x\in\mbb{R}^n$ with $x=(x_1,x_2,\dots,x_n)$
+    \[f(x)=\sum_{i,j}^na_{ij}x_ix_j\quad\text{and}\quad g(x)=x_1^2+x_2^2+\dots,x_n^2-1\]
+    and observe that $f$ and $g$ are continuously differentiable on $\mbb{R}^n$. Now define $S^{n-1}=\{u\in\mbb{R}^n:g(u)=0\;\text{and}\;\nabla g(u)\neq 0\}$. That is, for all $u=(u_1,u_2,\dots,u_n)\in S^{n-1}$, we have
+    \[u_1^2+u_2^2+\dots+u_n^2=1\quad\text{and}\quad (2u_1,2u_2,\dots,2u_n)\neq 0\in\mbb{R}^n\]
+    which is precisely the $n-1$ dimensional hypersphere in $\mbb{R}^n$. Any point in $S^{n-1}$ satisfies our constraint. Now, suppose that $t=(t_1,t_2,\dots, t_n)\in S^{n-1}$ is an extrumum of $f|_{S^{n-1}}$. Then by the Lagrange multiplier method, $\exists \lambda\in\mbb{R}$ so that
+    \[\nabla f(t)=\lambda\nabla g(t).\tag{2}\]
+    Denoting the $i$th component of either gradient with $\nabla f(t)_i$ and $\nabla g(t)_i$, $i=1,2,3\dots,n$, we compute
+    \begin{align*}
+        \nabla f(t)_i&=2t_ia_{ii}+\sum_{j\neq i}t_ja_{ji}+\sum_{j\neq i}t_ja_{ij}\\
+        &=2t_ia_{ii}+2\sum_{j\neq i}t_ja_{ij}\tag{since $a_{ij}=a_{ji}$ $\forall j$}\\
+        &=2\sum_{j=1}^nt_ja_{ij}
+    \end{align*}
+    and
+    \begin{align*}
+        \nabla g(t)_i&=2\lambda t_i
+    \end{align*}
+    for $i=1,2,\dots, n$ so that by (2)
+    \begin{align*}
+        2\sum_{j=1}^nt_ja_{ij}=2\lambda t_i\quad\Rightarrow\quad \lambda t_i=\sum_{j=1}^n t_ja_{ij}\quad\Rightarrow\quad At=\lambda t
+    \end{align*}
+    so $t$ must be an eigenvector of $A$ corresponding to eigenvalue $\lambda$. This says that when searching for extrema of $f|_{S^{n-1}}$ we can restrict our attention to eigenvectors of $A$ in $S^{n-1}$.\\[10pt]
+    Denote the spectrum of $A$ with $\sigma(A)=\{\lambda\in\mbb{R}:\det(\lambda\mbb{I}-A)=0\}$ (where $\sigma(A)\subset\mbb{R}$ rather than $\mbb{C}$ because $A$ is symmetric). Evaluating $f$ at an eigenvector $t\in S^{n-1}$ of $A$, we see that
+    \[f(t)=\sum_{i=1}^n\sum_{j=1}^nt_it_ja_{ij}=\sum_{i=1}^nt_i\sum_{j=1}^nt_ja_{ij}=\sum_{i=1}^n\lambda t_i^2=\lambda\sum_{i=1}^n t_i^2=\lambda\tag{since $t\in S^{n-1}$.}\]
+    so that at any eigenvector $t\in S^{n-1}$ of $A$ producing an extremum of $f|_{S^{n-1}}$ we have $f(t)=\lambda$, the eigenvalue corresponding to $t$. Set $\lambda_M=\max\sigma(A)$ and $\lambda_m=\min\sigma(A)$ with corresponding eigenvectors
+    $u=(u_1,u_2,\dots u_n)\in\mbb{R}^n$ and $v=(v_1,v_2,\dots,v_n)\in\mbb{R}^n$ respectively. Without loss of generality we take $u,v$ to have unit length (since an eigenvector corresponding to some eigenvalue remains so under normalization) so that
+    \[\|u\|=(u_1^2+u_2^2+\dots+u^2_n)^{1/2}=1\quad\text{and}\quad \|v\|=(v^2_1+v^2_2+\dots+v^2_n)^{1/2}=1\]
+    but also, since $u,v\neq 0$
+    \[(2u_1,2u_2,\dots,2u_n)\neq 0\quad\text{and}\quad (2v_1,2v_2,\dots,2v_n)\neq 0\]
+    so we get that $u,v\in S^{n-1}$ and altogether
+    \[f(u)=\lambda_M\geq f(x)\;\forall x\in S^{n-1}\quad\text{and}\quad f(v)=\lambda_m\leq f(x)\;\forall x\in S^{n-1}\]
+    where these inequalities hold $\forall x\in S^{n-1}$ because they hold for all eigenvectors in $S^{n-1}$, which is where extrema of $f$ can occur subject to our constraint. That is,
+    $\lambda_M=\max\sigma(A)$ is a global maximum (attained at $u$) and $\lambda_m=\min\sigma(A)$ is a global minimum (attained at $v$) of the given quadratic form $f$ subject to the constraint defined by $g$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 6} Let $A$ be a real symmetric $n\times n$ matrix which is positive definite. If $x^T$ denotes the transpose of the vector $x\in\mbb{R}^n$, show that
+    \[\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}x^TAx\right)dx_1\cdots dx_n=(2\pi)^{n/2}(\det A)^{-1/2}.\] 
+    {\bf Proof} Since $A$ is symmetric, by the spectral theorem there exists an $n\times n$ orthogonal matrix $U$ so that
+    \[A=UDU^{T}\]
+    with $D=\text{diag}\,\sigma(A)$, the diagonal matrix with entries the eigenvalues of $A$, which we shall denote $\lambda_1,\dots,\lambda_n$. We also need to note that
+    \[1=\det\mbb{I}=\det UU^T=\det U\det U^T=(\det U)^2\quad\Rightarrow\quad\det U=\sqrt{1}\quad\Rightarrow\quad \det U =\pm 1\]
+    where $\det U=\det U^T$ because the cofactor expansion over the first row in $\det U$ is identical to the cofactor expansion over the first column in $\det U^T$.\\[10pt]
+    With all of this aside we can define $y=(y_1,y_2,\dots,y_n)=U^Tx$ giving us the change of variables $x=Uy$ (clearly this change of variables is injective since $U$ invertible). But we get 
+    \[x_i=\sum_{j=1}^nu_{ij}y_j\quad\text{so}\quad\frac{\partial x_i}{\partial y_j}=u_{ij}\]
+    and thus we have Jacobian determinant simply
+    \[\frac{\partial(x_1,x_2,\dots,x_n)}{\partial(y_1,y_2,\dots,y_n)}=\det U=\pm1.\]
+    Finally we can apply this change of variables to the target integral and compute the result.
+    \begin{align*}
+        \int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}x^TAx\right)dx_1\cdots dx_n&=\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}(Uy)^TAUy\right)|\det U|dy_1\cdots dy_n\\
+        &=\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}y^TU^TAUy\right)dy_1\cdots dy_n\\
+        &=\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}y^TDy\right)dy_1\cdots dy_n\\
+        &=\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}\sum_{k=1}^n\lambda_ky_k^2\right)dy_1\cdots dy_n\\
+        &=\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\prod_{k=1}^n\exp\left(-\frac{1}{2}\lambda_ky_k^2\right)dy_1\cdots dy_n.
+    \end{align*}
+    But $A$ is positve definite, so $\lambda_k>0$ for $k=1,2\dots, n$ and this expression can be factored into a product of univariate integrals
+    \[\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}x^TAx\right)dx_1\cdots dx_n=\prod_{k=1}^n\int_{-\infty}^\infty e^{-\frac{1}{2}\lambda_ky_k^2}dy_k.\]
+    We introduce the change of variables $y_i=g(\mu_i)=2^{1/2}\lambda_i^{-1/2}\mu_i$ (which is injective, since $dg/d\mu_i=2^{1/2}\lambda_i^{-1/2}\neq 0$ and defined since $\lambda_i>0$ by positive definiteness of $A$) so that $\mu_i=2^{-1/2}\lambda_i^{1/2}y_i$ and $|dy_i/d\mu_i|=|2^{1/2}\lambda_i^{-1/2}|$ for $i=1,2,\dots,n$. With this, the right hand side becomes
+    \[\prod_{k=1}^n(2^{1/2}\lambda_k^{-1/2})\int_{-\infty}^\infty e^{-\mu_k^2}d\mu_k=\prod_{k=1}^n(2\pi)^{1/2}\lambda_k^{-1/2}=(2\pi)^{n/2}\prod_{k=1}^n\lambda_k^{-1/2}\]
+    where we used the fact that $\int_{-\infty}^\infty e^{-t^2}dt=\sqrt{\pi}$. Then, using the fact that $\det A=\prod_{k=1}^n\lambda_k$ we obtain the desired equality
+    \[\int_{-\infty}^\infty\cdots\int_{-\infty}^\infty\exp\left(-\frac{1}{2}x^TAx\right)dx_1\cdots dx_n=(2\pi)^{n/2}\prod_{k=1}^n\lambda_k^{-1/2}=(2\pi)^{n/2}(\det A)^{-1/2}\]
+    and we are done.\hfill{$\qed$}\newpage
+    \noindent{\bf Problem 7}\\[10pt]
+    {\bf a)} Let $C$ be a piecewise smooth simple closed curve in the plane with positive orientation. Prove that the area enclosed by $C$ is equal to
+    \[\int_Cxdy.\]
+    {\bf Proof} Let $R$ be the region enclosed by $C$, including $C$ itself. Define $A$ to be the area of $R$, so that
+    \[A=\iint_Rdxdy.\]
+    Letting $M(x,y)=0$ and $N(x,y)=x$, which are continuous and have continuous partial derivatives on $\mbb{R}^2$, we get
+    \[A=\iint_R1-0dxdy=\iint_R\left(\frac{\partial N}{\partial x}-\frac{\partial M}{\partial y}\right)dxdy=\int_C M(x,y)dx+N(x,y)dy=\int_Cxdy\]
+    by direct application of Green's theorem.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Using (a), show that the $n$-sided polygon in the plane whose vertices are 
+    \[(a_1,b_1),(a_2,b_2),\dots,(a_n,b_n)\]
+    arranged counterclockwise aroung the polygon has area given by
+    \[\frac{1}{2}\left(\;\begin{array}{|cc|}
+        a_1 & b_1\\
+        a_2 & b_2
+    \end{array}+\begin{array}{|cc|}
+        a_2 & b_2\\
+        a_3 & b_3
+    \end{array}+\dots +\begin{array}{|cc|}
+        a_{n-1} & b_{n-1}\\
+        a_n & b_n
+    \end{array}+\begin{array}{|cc|}
+        a_n & b_n\\
+        a_1 & b_1
+    \end{array}\;
+    \right).\]
+    {\bf Proof} Let $C$ now be the $n$-sided polygon, which is a piecewise smooth simple closed curve enclosing a region $R$ with area $A$. We
+    can divide $C$ into $n$ smooth, pairwise disjoint line segments $C_1,C_2,\dots C_n$ where
+    \[C_j=\{(x,y)\in\mbb{R}^2:x=a_i+t(a_{i+1}-a_i),\;y=b_i+t(b_{i+1}-b_i)\;0\leq t\leq 1\}\]
+    for $i=1,2,\dots,n-1$ and 
+    \[C_n=\{(x,y)\in\mbb{R}^2:x=a_n+t(a_1-a_n),\;y=b_n+t(b_1-b_n)\;0\leq t\leq 1\}.\]
+    With this construction, we can segment our formula for the area of the polygon and instantiate a change of variables to compute each piece separately.
+    \[A=\int_Cxdy=\int_{0}^1(t(a_1-a_n)+a_n)(b_1-b_n)dt+\sum_{j=1}^{n-1}\int_0^1(t(a_{j+1}-a_j)+a_j)(b_{j+1}-b_j)dt\tag{3}\]
+    Letting $1\leq i,k\leq n$ be arbitrary indices from $1$ to $n$, we find that
+    \[\int_0^1(t(a_k-a_i)+a_i)(b_k-b_i)dt=\frac{1}{2}(a_k-a_i)(b_k-b_i)+a_i(b_k-b_i)=\frac{1}{2}\begin{array}{|cc|}
+        a_i & b_i\\
+        a_k & b_k
+    \end{array}+\frac{1}{2}(a_kb_k-a_ib_i)\]
+    so that (3) becomes
+    \[A=\frac{1}{2}\begin{array}{|cc|}
+        a_n & b_n\\
+        a_1 & b_1
+    \end{array}+\frac{1}{2}(a_1b_1-a_nb_n)+\frac{1}{2}\sum_{j=1}^{n-1}\begin{array}{|cc|}
+        a_j & b_j\\
+        a_{j+1} & b_{j+1}
+    \end{array}+\frac{1}{2}\sum_{j=1}^{n-1}(a_{j+1}b_{j+1}-a_jb_j).\]
+    However, the last term is telescopic, so that $\sum_{j=1}^{n-1}(a_{j+1}b_{j+1}-a_jb_j)=a_nb_n-a_1b_1$. Using this we obtain
+    \begin{align*}
+        A&=\frac{1}{2}\begin{array}{|cc|}
+            a_n & b_n\\
+            a_1 & b_1
+        \end{array}+\frac{1}{2}(a_1b_1-a_nb_n)+\frac{1}{2}\sum_{j=1}^{n-1}\begin{array}{|cc|}
+            a_j & b_j\\
+            a_{j+1} & b_{j+1}
+        \end{array}+\frac{1}{2}(a_{n}b_{n}-a_1b_1)\\
+        &=\frac{1}{2}\left(\;\begin{array}{|cc|}
+        a_1 & b_1\\
+        a_2 & b_2
+    \end{array}+\begin{array}{|cc|}
+        a_2 & b_2\\
+        a_3 & b_3
+    \end{array}+\dots +\begin{array}{|cc|}
+        a_{n-1} & b_{n-1}\\
+        a_n & b_n
+    \end{array}+\begin{array}{|cc|}
+        a_n & b_n\\
+        a_1 & b_1
+    \end{array}\;
+    \right)
+    \end{align*}
+    which was the desired equality.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 8} If $F=(F_1,F_2,F_3)$ is a vector field in $\mbb{R}^3$, define the differential form
+    \[\omega=F_1dy\wedge dz+F_2dz\wedge dx+F_3 dx\wedge dy.\]
+    Using the usual algebraic rules for the differential 1-forms $dx$, $dy$, $dz$, show that
+    \[d\omega=(\text{div}\,F)dx\wedge dy\wedge dz,\]
+    where $\text{div}\,F$ indicates the divergence of $F$.\\[10pt]
+    {\bf Proof} Recalling that the wedge product of $1$-forms is anticommutative and $dx\wedge dx=dy\wedge dy=dz\wedge dz=0$, we can compute the result directly.
+    \begin{align*}
+        d\omega&=dF_1\wedge dy\wedge dz + dF_2\wedge dz\wedge dx +dF_3 dx\wedge dy\\
+        &=\left(\frac{\partial F_1}{\partial x}dx+\frac{\partial F_1}{\partial y}dy+\frac{\partial F_1}{\partial z}dz\right)\wedge dy\wedge dz\\
+        &\quad+\left(\frac{\partial F_2}{\partial x}dx+\frac{\partial F_2}{\partial y}dy+\frac{\partial F_2}{\partial z}dz\right)\wedge dz\wedge dx\\
+        &\quad+\left(\frac{\partial F_3}{\partial x}dx+\frac{\partial F_3}{\partial y}dy+\frac{\partial F_3}{\partial z}dz\right)\wedge dx\wedge dy\\
+        &=\frac{\partial F_1}{\partial x}dx\wedge dy\wedge dz+\frac{\partial F_1}{\partial y}dy\wedge dy\wedge dz+\frac{\partial F_1}{\partial z}dz\wedge dy\wedge dz\\
+        &\quad+\frac{\partial F_2}{\partial x}dx\wedge dz\wedge dx+\frac{\partial F_2}{\partial y}dy\wedge dz\wedge dx+\frac{\partial F_2}{\partial z}dz\wedge dz\wedge dx\\
+        &\quad+\frac{\partial F_3}{\partial x}dx\wedge dx\wedge dy+\frac{\partial F_3}{\partial y}dy\wedge dx\wedge dy+\frac{\partial F_2}{\partial z}dz\wedge dx\wedge dy\\
+        &=\frac{\partial F_1}{\partial x}dx\wedge dy\wedge dz-\frac{\partial F_1}{\partial z}dy\wedge dz\wedge dz\\
+        &\quad-\frac{\partial F_2}{\partial x}dz\wedge dx\wedge dx-\frac{\partial F_2}{\partial y}dy\wedge dx\wedge dz\\
+        &\quad-\frac{\partial F_3}{\partial y}dx\wedge dy\wedge dy-\frac{\partial F_3}{\partial z}dx\wedge dz\wedge dy\\
+        &=\frac{\partial F_1}{\partial x}dx\wedge dy\wedge dz+\frac{\partial F_2}{\partial y}dx\wedge dy\wedge dz+\frac{\partial F_3}{\partial z}dx\wedge dy\wedge dz\\
+        &=\left(\frac{\partial F_1}{\partial x}+\frac{\partial F_2}{\partial y}+\frac{\partial F_3}{\partial z}\right)dx\wedge dy\wedge dz\\
+        &=(\text{div}\,F)dx\wedge dy\wedge dz.\tag*{$\qed$}
+    \end{align*}
+    \noindent{\bf Problem 9} A function $f:\mbb{C}\rightarrow\mbb{C}$ is said to be analytic at $a\in\mbb{C}$ if the limit
+    \[\lim_{h\rightarrow 0}\frac{f(a+h)-f(a)}{h}\tag{4}\]
+    exists. Suppose that $f$ is analytic for all points in a region $R$. Letting $z=x+iy$ with $i=\sqrt{-1}$ and $x,y\in\mbb{R}$, we can write
+    \[f(z)=u(x,y)+iv(x,y)\]
+    for functions $u(x,y)$, $v(x,y)$ of two real variables $x$ and $y$. Show that
+    \[\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y}\quad\text{and}\quad\frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}\]
+    for all points in the region $R$.\\[10pt]
+    {\bf Proof} Let $f^\prime(a)$ be the limit given in (4) for any point $a\in R$. Let $z_0=x_0+iy_0\in R$ and $h$ be a strictly real number in the following limit
+    \begin{align*}
+        f^\prime(z_0)&=\lim_{h\rightarrow 0}\frac{f(z_0+h)-f(z_0)}{h}\\
+        &=\lim_{h\rightarrow 0}\frac{u(x_0+h,y_0)+iv(x_0+h,y_0)-u(x_0,y_0)-iv(x_0,y_0)}{h}\\
+        &=\lim_{h\rightarrow 0}\frac{u(x_0+h,y_0)-u(x_0,y_0)}{h}+\lim_{h\rightarrow 0}i\frac{v(x_0+h,y_0)-v(x_0,y_0)}{h}\\
+        &=\frac{\partial u}{\partial x}+i\frac{\partial v}{\partial x}.
+    \end{align*}
+    Similarly,
+    \begin{align*}
+        f^\prime(z_0)&=\lim_{h\rightarrow 0}\frac{f(z_0+ih)-f(z_0)}{h}\\
+        &=\lim_{h\rightarrow 0}\frac{u(x_0,y_0+h)+iv(x_0,y_0+h)-u(x_0,y_0)-iv(x_0,y_0)}{ih}\\
+        &=\lim_{h\rightarrow 0}\frac{u(x_0,y_0+h)-u(x_0,y_0)}{ih}+\lim_{h\rightarrow 0}\frac{i(v(x_0,y_0+h)-v(x_0,y_0))}{ih}\\
+        &=\frac{1}{i}\frac{\partial u}{\partial y}+\frac{\partial v}{\partial y}\\
+        &=\frac{\partial v}{\partial y}-i\frac{\partial u}{\partial y}.
+    \end{align*}
+    Putting these together we obtain
+    \[\frac{\partial u}{\partial x}+i\frac{\partial v}{\partial x}=\frac{\partial v}{\partial y}-i\frac{\partial u}{\partial y}\quad\Rightarrow\quad \frac{\partial u}{\partial x}=\frac{\partial v}{\partial y}\quad\text{and}\quad\frac{\partial v}{\partial x}=-\frac{\partial u}{\partial y}\tag{5}\]
+    the so-called Cauchy-Riemann equations.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 10} With $f$ as in the previous exercise, and $C$ a piecewise smooth simple closed curve in $R$, show that
+    \[\int_Cf(z)dz=0.\]
+    {\bf Proof} We take for granted the fact that $u(x,y)$ and $v(x,y)$ are continuous and have continuous partial derivatives (but are, in fact, infinitely differentiable) on $R$. Then we can simply apply Green's theorem to derive the result.
+    \begin{align*}
+        \int_Cf(z)dz&=\int_C(u(x,y)+iv(x,y))(dx+idy)\\
+        &=\int_Cu(x,y)dx+iu(x,y)dy+iv(x,y)dx-v(x,y)dy\\
+        &=\int_Cu(x,y)dx-v(x,y)dy+i\int_Cv(x,y)dx+u(x,y)dy\\
+        &=\iint_R\left(-\frac{\partial v}{\partial x}-\frac{\partial u}{\partial y}\right)dxdy+i\iint_R\left(\frac{\partial u}{\partial x}-\frac{\partial v}{\partial y}\right)dxdy\tag{Green's theorem}\\
+        &=\iint_R\left(\frac{\partial u}{\partial y}-\frac{\partial u}{\partial y}\right)dxdy+i\iint_R\left(\frac{\partial v}{\partial y}-\frac{\partial v}{\partial y}\right)dxdy\tag{by (5)}\\
+        &=0
+    \end{align*}
+    so the integral of the analytic function $f$ over the closed curve $C\subset R$ is zero.\hfill{$\qed$}
+\end{document}

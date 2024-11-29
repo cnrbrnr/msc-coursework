@@ -1,0 +1,78 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 2} \hfill {\bf Connor Braun} \hfill {\bf 2024-02-08}
+    \end{center}
+    \noindent{\bf Problem 4}\\[5pt]
+    Show that for the problem 
+    \[\min_{\beta\in\mbb{R}^3}\sum_{i=1}^n\bp{y_i-\sum_{m=1}^3\beta_mh_m(x_i)}^2,\]
+    where $h_1(X)=\1{X<\xi_1}$, $h_2(X)=\1{\xi_1\leq X<\xi_2}$ and $h_3(X)=\1{\xi_2\leq X}$, the minimizer is
+    \[\hat{f}(X)=\sum_{m=1}^3\bar{Y}_mh_m(X)\]
+    where $\hat{Y}_m$ is the average of all the response $y_i$'s in the $m$-th interval.\\[5pt]
+    {\bf Solution}\hspace{5pt} This problem can be solved by taking the standard least squares approach. Specifically, we shall optimize an arbitrary element of $\beta$, call it
+    $\beta_i$ with $i\in\{1,2,3\}$.
+    \begin{align*}
+        \frac{\partial}{\partial\beta_i}\sum_{j=1}^n\bp{y_j-\sum_{m=1}^3\beta_mh_m(x_j)}^2&=\sum_{j=1}^n2\bp{y_j-\sum_{m=1}^3\beta_mh_m(x_j)}h_{i}(x_j)\\
+    \end{align*} 
+    where if $\hat{\beta}$ is a critical point, then
+    \begin{align*}
+        \sum_{j=1}^ny_jh_i(x_j)=\sum_{j=1}^n\hat{\beta}_1h_1(x_j)h_i(x_j)+\hat{\beta}_2h_2(x_j)h_i(x_j)+\hat{\beta}_3h_3(x_j)h_i(x_j)=\sum_{j=1}^n\hat{\beta}_ih_i(x_j)
+    \end{align*}
+    with the final equality holding since $h_i(X)h_j(X)=0$ $\forall X$ if $i\neq j$ (because the regions between the knots are disjoint) and $h_i(X)^2=h_i(X)$ for $i=1,2,3$. Now, let $J_i:=\{1\leq j\leq n: h_i(x_j)=1\}$, with $|J_i|:=n_i$. With this, we can see that
+    \begin{align*}
+        \sum_{j=1}^n\hat{\beta}_ih_i(x_j)&=\sum_{j=1}^ny_jh_i(x_j)\quad\Leftrightarrow\quad \sum_{j\in J_i}\hat{\beta}_i=\sum_{j\in J_i}y_j\quad\Leftrightarrow\quad \hat{\beta}_i=\frac{1}{n_i}\sum_{j\in J_i}y_j=\bar{Y}_i
+    \end{align*}
+    which is precisely the average of all response $y_j$'s on the $i$th interval. But this holds for arbitrary $i=1,2,3$, so we have that $\hat{\beta}_m=\bar{Y}_m$ for $m=1,2,3$, and further
+    \begin{align*}
+        \hat{f}(X)=\sum_{m=1}^3\bar{Y}_mh_m(X)
+    \end{align*} 
+    and we are finished.\hfill{$\qed$}\\[5pt]
+\end{document}

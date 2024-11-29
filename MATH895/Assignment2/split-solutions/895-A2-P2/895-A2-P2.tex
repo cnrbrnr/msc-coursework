@@ -1,0 +1,98 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \noindent{\bf Problem 2}\\[5pt]
+    Prove the following lemma, used in a proof of the Borel-Cantelli lemma.\\[5pt]
+    {\bf Lemma}\hspace{5pt} Let $(p_n)_{n\geq 1}$ be a sequence of real numbers with $0\leq p_n<1$ for $n\geq 1$. Then
+    \[\prod_{n=1}^\infty(1-p_n)=0\quad\ifff\quad\sum_{n=1}^\infty p_n=\infty.\]
+    {\bf Proof}\hspace{5pt} To begin, suppose $\prod_{n=1}^\infty(1-p_n)=0$. Additionally, suppose that $p_n\rightarrow 0$ as $n\rightarrow \infty$, for otherwise the consequent follows trivially. We have
+    \begin{align*}
+        -\infty=\log\bp{\lim_{N\rightarrow\infty}\prod_{n=1}^N(1-p_n)}&=\lim_{N\rightarrow\infty}\log\bp{\prod_{n=1}^N(1-p_n)}\tag{continuity of logarithms}\\
+        &=\lim_{N\rightarrow\infty}\sum_{n=1}^N\log(1-p_n)=\sum_{n=1}^\infty\log(1-p_n)
+    \end{align*}
+    which further implies that 
+    \[\sum_{n=1}^\infty\log\bp{\frac{1}{1-p_n}}=\infty.\]
+    Using the well-known upper bound $\log(x)\leq x-1$, where $x\geq 1$, established by
+    \[\log(x)=\int_1^x\frac{1}{t}dt\leq \int_1^xdt=x-1\]
+    we have that
+    \begin{align*}
+        \infty=\sum_{n=1}^\infty\log\bp{\frac{1}{1-p_n}}\leq\sum_{n=1}^\infty\frac{1}{1-p_n}-1=\sum_{n=1}^\infty\frac{p_n}{1-p_n}.
+    \end{align*}
+    Now, since $p_n\rightarrow 0$ as $n\rightarrow\infty$, $\exists K\in\mbb{N}:$ $n\geq K$ implies that $p_n<\tfrac{1}{2}$, and further that $1-p_n\geq \tfrac{1}{2}$. By the above, this yields
+    \begin{align*}
+        \infty\leq\sum_{n=1}^\infty\frac{p_n}{1-p_n}=\sum_{n<K}\frac{p_n}{1-p_n}+\sum_{n\geq K}\frac{p_n}{1-p_n}\leq \sum_{n<K}\frac{p_n}{1-p_n}+2\sum_{n=K}^\infty p_n\quad\Rightarrow\quad \infty \leq 2\sum_{n=K}^\infty p_n \leq 2\sum_{n=1}^\infty p_n
+    \end{align*}
+    which, of course, implies that $\sum_{n=1}^\infty p_n=\infty$ as desired. For the converse, suppose that $\sum_{n=1}^\infty p_n=\infty$. Then, taking the Taylor expansion of $\log(1-x)$ with $0\leq x<1$ about $1$, we obtain
+    \begin{align*}
+        \log(1-x)&=\log(1)+(1-x-1)-\frac{1}{2!}(1-x-1)^2+\frac{2}{3!}(1-x-1)^3-\dots\\
+        &=-x-\frac{x^2}{2}-\frac{x^3}{3}-\dots\\
+        &=-\sum_{k=1}^\infty\frac{x^k}{k}\\
+        &\leq -x.\tag{1}
+    \end{align*}
+    Using this along with the hypothesis, we have
+    \begin{align*}
+        \sum_{n=1}^\infty p_n=\infty\quad\Rightarrow\quad -\infty=-\sum_{n=1}^\infty p_n&\geq \sum_{n=1}^\infty\log(1-p_n)\tag{by (1)}\\
+        &=\log\bp{\prod_{n=1}^\infty(1-p_n)}
+    \end{align*}
+    where in the last equality we implicitly used the continuity of the natural logarithm. Similarly taking the continuity of $e^x$ for granted:
+    \begin{align*}
+        0\leq \prod_{n=1}^\infty(1-p_n)\leq \lim_{N\rightarrow\infty}e^{-\sum_{n=1}^Np_n}=0
+    \end{align*}
+    whereby the squeeze theorem we conclude that $\prod_{n=1}^\infty(1-p_n)=0$, and the lemma is thus proven.\hfill{$\qed$}\\[5pt]
+\end{document}

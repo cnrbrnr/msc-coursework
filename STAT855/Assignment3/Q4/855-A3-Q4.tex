@@ -1,0 +1,223 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment III}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document} 
+    \maketitle
+    \noindent{\bf Problem 4} A particle moves among six vertices in the graph below. For each vertex, its neighbors are those vertices connected to it by an edge. At each step, the particle
+    is equally likely to move to one of its neighbors, independently of its past motion. For each $n\geq 0$, denote by $X_n$ the vertex occupied by the particle after $n\geq 0$ steps and $Y_n=X_{2n}$.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=60mm]{855-A3-Q4-fig.png}}
+    \end{center}
+    {\bf Figure 1} State transition diagram for problem 4.\\[10pt]
+    {\bf a)} Find all invariant distributions for $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} First define the bijection $I:\{A,B,C,D,E,F\}\rightarrow S$ with $I(A)=1$, $I(B)=2$, $I(C)=3$, $I(D)=4$, $I(E)=5$ and $I(F)=6$ so that we can take $S=\{1,2,3,4,5,6\}$ to be our state space. From figure 1, we can clearly see that for any pair $i,j\in S$ we have $i\longleftrightarrow j$.\\[10pt]
+    Formally, take $i,j\in S$ and suppose that $i\neq j$ (for otherwise we have $i\longleftrightarrow j$ trivially). If $j>i$ then let $m=j-i$. We have
+    \begin{align*}
+    P_i(X_m=j)&=\sum_{i_1,i_2,\dots,i_{m-1}\in S}P_i(X_m=j, X_{m-1}=i_{m-1},\dots,X_1=i_1)\\
+    &\geq P_i(X_1=i+1,X_2=i+2,\dots, X_{m-1}=j-1, X_m=j)\\
+    &=\left(\frac{1}{2}\right)^m\\
+    &>0
+    \end{align*}
+    so $i\longrightarrow j$ when $j>i$. Alternatively, suppose that $i>j$ and let $m=i-j$. Then
+    \begin{align*}
+        P_i(X_m=j)&=\sum_{i_1,i_2,\dots,i_{m-1}\in S}P_i(X_m=j,X_{m-1}=i_{m-1},\dots,X_1=i_i)\\
+        &\geq P_i(X_1=i-1,X_2=i-2,\dots,X_{m-1}=j+1,X_m=j)\\
+        &=\left(\frac{1}{2}\right)^m\\
+        &>0
+    \end{align*}
+    thus in all cases we obtain $i\longrightarrow j$. Of course, $i,j$ were arbitrary, so an identical argument establishes $j\longrightarrow i$ by simply swapping $i$ and $j$ in the above. Thus, $\forall i,j\in S$, $i\longleftrightarrow j$.
+    Since every state communicates with one another, there is one communicating class in this process and the system is irreducible.\\[10pt]
+    This, along with the fct that $S$ is finite, allows us to conclude that there exists a unique invariant distribution and we can find it by solving
+    the system of equations
+    \[\pi=\pi P\quad\text{subject to the constraint}\quad \sum_{i\in S}\pi_i=1\]
+    where we define $\pi=\{\pi(i)=\pi_i:i\in S\}$ and view this as a $1\times 6$ row vector. Further, the transition probability matrix $P$ for the system is given by
+    \[P=\begin{pmatrix}
+       0 & 1/2 & 0 & 0 & 0 & 1/2\\
+       1/2 & 0 & 1/2 & 0 & 0 & 0\\
+       0 & 1/2 & 0 & 1/2 & 0 & 0\\
+       0 & 0 & 1/2 & 0 & 1/2 & 0\\
+       0 & 0 & 0 & 1/2 & 0 & 1/2\\
+       1/2 & 0 & 0 & 0 & 1/2 & 0 
+    \end{pmatrix}\]
+    So the system we aim to solve is given by
+    \begin{align*}
+        \pi_1 &= \frac{1}{2}\pi_2 + \frac{1}{2}\pi_6,\quad
+        \pi_2 = \frac{1}{2}\pi_1 + \frac{1}{2}\pi_3,\quad
+        \pi_3 = \frac{1}{2}\pi_2 + \frac{1}{2}\pi_4,\\
+        \pi_4 &= \frac{1}{2}\pi_3 + \frac{1}{2}\pi_5,\quad
+        \pi_5 = \frac{1}{2}\pi_4 + \frac{1}{2}\pi_6,\quad
+        \pi_6 = \frac{1}{2}\pi_1 + \frac{1}{2}\pi_5\\
+        \text{and}\qquad 1&=\pi_1+\pi_2+\pi_3+\pi_4+\pi_5+\pi_6.
+    \end{align*}
+    One of these equations (excluding the last) is redundant, so we will exclude $\pi_6=(1/2)\pi_1+(1/2)\pi_5$ and solve
+    \begin{align*}
+        \begin{pmatrix}
+            -1 & 1/2 & 0 & 0 & 0 & 1/2\\
+            1/2 & -1 & 1/2 & 0 & 0 & 0\\
+            0 & 1/2 & -1 & 1/2 & 0 & 0\\
+            0 & 0 & 1/2 & -1 & 1/2 & 0\\
+            0 & 0 & 0 & 1/2 & -1 & 1/2\\
+            1 & 1 & 1 & 1 & 1 & 1 
+        \end{pmatrix}\begin{pmatrix}
+            \pi_1\\
+            \pi_2\\
+            \pi_3\\
+            \pi_4\\
+            \pi_5\\
+            \pi_6
+        \end{pmatrix}=\begin{pmatrix}
+            0\\
+            0\\
+            0\\
+            0\\
+            0\\
+            1
+        \end{pmatrix}
+    \end{align*}
+    numerically (see Appendix A.2 for the code used to do this). The result is
+    \[\pi_i=\frac{1}{6}\quad\text{for}\quad i\in S\]
+    which is the unique invariant distribution for $\{X_n\}_{n\geq 0}$.\\[10pt]
+    {\bf b)} Find the communicating classes of $\{Y_n\}_{n\geq 0}$.\\[10pt]
+    {\bf Solution} From 3a, we know that the transition probability matrix of $\{Y_n\}_{n\geq 0}$ is $P^2$, which is given by
+    \begin{align*}
+        P^2=\begin{pmatrix}
+            1/2 & 0 & 1/4 & 0 & 1/4 & 0\\
+            0 & 1/2 & 0 & 1/4 & 0 & 1/4\\
+            1/4 & 0 & 1/2 & 0 & 1/4 & 0\\
+            0 & 1/4 & 0 & 1/2 & 0 & 1/4\\
+            1/4 & 0 & 1/4 & 0 & 1/2 & 0\\
+            0 & 1/4 & 0 & 1/4 & 0 & 1/2
+        \end{pmatrix}
+    \end{align*}  
+    where we can see that
+    \[P_1(X_1=3)=1/4,\quad P_3(X_1=5)=1/4,\quad P_5(X_1=1)=1/4\]
+    so $1\longrightarrow 3$, $3\longrightarrow 5$, $5\longrightarrow 1$, and by repeated application of the transitivity property of the 'leads to' relation we get $\forall i,j\in \{1,3,5\}=C_1\subset S$, $i\longleftrightarrow j$, which says that $C_1$ is a communicating class. Further, this class is closed since
+    $P_i(X_1=j)=0$ for $i\in C_1$, $j\in\{2, 4, 6\}=S\setminus C_1$. Similarly, we have
+    \[P_2(X_1=4)=1/4,\quad P_4(X_1=6)=1/4,\quad P_6(X_1=2)=1/4\]
+    so $2\longrightarrow 4$, $4\longrightarrow 6$, $6\longrightarrow 2$ and once again by repeated application of the transitivity property of the 'leads to' relation we get $\forall i,j\in\{2,4,6\}=C_2\subset S$, $i\longleftrightarrow j$, which says that $C_2$ is a communicating class as well. This class is also closed, since
+    $P_i(X_1=j)=0$ for $i\in C_2$, $j\in C_1=S\setminus C_2$. Thus, we have partitioned the state space $S$ into two closed communicating classes $C_1$ and $C_2$, and there can be no others.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Find all invariant distributions of $\{Y_n\}_{n\geq 0}$.\\[10pt]
+    {\bf Solution} We seek an invariant distribution in precisely the same way as in 4a. The main difference here is that the transition matrix for the process $\{Y_n,n\geq 0\}$ is not irreducible, so we are
+    not able to invoke the Perron-Frobenius theorem to affirm the existence/uniqueness of an invariant distribution at the outset.\\[10pt]
+    Let $\pi=\{\pi(i)=\pi_i: i\in S\}$ be a row vector. We wish to determine the value of $\pi_i$ for $i\in S$ so that it satisfies
+    \[\pi=\pi P^2\quad\text{subject to the constraint}\quad \sum_{i\in S}\pi_i=1.\]
+    The system we aim to solve is thus given by
+    \begin{align*}
+        \pi_1&=\frac{1}{2}\pi_1+\frac{1}{4}\pi_3+\frac{1}{4}\pi_5\quad
+        \pi_2=\frac{1}{2}\pi_2+\frac{1}{4}\pi_4+\frac{1}{4}\pi_6\quad
+        \pi_3=\frac{1}{4}\pi_1+\frac{1}{2}\pi_3+\frac{1}{4}\pi_5\\
+        \pi_4&=\frac{1}{4}\pi_2+\frac{1}{2}\pi_4+\frac{1}{4}\pi_6\quad
+        \pi_5=\frac{1}{4}\pi_1+\frac{1}{4}\pi_3+\frac{1}{2}\pi_5\quad
+        \pi_6=\frac{1}{4}\pi_2+\frac{1}{4}\pi_4+\frac{1}{2}\pi_6\\
+        \text{and}\qquad 1&=\pi_1+\pi_2+\pi_3+\pi_4+\pi_5+\pi_6.
+    \end{align*}
+    One of these equations (excluding the last) is redundant, so we will exclude $\pi_6=(1/4)\pi_2+(1/4)\pi_4+(1/2)\pi_6$ and solve
+    \begin{align*}
+        \begin{pmatrix}
+            -1/2 & 0 & 1/4 & 0 & 1/4 & 0\\
+            0 & -1/2 & 0 & 1/4 & 0 & 1/4\\
+            1/4 & 0 & -1/2 & 0 & 1/4 & 0\\
+            0 & 1/4 & 0 & -1/2 & 0 & 1/4\\
+            1/4 & 0 & 1/4 & 0 & -1/2 & 0\\
+            1 & 1 & 1 & 1 & 1 & 1
+        \end{pmatrix}\begin{pmatrix}
+            \pi_1\\
+            \pi_2\\
+            \pi_3\\
+            \pi_4\\
+            \pi_5\\
+            \pi_6
+        \end{pmatrix}=\begin{pmatrix}
+            0\\
+            0\\
+            0\\
+            0\\
+            0\\
+            1
+        \end{pmatrix}
+    \end{align*}
+    numerically (see Appendix A.3 for the code used to do this). From the reduced row echelon form of the system, we find an infinite family of solutions to the system given by
+    \[\Theta=\{\pi=(1/3-t,t,1/3-t,t,1/3-t,t):t\in[0,1/3]\}.\]
+    In fact, the invariant distribution found for $\{X_n\}_{n\geq 0}$ in 4a is a member of this family -- an expected consequence given our result in 3b.\hfill{$\qed$}\\[10pt]
+    {\bf A.2 Code used for problem 4a}
+    \begin{verbatim}
+        # Finding invariant distributions of symmetric walk on the hexagon
+        library(pracma) # used to find system RREF in 4c
+
+        # Generate one step transition matrix P
+        ind_f = c(2, 3, 4, 5, 6, 1)
+        ind_b = c(6, 1, 2, 3, 4, 5)
+        P_vec = c()
+        for (i in 1:6) {
+            x = rep(0, 6)
+            x[c(ind_b[i], ind_f[i])] <- 1/2
+            P_vec = append(P_vec, x)
+        }
+        P = matrix(P_vec, nrow=6, ncol=6)
+
+        # Write out the system to solve by hand
+        pi_system = matrix(c(
+            -1, 1/2, 0, 0, 0, 1/2,
+            1/2, -1, 1/2, 0, 0, 0,
+            0, 1/2, -1, 1/2, 0, 0,
+            0, 0, 1/2, -1, 1/2, 0,
+            0, 0, 0, 1/2, -1, 1/2,
+            1, 1, 1, 1, 1, 1
+        ), nrow=6, ncol=6)
+        pi_system = t(pi_system)
+
+        # Write out the RHS of the system
+        constants = matrix(c(0, 0, 0, 0, 0, 1), nrow=6)
+
+        # Solve the system and print the solution
+        sol = solve(pi_system, constants)
+        sol
+    \end{verbatim}
+    {\bf A.3 Code used for problem 4c}
+    \begin{verbatim}
+        # Get two step transition matrix from P in 4a
+        P_y = P %*% P
+        y_pi_system = P_y # initialize the system of equations
+        y_pi_system[y_pi_system == 0.5] <- -0.5 # change 0.5 entries to -0.5
+        y_pi_system[6, seq(6)] <- 1 # replace bottom equation distribution constraint
+
+        # Create the augmented matrix
+        aug_y = cbind(y_pi_system, constants)
+
+        # Obtain reduced row echelon form and read off solution
+        rref(aug_y)
+
+        # Test the invariance property over many elements of the solution family 
+        generate_y_invariant = function(t){
+            return(c(1/3 - t, t, 1/3 - t, t, 1/3 - t, t))
+        }
+        fail = FALSE
+        for (t in seq(0, 0.45, length.out=1000)){
+            pi_inv = generate_y_invariant(t) 
+            res = sum(abs(pi_inv - (pi_inv %*% P_y)))
+            if (res != 0){
+                fail = TRUE
+            }
+        }
+        fail
+    \end{verbatim}
+\end{document}

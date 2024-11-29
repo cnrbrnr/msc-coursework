@@ -1,0 +1,125 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 6}\\[5pt]
+    The goal of this problem is to show that, in general, convergence in probability does not imply convergence almost surely. Let $(\Omega, \mathcal{F}, P)$ be the probability space where $\Omega=[0,1]$,
+    $\mathcal{F}$ is the borel $\sigma$-field and $P$ is the Lebesgue measure. Define the events $A_n\in\mathcal{F}$ for $n\geq  1$ as follows:
+    \begin{align*}
+        A_1&=[0,1],\\
+        A_2&=[0,\tfrac{1}{2}],\;A_3=[\tfrac{1}{2},1],\\
+        A_4&=[0,\tfrac{1}{3}],\;A_5=[\tfrac{1}{3},\tfrac{2}{3}],\;A_6=[\tfrac{2}{3},1],\\
+        A_7&=[0,\tfrac{1}{4}],\;A_8=[\tfrac{1}{4},\tfrac{2}{4}],\;A_9=[\tfrac{2}{4},\tfrac{3}{4}],\;A_{10}=[\tfrac{3}{4},1],\\
+        A_{11}&=[0,\tfrac{1}{5}],\;A_{12}=[\tfrac{1}{5},\tfrac{2}{5}],\dots
+    \end{align*}
+    Let $(X_n)_{n\geq 1}$ be random variables with $X_n=\1{A_n}$ for $n\geq 1$.\\[5pt]
+    {\bf a)} Show that $X_n\overset{P}{\longrightarrow} 0$ as $n\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix $\varepsilon>0$, but $\varepsilon<1$ (for otherwise the proof is trivial). Then observe that
+    \[\{\omega\in\Omega:|X_n(\omega)|>\varepsilon\}=\{\omega\in\Omega:\1{A_n}(\omega)>\varepsilon\}=A_n\]
+    so that we seek an expression for $P(A_n)$ in terms of $n$ which we can pass to the limit. For this, define the n-th {\it triangular number} $T(n):=\frac{n(n+1)}{2}=\sum_{k=1}^nk$ and observe that for $T(n)=\sum_{k=1}^nk< m\leq \sum_{k=1}^{n+1}k=T(n+1)$, we have
+    \[P(A_m)=\frac{i+1}{n+1}-\frac{i}{n+1}=\frac{1}{n+1}\]
+    for some $i=0,\dots,n$. We proceed by establishing a relationship between such an index $m$ and the largest triangular number less than it. This will allow us to measure any of the $A_i$ given only its index $i=1,2,\dots$ by the above observation.\\[5pt]
+    Consider the equation
+    \[\frac{x(x+1)}{2}-c=0\quad\Leftrightarrow\quad \frac{1}{2}x^2+\frac{1}{2}x-c=0\tag{13}\]
+    with $c\in\mbb{R}_+$. The discriminant of this quadratic is positive so that (13) admits exactly two solutions in $\mbb{R}$. Only one of these is nonnegative, so denoting it with $x^\ast$ we have $\frac{x^\ast(x^\ast+1)}{2}=c$. Thus, if $x^\ast\in\mbb{N}$ then $c=T(x^\ast)\in\mbb{N}$, so $c$ is the $x^\ast$-th triangular number.
+    Further, $T(\floor{x^\ast})\leq c$, and for any $n\in\mbb{N}$ with $n\leq\floor{x^\ast}$, $T(n)\leq T(\floor{x^\ast})$, since $T$ is increasing. That is, $T(\floor{x^\ast})$ is the largest triangular number $\leq c$. By the quadratic formula,
+    \begin{align*}
+        \floor{x^\ast}&=\floor{-\frac{1}{2}+\sqrt{\tfrac{1}{4}+2c}}=\floor{\frac{2\sqrt{\tfrac{1}{4}+2c}-1}{2}}=\floor{\frac{\sqrt{1+8c}-1}{2}}=:R(c)
+    \end{align*}
+    such that $T(R(c))$ is the largest triangular number $\leq c$ for any $c\in\mbb{R}_+$. Now that we are equipped with a means of relating indices of the $A_i$ to their Lebesgue measure, we can compute
+    \begin{align*}
+        \lim_{n\rightarrow\infty}P(A_n)=\lim_{n\rightarrow\infty}\frac{1}{R(n)+1}=\lim_{n\rightarrow\infty}\frac{1}{\floor{\frac{\sqrt{1+8n}-1}{2}}+1}&\leq\lim_{n\rightarrow\infty}\frac{2}{\sqrt{1+8n}-1}\tag{$\floor{x}>x-1\;\forall x\in\mbb{R}$}\\
+        &=0.
+    \end{align*}
+    Thus, we have that $\lim_{n\rightarrow\infty}P(|X_n-0|>\varepsilon)=0$ for arbitrary $\varepsilon>0$ and so $X_n\overset{P}{\longrightarrow} 0$ as $n\rightarrow\infty$.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Show that $(X_n)_{n\geq 1}$ does not converge to $0$ almost surely as $n\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix some $\varepsilon>0$, but with $\varepsilon<1$ (since otherwise the proof is trivial) and observe that 
+    \begin{align*}
+        \{\lim_{n\rightarrow\infty}Xn=0\}&=\{\omega\in\Omega:\forall\delta>0,\exists N\in\mbb{N}:n\geq N\Rightarrow |X_n(\omega)-0|<\delta\}\\
+        &\subset\{\omega\in\Omega:\exists N\in\mbb{N}:n\geq N\Rightarrow\1{A_n}<\varepsilon\}\\
+        &=\bigcup_{N\in\mbb{N}}\bigcap_{n\geq N}\{\omega\in\Omega:\1{A_n}<\varepsilon\}\\
+        &=\bigcup_{n\in\mbb{N}}\bigcap_{n\geq N}([0,1]\setminus A_n)\tag{$\1{A_n}(\omega)<1\Leftrightarrow \omega\in[0,1]\setminus A_n$}.
+    \end{align*}
+    Now, we proceed by restricting the inner intersection to a finite set of indices which 'sweep a row of the triangle'. Specifically, fix some $N\in\mbb{N}$ and consider $T(N)=\sum_{k=1}^Nk>N$. From the form of the sequence $\{A_i\}_{i\geq 1}$, we see that
+    for $\sum_{k=1}^Nk<m\leq\sum_{k=1}^{N+1}k$, $\exists\, 0\leq i\leq N$ so that $A_m=[\tfrac{i}{N+1},\tfrac{i+1}{N+1}]$, and the union of all such $A_m$ is $[0,1]$. Continuing from the above, we obtain
+    \begin{align*}
+        \bigcup_{n\in\mbb{N}}\bigcap_{n\geq N}([0,1]\setminus A_n)&\subset\bigcup_{n\in\mbb{N}}\bigcap_{k=T(N)+1}^{T(N+1)}([0,1]\setminus A_k)\tag{$N<T(N)+1\leq T(N+1)$}\\
+        &=\bigcup_{n\in\mbb{N}}\bp{[0,1]\setminus\bp{\bigcup_{k=T(N)+1}^{T(N+1)}A_k}}\tag{DeMorgan's Law}\\
+        &=\bigcup_{n\in\mbb{N}}\bp{[0,1]\setminus\bp{[0,\tfrac{1}{N+1}]\cup[\tfrac{1}{N+1},\tfrac{2}{N+1}]\cup\cdots\cup[\tfrac{N}{N+1},1]}}\\
+        &=\bigcup_{n\in\mbb{N}}\emptyset\\
+        &=\emptyset.
+    \end{align*}
+    Which completes the proof, since this gives us
+    \begin{align*}
+        P(\{\omega\in\Omega:\lim_{n\rightarrow\infty}X_n(\omega)=0\})\leq P(\emptyset)=0
+    \end{align*}
+    so $(X_n)_{n\geq 1}$ does not converge to $0$ almost surely as $n\rightarrow\infty$\hfill{$\qed$}\\[5pt]
+    {\bf c)} Show that there exists a subsequence $(n_\ell)_{\ell\geq 1}$ such that $X_{n_\ell}\overset{a.s.}{\longrightarrow}0$ as $\ell\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Define $(n_\ell)_{\ell\geq 1}$ with $n_\ell=T(\ell)$ for $\ell\geq 1$. Then, $\forall\ell\geq 1$, $A_{n_\ell}=A_{T(\ell)}=[\tfrac{\ell-1}{\ell},1]$. Then observe that
+    \begin{align*}
+        \{\omega\in\Omega:\forall\varepsilon>0,\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\varepsilon\}=\bigcap_{m=1}^\infty\{\omega\in\Omega:\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\tfrac{1}{m}\}\tag{14}
+    \end{align*}
+    which holds since, fixing an integer $m\geq 1$, if $\omega$ is an element of the left hand side, then $\exists N\in\mbb{N}$ so that $\ell\geq N$ implies that $|X_{n_\ell}(\omega)|<\tfrac{1}{m}$. Since this holds for arbitrary $m\geq 1$, $\omega$ is an element of the right hands side. For the reverse inclusion, fix $\varepsilon>0$
+    and observe that, by the Archimedean property of $\mbb{R}$, $\exists M\in\mbb{N}$ so that $0<\frac{1}{M}<\varepsilon$. But $\exists N\in\mbb{N}$ so that $\ell\geq N$ implies $|X_{n_\ell}(\omega)|<\tfrac{1}{M}<\varepsilon$, so $\omega$ is an element of the left hand side.\\[5pt]
+    Having shown (14), we press on to find
+    \begin{align*}
+        \bigcap_{m=1}^\infty\{\omega\in\Omega:\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\tfrac{1}{m}\}&=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}\{\omega\in\Omega:\1{A_{k_\ell}}<\tfrac{1}{m}\}\\
+        &=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}([0,1]\setminus A_{n_\ell}).\tag{15}
+    \end{align*}
+    However, $[0,1]\setminus A_{n_i}\subset[0,1]\setminus A_{n_{i+1}}$ for any $i\geq 1$ such that for $N\in\mbb{N}$, $\cap_{\ell\geq N}([0,1]\setminus A_{n_\ell})=[0,1]\setminus A_{n_N}=[0,\tfrac{N-1}{N}]\nearrow[0,1]$ as $N\rightarrow\infty$.
+    But then (15) simplifies to 
+    \begin{align*}
+        \bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}([0,1]\setminus A_{n_\ell})&=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}[0,\tfrac{N-1}{N}]=\bigcap_{m=1}^\infty[0,1]=[0,1].
+    \end{align*}
+    so ultimately we have found for our choice of $(n_\ell)_{\ell\geq 1}$
+    \[P(\lim_{\ell\rightarrow\infty}X_{n_\ell}=0)=P([0,1])=1-0=1\]
+    so that the subsequence $X_{n_\ell}\overset{a.s.}{\longrightarrow}0$ as $\ell\rightarrow\infty$.\hfill{$\qed$}\\[5pt]
+\end{document}

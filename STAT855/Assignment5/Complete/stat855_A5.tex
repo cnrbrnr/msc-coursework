@@ -1,0 +1,462 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1} Let $d$ be a positive integer and $\beta>0$. For each $x=(x_1,x_2,\dots,x_d)\in S=\{0,1\}^d$, define
+    \[m(x)=\sum_{i=1}^{d-1}\mathbbm{1}_{\{x_i\neq x_{i+1}\}},\quad\pi_\beta(x)=C^{-1}_\beta\exp(\beta m(x)),\]
+    where $\mathbbm{1}_{\{a\neq b\}}$ is 1 if $a\neq b$ and $0$ otherwise, and $C_\beta$ is a constant so that $\sum_{x\in S}\pi_\beta(x)=1$.
+    Use the Markov chain Monte Carlo method to compute $\mc{V}(d,\beta)=\sum_{x\in S}m(x)\pi_\beta(x)$ for the specified configurations of $(d,\beta)$.\\[10pt]
+    {\bf Solution} Following the Metropolis-Hastings procedure, we first specify a transition kernel $T$, which for $x=(x_1,\dots,x_d),\,z=(z_1,\dots,z_d)\in S$
+    we define
+    \[T(z|x)=\begin{cases}
+        1/d\quad&\text{if $\sum_{j=1}^d\mathbbm{1}_{z_j\neq x_j}=1$}\\
+        0\quad&\text{{\it o.w.}}
+    \end{cases}\]
+    which is clearly symmetric, so that $T(z|x)=T(x|z)$ for all $x,z\in S$. As such, this kernel does not impact 
+    the rejection probabilities computed at each step, and so we only implement it algorithmically to propose new states. That is,
+    supposing that $x$ is the current state at some step, we sample a discrete random variable $A$ equiprobable on the support $\{1,2,\dots,d\}$, and use it to propose
+    a new state $z=(z_1,\dots,z_d)\in S$ defined by
+    \[z_j=\begin{cases}
+        x_j\quad&\text{if $a\neq j$}\\
+        1 - x_j\quad&\text{{\it o.w.}}
+    \end{cases}\quad\text{for $j=1,2,\dots, d$}\]
+    where $a$ is a randomly sampled value of $A$. With this as the newly proposed state, we compute the rejection probability $r$ by
+    \[r(z,x)=\min\left\{1,\;\frac{\pi_\beta(z)}{\pi_\beta(x)}\right\}\]
+    and sample $\mc{U}\sim\text{Uniform(0,1)}$, setting $z$ as the next state in the chain if, given $\{\mc{U}=u\}$, $u<r(z,x)$. Otherwise, $x$ is set as the subsequent
+    state of the chain. This Metropolis-Hastings process admits a unique invariant distribution $\pi_\beta:=\{\pi_\beta(x):x\in S\}$ so that, by the ergodic theorem,
+    \[\frac{1}{N}\sum_{n=1}^Nm(x_n)\longrightarrow \sum_{x\in S}m(x)\pi_\beta(x)=\mc{V}(d,\beta)\quad\text{{\it w.p.} 1 as $N\rightarrow\infty$}\]
+    which holds since the chain is irreducible and $m(x)<\infty$ $\forall x\in S$. We implement this algorithm in Python 3.11.5, and summarize the output in Table 1. Please see Appendix A.1
+    for the code used to do this.\\[10pt]
+    {\bf Table 1.} Estimates of $\mc{V}(d,\beta)$ for $(d,\beta)\in\{60, 120\}\times\{0.4,0.8,1.2\}$, computed using the Metropolis-Hastings algorithm over $10^6$ iterates, a burn in period of $5\times 10^3$
+    iterates, and a thinning parameter of $60$ for each simulation. Estimates are rounded to four points of precision.
+    \begin{center}
+        \begin{tabular}{@{}l|c|c|c|c@{}}\toprule
+            $\mc{V}(d,\beta)$ & $\beta=0.4$ & $\beta=0.8$ & $\beta=1.2$ \\\midrule
+            $d=60$ & 35.3405 & 40.7057 & 45.3689\\\midrule
+            $d=120$ & 71.2358 & 82.0352 & 91.4342\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    {\bf Problem 2} Let $S\sim\text{Exp}(\lambda)$ and $T\sim\text{Exp}(\mu)$, with parameters $\lambda,\mu>0$ and such that $S\perp T$. Let $Z$ be another random variable, independent
+    of both $S$ and $T$.\\[10pt]
+    {\bf a)} Prove that as $h\downarrow 0$, $P(S<h,S+T>h)=\lambda h+o(h)$.\\[10pt]
+    {\bf Proof} Write $\mc{P}(h)=P(S<h,S+T>h)=P((T,S)\in\mc{A})$, where $\mc{A}=\{(x,y)\in\mbb{R}_{>0}^2:y<h\;\text{and}\;x+y>h\}$. By Fubini's theorem, we have
+    \begin{align*}
+        \mc{P}(h)=\int_\mc{A}f_{S,T}(x,y)dA&=\int_0^h\int_{h-y}^\infty f_{S,T}(x,y)dxdy\\
+        &=\int_0^h\int_{h-y}^\infty \lambda e^{-\lambda y}\mu e^{-\mu x}dxdy\tag{factorization theorem}
+    \end{align*}
+    where $f_{S,T}(x,y)$ is the joint density function of $S$ and $T$, which factorizes into the product of marginal density functions since $S\perp T$. We proceed by first evaluating this integral.
+    \begin{align*}
+        \mc{P}(h)=\int_0^h\int_{h-y}^\infty \lambda e^{-\lambda y}\mu e^{-\mu x}dxdy
+        &=\lambda\int_0^he^{-\lambda y}\left(-\frac{\mu}{\mu}e^{-\mu x}\right)\bigg|_{h-y}^\infty dy\\
+        &=\lambda\int_0^he^{-\lambda y}e^{-\mu(h-y)}dy\\
+        &=\lambda e^{-\mu h}\int_0^he^{-(\lambda-\mu)y}dy.\tag{1}
+    \end{align*}
+    We arrive at a crossroads, since (1) evaulates differently depending on if $\lambda$ and $\mu$ are equal. Suppose first that they are. Then (1) can be evaulated
+    \begin{align*}
+        \mc{P}(h)=\lambda e^{-\mu h}(y)\bigg|^h_0=\lambda e^{-\lambda h}h.
+    \end{align*}
+    Define $f(x)=\lambda xe^{-\lambda x}$. Then, by Taylor's theorem, we have
+    \[f(h)=f(0)+f^\prime(0)h+o(h)=(\lambda e^{-\lambda x}-\lambda^2xe^{-\lambda x})\bigg|_{x=0}h+o(h)=\lambda h+o(h)\]
+    as desired. Alternatively, suppose that $\mu\neq \lambda$. Then we can reevaluate (1) as
+    \begin{align*}
+        \mc{P}(h)=\frac{\lambda e^{-\mu h}}{\lambda-\mu}\left(e^{-(\lambda-\mu)y}\right)\bigg|_{h}^0=\frac{\lambda e^{-\mu h}}{\lambda-\mu}\left(1-e^{-(\lambda-\mu)h}\right)=\frac{\lambda e^{-\mu h}-\lambda e^{-\lambda h}}{\lambda - \mu}.
+    \end{align*}
+    Now, redefine $f(x)=(\lambda e^{-\mu x}-\lambda e^{-\lambda x})/(\lambda - \mu)$. By Taylor's theorem, we find
+    \[f(h)=f(0)+f^\prime(0)h+o(h)=\frac{\lambda-\lambda}{\lambda-\mu}+\left(\frac{\lambda^2 e^{-\lambda x}-\mu\lambda e^{-\mu x}}{\lambda-\mu}\right)\bigg|_{x=0}h+o(h)=\frac{\lambda^2-\mu\lambda}{\lambda-\mu}h+o(h)=\lambda h+o(h)\]
+    so that, in either case, $\mc{P}(h)=\lambda h +o(h)$ as $h\downarrow 0$.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Fix $z\in\mbb{R}$; assume $P(Z<z)>0$. Denote $X=S-(z-Z)$. Compute $P(X>x|Z<z,Z+S>z)$ for each $x>0$.\\[10pt]
+    {\bf Solution} Denoting the probability of interest with $\mc{P}(x)$, we see it can be rewritten as 
+    \begin{align*}
+        \mc{P}(x)=P(X>x|Z<z,Z+S>z)&=P(S+Z-z>x|Z<z,Z+S>z)\\
+        &=\frac{P(S>X+z-Z,Z<z, S>z-Z)}{P(Z<z,S>z-Z)}.
+    \end{align*}
+    Now, noticing $\{S>X+z-Z\}\subseteq\{S>z-Z\}$, we further simplify the above to find
+    \begin{align*}
+        \mc{P}(x)=\frac{P(S>x+z-Z,Z<z)}{P(Z<z,S>z-Z)}
+    \end{align*}
+    and we proceed by computing the numerator and denominator of these separately. For an arbitrary pair of random variables $A$ and $B$, let $f_A$ and $f_{A,B}$ denote the marginal
+    density function of $A$ and the joint density function of $A$ and $B$ respectively. Then we find
+    \begin{align*}
+        P(S>x+z-Z,Z<z)&=P((S,Z)\in\mc{W})\tag{$W=\{(u,v)\in\mbb{R}^2:u>x+z-v,v<z\}$}\\
+        &=\int_{\mc{W}}f_{S,Z}(u,v)dudv\\
+        &=\int_{-\infty}^z\int_{x+z-v}^\infty f_Z(v)f_S(u)dudv\tag{since $S\perp Z$}\\
+        &=\int_{-\infty}^z\int_{x+z-v}f_Z(v)\lambda e^{-\lambda u}dudv\\
+        &=\int_{-\infty}^zf_Z(v)\left(e^{-\lambda u}\right)\bigg|_{\infty}^{x+z-v}dv\\
+        &=e^{-\lambda x}\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv.
+    \end{align*}
+    The denominator can be worked out similarly:
+    \begin{align*}
+        P(Z<z,S>z-Z)&=P((S,Z)\in\mc{U})\tag{$\mc{U}=\{(u,v)\in\mbb{R}^2:u>z-Z,v<z\}$}\\
+        &=\int_{\mc{U}}f_{S,Z}(u,v)dudv\\
+        &=\int_{-\infty}^z\int_{z-v}^\infty f_Z(v)\lambda e^{-\lambda u}dudv\\
+        &=\int_{-\infty}^zf_Z(v)\left(e^{-\lambda u}\right)\bigg|_{\infty}^{z-v}dv\\
+        &=\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv
+    \end{align*}
+    which yields the desired probability
+    \begin{align*}
+        \mc{P}(x)=\frac{e^{-\lambda x}\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv}{\int_{-\infty}^zf_Z(v)e^{-\lambda(z-v)}dv}=e^{-\lambda x}
+    \end{align*}
+    for any $x>0$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 3} A particle does a continuous-time random walk on a triangle with vertices $\mc{I}=\{A,B,C\}$ with $Q$-matrix given by
+    \[Q=\begin{pmatrix}
+        -2 & 1 & 1\\
+        4 & -4 & 0\\
+        2 & 1 & -3
+    \end{pmatrix}.\]
+    Denote by $X_t$ the position of the particle at time $t\geq 0$.\\[10pt]
+    {\bf a)} Compute $P_{A,A}(t)=P(X_t=A|X_0=A)$ for $t\geq 0$.\\[10pt]
+    {\bf Solution} For this problem we appeal to the backward equation. Letting $P(t)=\{P_{i,j}(t)=P(X_t=j|X_0=i):i,j\in\mc{I}\}$ be the transition probability matrix at time $t\geq 0$, we have the matrix-valued initial value problem 
+    \[P^\prime(t)=QP(t)\quad P(0)=\mbb{I}\]
+    with $\mbb{I}$ the identity matrix in $\mbb{R}^3$. The unique solution is given by
+    \[P(t)=e^{Qt}=\sum_{k=0}^\infty\frac{(tQ)^k}{k!}.\tag{2}\]
+    Suppose that $Q$ is diagonalizable. That is, $\exists U\in \mc{M}_{3\times 3}(\mbb{R})$ (the space of $3\times 3$ real matrices) non-singular so that
+    \[Q=UDU^{-1},\quad D=\text{diag}\,(\sigma(Q))\]
+    and $\sigma(Q)=\{\lambda\in\mbb{C}:\det(\lambda\mbb{I}-Q)=0\}$ is the spectrum of $Q$. Then (2) can be written as
+    \[P(t)=\sum_{k=0}^\infty\frac{t^k(UDU^{-1})^k}{k!}=U\left(\sum_{k=0}^\infty\frac{(tD)^k}{k!}\right)U^{-1}=Ue^{Dt}U^{-1}\]
+    further, observing that $(tD)^k/k!$ is diagonal $\forall k\geq 0$, we let $d_i$ and $\lambda_i$ be the $i$th diagonal entries of $e^Dt$ and $D$ respectively for $i=1,2,3$. With this, we find that 
+    \[d_i=\sum_{k=0}^\infty\frac{(tD)^k_{i,i}}{k!}=\sum_{k=0}^\infty\frac{(t\lambda_i)^k}{k!}=e^{\lambda_it}\]
+    so that
+    \[P(t)=Ue^{Dt}U^{-1}=U\begin{pmatrix}
+        e^{\lambda_1t} & 0 & 0\\
+        0 & e^{\lambda_2 t} & 0\\
+        0 & 0 & e^{\lambda_3 t}
+    \end{pmatrix}U^{-1}.\]
+    Thus, our desired function can be expressed in terms of the spectrum and eigenvectors of $Q$. We proceed numerically, with the code used to find the spectrum and eigenvectors of $Q$ available in Appendix A.2.\\[10pt]
+    Indeed, $Q$ is diagonalizable, since its eigenvalues are pairwise distinct, and $\sigma(Q)=\{0, -5, -4\}$. We also have, rounding to four points of precision,
+    \[U=\begin{pmatrix}
+        0.5774 & 0.2357 & 0.0000\\
+        0.5774 & -0.9428 & -0.7071\\
+        0.5774 &   0.2357 & 0.7071
+    \end{pmatrix}\quad\text{and}\quad U^{-1}=\begin{pmatrix}
+        1.0392 & 0.3464 & 0.3464\\
+        1.6971 & -0.8485 & -0.8485\\
+        -1.4142 & 0 & 1.4142
+    \end{pmatrix}\]
+    so that $U\text{diag}\,(\sigma(Q))U^{-1}=Q$. Of course, then the desired probability $P_{A,A}(t)$ is simply given by the first diagonal entry of $Ue^{Dt}U^{-1}$, so
+    \begin{align*}
+        P_{A,A}(t)=(Ue^{Dt}U^{-1})_{1,1}&=(1.0392)(0.5774)e^{0t}+(1.6971)(0.2357)e^{-5t}+(-1.4142)(0)e^{-4t}\\
+        &=0.6000+0.4000e^{-5t}.\tag*{$\qed$}
+    \end{align*}
+    {\bf b)} Implement the na\"ive Monte Carlo method to estimte 
+    \[(P(X_t=A|X_0=A), P(X_t=B|X_0=A), P(X_t=C|X_0=A))\]
+    for $t\in\{0.3, 5\}$.\\[10pt]
+    {\bf Solution} See Appendix A.3 for the code used to do this. First, setting $t=0.3$, we simulate the continuous time Markov chain
+    generated by $Q$ (which is non-explosive, since the state space is finite) $10^4$ times, noting $X_t$. We estimate $P_{A,Y}(t)$ as the proportion
+    of realizations with $X_t=Y$, for $Y\in\mc{I}$.
+    \[(P(X_t=A|X_0=A), P(X_t=B|X_0=A), P(X_t=C|X_0=A))=(0.6913, 0.1543, 0.1544)\]
+    rounding to four decimal places. Now, setting $t=5$ and using the same technique, we estimate
+    \[(P(X_t=A|X_0=A), P(X_t=B|X_0=A), P(X_t=C|X_0=A))=(0.6038, 0.1966, 0.1996)\]
+    again rounded to four decimal places.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 4} Calls arrive at a telephone exchange as a Poisson process of rate $\lambda$, and the length of the calls are independent exponential random variables
+    of rate $\mu$. Assume that infinitely many telephone lines are available, and denote $X_t$ the number of lines in use at time $t$.\\[10pt]
+    {\bf a)} Identify the state space $\mc{I}$ and the Q-matrix $Q$ associated with $\{X_t:t\geq 0\}$.\\[10pt]
+    {\bf Solution} We have $\mc{I}=\{0,1,2,\dots,\}=\mbb{N}$ and
+    \begin{align*}
+        Q=\begin{pmatrix}
+            -\lambda & \lambda & 0 & 0 & 0 & 0 & 0 & 0\cdots\\
+            \mu & -(\lambda +\mu) & \lambda & 0 & 0 & 0 & 0 & 0\cdots\\
+            0 & 2\mu & -(\lambda+2\mu) & \lambda & 0 & 0 & 0 & 0\cdots\\
+            0 & 0 & 3\mu & -(\lambda +3\mu) & \lambda & 0 & 0 & 0\cdots\\
+            0 & 0 & 0 & 4\mu & -(\lambda+4\mu) & \lambda & 0 & 0\cdots\\
+            0 & 0 & 0 & 0 & 5\mu & -(\lambda+5\mu) & \lambda & 0\cdots\\
+            0 & 0 & 0 & 0 & 0 & 6\mu & -(\lambda+6\mu) & \lambda\cdots\\
+            \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots
+        \end{pmatrix}.
+    \end{align*}
+    That is, we model this process as a $M/M/\infty$ queue. To be more explicit, we write for $i\in\mc{I}$
+    \[Q_{i,i+1}=\lambda\;\;\forall i\in\mc{I},\quad Q_{i,i-1}=i\mu\;\text{if\;}i>0,\quad Q_{i,i}=-(\lambda+i\mu)\;\;\forall i\in\mc{I}\tag*{$\qed$}\]
+    {\bf b)} Find the invariant distribution.\\[10pt]
+    {\bf Solution} Let $\pi=(\pi_i:i\in\mc{I})$ define a measure on $\mc{I}$ for this process. We know that this measure is invariant if it satisfies the detailed balance equations given by
+    \[\pi_jq_{i,j}=\pi_jq_{j,i}\quad\forall i,j\in\mc{I}.\]
+    Now, observe that these equations are trivially satisfied when $i=j$ and when $|i-j|>1$, since if $i=j$, then $\pi_iq_{i,i}=\pi_iq_{i,i}$ and if $|i-j|>1$, then $q_{ij}=q_{ji}=0$, so $\pi_iq_{i,j}=\pi_jq_{j,i}$.
+    Thus we need only consider the case when $|i-j|=1$, and without loss of generality we will take $j=i+1$, $i\geq 0$. Then
+    \[\pi_{i+1}q_{i+1,i}=\pi_iq_{i,i+1}\quad\Rightarrow\quad (i+1)\mu\pi_{i+1}=\lambda \pi_i\quad\Rightarrow\quad\pi_{i+1}=\frac{\lambda}{\mu(i+1)}\pi_i.\]
+    Now, letting $\xi=\lambda/\mu$, we have for $i\geq 1$
+    \[\pi_i=\xi\frac{1}{i}\pi_{i-1}=\xi^2\frac{1}{(i)(i-1)}\pi_{i-2}=\dots=\xi^i\frac{1}{i!}\pi_0\]
+    so that
+    \[\pi=(\pi_0,\xi\pi_0,(\xi^2/2)\pi_0,\dots)\]
+    is an invariant measure. For this to be an invariant distribution, we impose the constraint
+    \[\sum_{i\in\mc{I}}\pi_i=1\quad\Rightarrow\quad\sum_{k=0}^\infty\frac{\xi^k}{k!}\pi_0=1\quad\Rightarrow\quad\pi_0=e^{-\xi}=e^{-\lambda/\mu}.\]
+    Thus we arrive at an invariant distribution for this process, defined by
+    \[\pi_i=e^{-\lambda/\mu}\frac{(\lambda/\mu)^i}{i!}\]
+    for any $i\in\mc{I}$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 5} Let $\mc{I}=\{0,1,2,\dots\}$ be all non-negative integers and $f:I\rightarrow[0,\infty)$ be a non-negative function so that $\sum_{i\in\mc{I}}f(i)=1$
+    , $f(0)=0$ and $f(i)>0$ for any $i\geq 1$. Let $\{Y_n:n\geq 0\}$ be a discrete-time Markov chain with state space $\mc{I}$ and transition matrix $\Pi$ given by
+    \[\Pi_{0,i}=f(i)\;\;\text{for $i\geq 1$;}\quad\Pi_{i,i-1}=1\;\;\text{for $i\geq 1$.}\]
+    Let $\{T_n:n\geq 1\}$ be a sequence of independent and identically distributed random variables with the common distribution being the exponential distribution with rate 1.
+    Define $J_0=0$ and for each integer $n\geq 1$,
+    \[J_n=\sum_{m=1}^nT_m.\]
+    {\bf a)} Show that $\{Y_n:n\geq 0\}$ is recurrent, and conclude that $P(\lim_{n\rightarrow\infty}J_n=\infty)=1$.\\[10pt]
+    {\bf Proof} First, we show that the jump chain is irreducible. To see this, fix $i\in\mc{I}$, $i\neq 0$. Then $\Pi_{0,i}=f(i)>0$, so $0\longrightarrow i$.
+    Of course, then $P(Y_0=i,Y_1=i-1,\dots,Y_i=0)=\Pi_{i,i-1}\Pi_{i-1,i-2}\cdots\Pi_{1,0}=1>0$, so $i\longrightarrow 0$, and further $i\longleftrightarrow 0$.
+    But this holds for any $i\neq 0$, so $\forall j\in\mc{I}$, $i\longleftrightarrow 0$, and $j\longleftrightarrow 0$, so by transitivity of communication, $i\longleftrightarrow j$,
+    and the chain is indeed irreducible.\\[10pt]
+    Now, let $T=\inf\{n>0:Y_n=0\}$ be the first passage time associated to $0$, and $h_0=P_0(T<\infty)$. Then
+    \[h_0=1-P_0(T=\infty)=1-\lim_{r\rightarrow\infty}P_0(T>r)\]
+    where the last equality holds by the continuity of probability and the observation that $\{T>r\}\searrow\{T=\infty\}$ as $r\rightarrow\infty$. Now, fixing $r\in\mbb{N}$ for the moment, we have
+    \begin{align*}
+        P_0(T>r)&=\sum_{i\in\mc{I}}P_0(T>r|Y_1=i)P_0(Y_1=i)\tag{law of total probability}\\
+        &=\sum_{i\in\mc{I}}\mathbbm{1}_{\{i\geq r\}}f(i)\tag{3}\\
+        &=\sum_{i=r}^\infty f(i)
+    \end{align*}
+    where (3) holds since, conditioning on $\{Y_0=0,Y_1=i\}$, we have $T=i+1$ {\it w.p.} 1 for $i\in\mc{I}$. Further, we get $T>r$ {\it w.p.} 1 if $i\geq r$ and $T\leq r$ {\it w.p.} 1 otherwise. Now, writing
+    \[P_0(T>r)=\sum_{i=r}^\infty f(i)=\sum_{i=1}^\infty f(i) - \sum_{i=1}^{r-1}f(i)\]
+    we get
+    \[\lim_{r\rightarrow\infty}P_0(T>r)=\lim_{r\rightarrow\infty}\sum_{i=r}^\infty f(i)=\sum_{i=1}^\infty f(i)-\lim_{r\rightarrow\infty}\sum_{i=1}^{r-1}f(i)=\sum_{i=1}^\infty f(i)-\sum_{i=1}^\infty f(i)=1-1=0\]
+    so that
+    \[h_0=1-\lim_{r\rightarrow\infty}P_0(T>r)=1\]
+    which is true if and only if the state $0$ is recurrent. But by the irreducibility of $\{Y_n:n\geq 0\}$, we get that $\forall j\in\mc{I}$, $j$ must be recurrent also. Since the jump chain $\{Y_n:n\geq 0\}$ is recurrent, we conclude that $P(\lim_{n\rightarrow\infty}J_n=\infty)=1$, as desired.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $Z$ be a discrete random variable with probability mass function given by $f$. Assume $\mbb{E}[Z]<\infty$. For each $t\geq 0$, define $X_t=Y_n$ if $J_n\leq t<J_{n+1}$ for some integer $n\geq 0$.
+    Show that the invariant distribution for the continuous time markov chain $\{X_t:t\geq 0\}$ is given by
+    \[\pi_i=P(Z\geq i)/(1+\mbb{E}[Z])\quad\text{for $i\in\mc{I}$}.\]
+    {\bf Proof} We begin by constructing a Q-matrix $Q$ for the process. Note that, by construction, the $n$th holding time, $n\geq 1$, is given by
+    \[J_{n}-J_{n-1}=\begin{cases}
+        \sum_{m=1}^{n}T_m-\sum_{m=1}^{n-1}T_m=T_{n}\sim\text{Exp}(1)\quad&\text{if $n\geq 2$}\\
+        T_1\sim\text{Exp}(1)\quad&\text{{\it o.w.}}
+    \end{cases}\]
+    which tells us that the diagonals of the Q-matrix are all $-\nu_i=-1$. Further, we can use these to determine the elements of $Q$ by the formula
+    \[q_{i,j}=\Pi_{i,j}\nu_i\;\;\forall i\neq j\]
+    Thus, the process has Q-matrix $Q=\{q_{i,j}:i,j\in\mc{I}\}$ defined by
+    \[q_{i,i}=-1\;\forall i\in\mc{I};\quad q_{i,i-1}=1\;\forall i\geq 1;\quad q_{0,j}=f(j)\;\forall j\geq 1.\]
+    Equipped with this, we set $\pi=(\pi_i:i\in\mc{I})$, which is an invariant distribution for the continuous time Markov chain if
+    \[\pi Q=0\quad\Leftrightarrow\quad \sum_{i\in\mc{I}}\pi_iq_{ij}=0\;\;\forall j\in\mc{I}\quad\text{and}\quad\sum_{i\in\mc{I}}\pi_i=1.\]
+    We proceed by solving these equations. Observe that when $j=0$, we have
+    \[0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0q_{0,0}+\pi_1q_{1,0}=-\pi_0+\pi_1\quad\Rightarrow\quad \pi_1=\pi_0\]
+    similarly, when $j=1$, we get
+    \[0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0q_{0,1}+\pi_1q_{1,1}+\pi_2q_{2,1}=\pi_0f(1)+-\pi_1+\pi_2\quad\Rightarrow\quad \pi_2=\pi_0(1-f(1)).\]
+    Treating these as a basis, suppose that for some $j\geq 0$ we have $\pi_j=\pi_0(1-\sum_{i=0}^{j-1}f(i))$. Then
+    \begin{align*}
+        0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0f(j)-\pi_{j}+\pi_{j+1}\quad\Rightarrow\quad \pi_{j+1}&=\pi_j-\pi_0f(j)\\
+        &=\pi_0\left(1-\sum_{i=0}^{j-1}f(i)\right)-\pi_0f(j)\\
+        &=\pi_0\left(1-\sum_{i=0}^jf(i)\right)
+    \end{align*}
+    so, by the principle of induction, we have $\pi_j=\pi_0(1-\sum_{i=0}^{j-1}f(i))$ for all $j\geq 0$. However, observe that
+    \[\sum_{i=0}^{j}f(i)=\sum_{i=0}^{j}P(Z=i)=P(Z\leq j)\]
+    so that for $j\geq 0$ we in fact have
+    \[\pi_j=\pi_0P(Z\geq j).\tag{4}\]
+    With an expression for each element of $\pi$ in terms of $\pi_0$, we use the normalization condition to fix $\pi_0$ uniquely:
+    \begin{align*}
+       1=\sum_{j\in\mc{I}}\pi_j=\pi_0+\sum_{j=1}^\infty\pi_j=\pi_0+\pi_0\sum_{j=1}^\infty P(Z\geq j)=\pi_0\left(1+\sum_{j=1}^\infty P(Z\geq j)\right)
+    \end{align*}
+    where since $Z$ is a non-negative integer-valued random variable, this gives us
+    \[\pi_0=\frac{1}{1+\sum_{j=1}^\infty P(Z\geq j)}=\frac{1}{1+\mbb{E}[Z]}.\]
+    But now we are done, since by (4), this gives us
+    \[\pi_j=\frac{P(Z\geq j)}{1+\mbb{E}[Z]}\]
+    for all $j\in\mc{I}$ defines an invariant distribution on $\mc{I}$ for this process.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 6} Consider the setup in problem 4. For any integer $n\geq 0$, denote $m_n(t)$ the expected number of lines in use at time $t$, given that $n$
+    are in use at time $0$. Show that
+    \[m_n(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t}).\]
+    {\bf Proof} Suppose that there are $n\in\mbb{N}$ people in the queue at time $t=0$. Define the random variable $N(t)$ to be the number of people in the queue at time $t$.
+    We can be decompose $N(t)$
+    \[N(t)=K(t)+L(t)\]
+    where $K(t)$ is the number of the original $n$ individuals who remain in the queue at time $t$, and $L(t)$ is the number of individuals
+    who arrived later and remain in the queue by time $t$.\\[10pt]
+    With this setup, let $K_j$ be the random variable for the time that the $j$th person (of the original $n$) leaves the queue. Then,
+    \[K(t)=\sum_{j=1}^n\mathbbm{1}_{\{K_j>t\}}\quad\Rightarrow\quad\mbb{E}[K(t)]=\sum_{j=1}^nP(K_j>t)=\sum_{j=1}^ne^{-\mu t}=ne^{-\mu t}\]
+    where $P(K_j>t)=e^{-\mu t}$ is the survival function of the $j$th person when the duration of their call is exponentially distributed with rate parameter $\mu$. Now, to compute the desired expectation
+    \[m_n(t)=\mbb{E}[N(t)]=\mbb{E}[K(t)]+\mbb{E}[L(t)]=ne^{-\mu t}+m_0(t)\]
+    we need only determine $m_0(t)$. To do this, we use the law of iterated expectation, conditioning on the value of the first holding time $S_1$.
+    \begin{align*}
+        m_0(t)=\mbb{E}[L(t)]=\mbb{E}_{S_1}[\mbb{E}[L(t)|S_1<t]]\tag{5}
+    \end{align*}
+    where we condition on $S_1<t$ since otherwise $L(t)=0$ {\it w.p.} 1 so that these instances do not influence the expectation. However, provided $S_1<t$ is fixed, the inner expectation can be expressed
+    \[\mbb{E}[L(t)|S_1<t]=\mbb{E}[\mathbbm{1}_{\{L_1>t-S_1\}}+L(t-S_1)|S_1<t]=P(L_1>t-S_1)+m_0(t-S_1)=e^{-\mu(t-S_1)}+m_0(t-S_1)\]
+    having let $L_1$ be the random variable for the time at which the first person to arrive departs. Returning to (5) we can now compute the outer expectation. Since $S_1\sim\text{Exp}\;(\lambda)$, we have
+    \begin{align*}
+        m_0(t)=\mbb{E}_{S_1}[e^{-\mu(t-S_1)}+m_0(t-S_1)|S_1<t]&=\int_{0}^t\left(e^{-\mu(t-x)}+m_0(t-x)\right)\lambda e^{-\lambda x}dx\\
+        &=\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{-\lambda(t-y)}dy\tag{substituting $y=t-x$}\\
+        &=e^{-\lambda t}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy.
+    \end{align*}
+    From here, we differentiate $m_0(t)$ to obtain a first order, linear ordinary differential equation:
+    \begin{align*}
+        m_0^\prime(t)&=-\lambda e^{-\lambda t}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy+e^{-\lambda t} \frac{d}{dt}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy\\
+        &=-\lambda \int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{-\lambda (t-y)}dy+\lambda e^{-\lambda t}e^{\lambda t}(e^{-\mu t}+m_0(t))\\
+        &=-\lambda m_0(t)+\lambda e^{-\mu t}+\lambda m_0(t)\\
+        &=\lambda e^{-\mu t}.
+    \end{align*}
+    Supplying the initial condition that $m_0(0)=0$, we see that the second term in the proposed solution
+    \[m_n(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t})\]
+    is the unique solution to $m_0^\prime(t)=\lambda e^{-\mu t}$, $m_0(0)=0$, since
+    \begin{align*}
+        \frac{\lambda}{\mu}(1-e^{-\mu t})\bigg|_{t=0}=0\quad\text{and}\quad\frac{d}{dt}\frac{\lambda}{\mu}(1-e^{-\mu t})=\lambda e^{-\mu t}=m_0^\prime(t).
+    \end{align*}
+    With this, we get
+    \[m_n(t)=\mbb{E}[N(t)]=\mbb{E}[K(t)]+\mbb{E}[L(t)]=ne^{-\mu t}+m_0(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t})\]
+    as desired.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Code used for problem 1}
+    \begin{verbatim}
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        # Set process parameters
+        dim = 120
+        beta = 0.4
+
+        # Set simulation parameters
+        T = 1e6 # number of steps
+        burnin = 5e3 # duration of burn-in period
+        thinning = dim # steps between samples
+        np.random.seed(196883) 
+
+        # Symmetric transition kernel
+        def trans_kernel(X, indices):
+            '''Perturb 1D Boolean array in random index'''
+            ind = np.random.choice(indices)
+            perturbation = np.zeros_like(X)
+            perturbation[ind] = 1
+
+            return np.abs(X - perturbation)
+
+        # Process functions
+        m_x = lambda X: np.sum(np.abs(np.diff(X))) # m:S-->{1,2,...,d-1}
+        pi_x = lambda X: np.exp(beta * m_x(X)) # pi:S-->R+
+
+        # Initialize simulation
+        state = np.zeros((dim,))
+        inds = np.arange(state.shape[0])
+        chain = []
+        for i in range(int(T)):
+
+            prop = trans_kernel(state, inds) # propose new state
+            r = np.min([1, pi_x(prop)/pi_x(state)]) # acceptance probability
+
+            u = np.random.uniform() # decision variable
+            if u <= r:
+                state = prop # accept
+            else:
+                pass # reject
+
+            # Store sample for time average according to burn-in/thinning procedure
+            if (i > burnin) and (i % thinning == 0):
+                chain.append(m_x(state))
+
+        # Print results
+        print('Burn-in: {}\t Thinning: {}\t Duration: {}\t Samples: {}\n'.format(burnin, thinning, T, len(chain)))
+        print("Estimate of nu with d = {} and beta = {}: {}".format(dim, beta, round(np.mean(chain), 4)))
+    \end{verbatim}
+    {\bf A.2 Code used for problem 3a}
+    \begin{verbatim}
+        # Define Q matrix
+        Q = np.array(
+            [
+                -2, 1, 1,
+                4, -4, 0,
+                2, 1, -3
+            ]
+        ).reshape((3,3))
+
+        spectrum, U = np.linalg.eig(Q) # obtain spectrum and eigenvectors
+        U_inv = np.linalg.inv(U) # invert eigenvector matrix
+        D = np.diag(spectrum) # create diagonal matrix of eigenvalues
+
+        # Verify the diagonalization identity
+        print(U @ D @ U_inv) # Evaluates to Q
+    \end{verbatim}
+    {\bf A.3 Code used for problem 3b}
+    \begin{verbatim}
+        def Q_to_Pi(Q):
+            '''
+            Generate jump chain transition kernel from Q matrix
+                - Assumes all diagonal entries of Q nonzero
+            '''
+
+            Pi = Q / np.tile(np.abs(np.diagonal(Q)), 3).reshape((3,3)).T
+            return Pi - np.diag(np.diagonal(Pi))
+
+        def run_CTMC(Pi, Q, T, init_state):
+
+            '''Contruct one CTMC realization from non-explosive Q matrix'''
+
+            I = np.arange(Q.shape[0]) # create state space
+            J_time = [0] # initialize jump times
+            J_chain = [init_state] # initialize jump chain
+            num_J = 0 # initialize jump counter
+
+            # Create jumps until we exceed the simulation time allowance once
+            while J_time[num_J] < T: 
+
+                curr_time = J_time[num_J] 
+                curr_state = J_chain[num_J]
+
+                # Use current state to sample the corresponding holding time and state distributions
+                hold = np.random.exponential(scale=(1 / np.abs(Q[curr_state, curr_state])))
+                new_state = np.random.choice(I, p=Pi[curr_state, :])
+
+                # Add latest state and jump time to data
+                J_time.append(curr_time + hold)
+                J_chain.append(new_state)
+
+                # Increment number of jumps
+                num_J += 1
+
+            # Return data as column array of jump times and chain
+            return np.concatenate(
+                (np.array(J_time).reshape((-1, 1)), np.array(J_chain).reshape((-1, 1))),
+                axis=1
+            )
+
+
+        # Define Q matrix
+        Q = np.array(
+            [
+                -2, 1, 1,
+                4, -4, 0,
+                2, 1, -3
+            ]
+        ).reshape((3,3))
+        Pi = Q_to_Pi(Q) # Generate jump chain transition kernel from Q
+
+        # Simulation parameters
+        num_runs = 1e4 # number of CTMC realizations to generate
+        T = 5 # duration for each run
+        init = 0 # initial state
+
+        term_states = [] # initialize output 
+        for run in range(int(num_runs)):
+
+            data = run_CTMC(Pi, Q, T, init) # run CTMC
+
+            # Extract state at time T
+            term_row = np.where(data[:, 0] <= T)[0][-1]
+            term_states.append(data[term_row, 1])
+
+        term_states = np.array(term_states)
+
+        # Estimate transition probabilities as proportions
+        num_A = np.where(term_states == 0)[0].size
+        num_B = np.where(term_states == 1)[0].size
+        num_C = np.where(term_states == 2)[0].size
+
+        transition_estimate = np.array([num_A, num_B, num_C]) / num_runs
+
+        # Print result
+        print(
+            'Starting from {}, we transition to states [0,1,2] after {}s with probabilties {}'.format(
+                init, T, transition_estimate
+            )
+        )
+    \end{verbatim}
+\end{document}

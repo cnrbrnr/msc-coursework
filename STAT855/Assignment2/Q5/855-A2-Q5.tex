@@ -1,0 +1,113 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+
+    \noindent{\bf Problem 5} Consider a Markov chain $X_n$, $n\geq 0$ with state space $S=\{0,1,2\}$. The initial distribution $\lambda$ and transition matrix $P$ are given as 
+    \[\lambda=\begin{pmatrix}
+        \frac{1}{2}\\[1.2pt]
+        \frac{1}{6}\\[1.2pt]
+        \frac{1}{3}
+    \end{pmatrix}\qquad P=\begin{pmatrix}
+        \frac{1}{2} & \frac{1}{3} & \frac{1}{6}\\[1.2pt]
+        \frac{3}{4} & 0 & \frac{1}{4}\\[1.2pt]
+        0 & 1 & 0
+    \end{pmatrix}.\]
+    Compute the probability mass function of $X_n$ for $n\geq 0$.\\[10pt]
+    {\bf Solution} Let $c_P(\mu)$ denote the characteristic polynomial of $P$. In order to easily compute powers of $P$, we begin by finding its spectrum $\sigma (P)=\{\mu^\ast\in\mbb{C}:c_P(\mu^\ast)=0\}$ so as to diagonalize it.
+    \begin{align*}
+        c_P(\mu)&=\det(P-\mu\mbb{I})\\
+        &=\left|\begin{pmatrix}
+            1/2-\mu & 1/3 & 1/6\\
+            3/4 & -\mu & 1/4\\
+            0 & 1 & -\mu
+        \end{pmatrix}\right|\\
+        &=-\left(\frac{1}{4}\left(\frac{1}{2}-\mu\right)-\frac{1}{8}\right)-\mu\left(-\mu\left(\frac{1}{2}-\mu\right)-\frac{1}{4}\right)\\
+        &=\frac{1}{4}\mu+\frac{1}{2}\mu^2-\mu^3+\frac{1}{4}\mu\\
+        &=-\mu\left(\mu^2-\frac{1}{2}\mu-\frac{1}{2}\right)\\
+        &=-\mu(\mu-1)(\mu+1/2)
+    \end{align*}
+    so we get $\sigma(P)=\{1,0,-1/2\}$. Since $P$ has three pairwise distinct eigenvalues, $P$ is diagonalizable. That is, $\exists U\in M_3(\mbb{R})$ invertible so that
+    \[P=UDU^{-1}\quad\Rightarrow\quad P^n=UD^nU^{-1}\]
+    where $D=\text{diag}\,\sigma(P)$. Next, we have $P^n=U(D^nU^{-1})$ by the associativity of matrix multiplication. For any $m\times m$ matrix $A$, let $A_{i,j}$ be the element in the $i$th row and $j$th column of $A$ for $1\leq i,j\leq m$.
+    Then by the definition of matrix multiplication, for $1\leq i,j\leq 3$
+    \begin{align*}
+        (D^nU^{-1})_{ij}&=\sum_{k=1}^3D^n_{i,k}U^{-1}_{k,j}\\
+        &=D^n_{i,i}U^{-1}_{i,j}\tag{since $D$ diagonal}\\
+        &=\mu_i^nU_{i,j}^{-1}
+    \end{align*}
+    where $\mu_i$ is the $i$th eigenvalue of $P$. Furthermore
+    \begin{align*}
+        (P^n)_{i,j}&=(U(D^nU^{-1}))_{ij}\\
+        &=\sum_{k=1}^3U_{i,k}(D^nU^{-1})_{kj}\\
+        &=\sum_{k=1}^3U_{i,k}\mu^n_kU^{-1}_{k,j}\\
+        &=\alpha_{i,j}\mu_1^n+\beta_{i,j}\mu_2^n+\gamma_{i,j}\mu_3^n
+    \end{align*}
+    where we have designated $\alpha_{i,j}=U_{i,1}U^{-1}_{1,j}$, $\beta_{i,j}=U_{i,2}U^{-1}_{2,j}$, $\gamma_{i,j}=U_{i,3}U^{-1}_{3,j}$. Further designating $\mu_1=1$, $\mu_2=-1/2$ we get
+    \[(P^n)_{i,j}=\alpha_{i,j}+\beta_{i,j}(-1/2)^n\]
+    for any $1\leq i,j\leq 3$. Noting that $P^0=\mbb{I}_3$ the identity linear transformation on $\mbb{R}^3$, we can use known entries of $P^0$ and $P^1$ to find $\alpha_{i,j}$ and $\beta_{i,j}$
+    which will determine all nine entries of $P^n$ for any $n\geq 0$. Quite a bit of tedious computation to complete this. Nonetheless, we begin by finding the constants for $p_{1,1}^n$ and $p_{1,2}^n$:
+    \begin{align*}
+        p^0_{1,1}&=1=\alpha_{1,1}+\beta_{1,1}\quad\Rightarrow\quad\beta_{1,1}=1-\alpha_{1,1}\tag{6}\\
+        p_{1,1}^1&=1/2=\alpha_{1,1}+\beta_{1,1}(-1/2)\quad\Rightarrow\quad 1=2\alpha_{1,1}+\alpha_{1,1}-1\quad\Rightarrow\quad \alpha_{1,1}=2/3\quad\Rightarrow\quad \beta_{1,1}=1/3\\[10pt]
+        p_{1,2}^0&=0=\alpha_{1,2}+\beta_{1,2}\quad\Rightarrow\quad \alpha_{1,2}=-\beta_{1,2}\tag{7}\\
+        p_{1,2}^1&=1/3=\alpha_{1,2}+\beta_{1,2}(-1/2)\quad\Rightarrow\quad 1/3=\alpha_{1,2}(1+1/2)\quad\Rightarrow\quad\alpha_{1,2}=2/9\quad\Rightarrow\quad\beta_{1,2}=-2/9
+    \end{align*}
+    Here on we can make things a bit more terse by noticing that $P^0=\mbb{I}_3$, so $p^0_{i,i}=1$ and $p^0_{i,j}=0$ for $1\leq i,j\leq 3$ and $i\neq j$, so the implications in (6) and (7) hold
+    for each these cases respectively. To be precise, $\beta_{i,i}=1-\alpha_{i,i}$ and $\alpha_{i,j}=-\beta_{i,j}$ for $1\leq i,j\leq 3$ and $i\neq j$. With this, the remaining fourteen constants can be found.
+    \begin{align*}
+        p_{1,3}^1&=1/6=\alpha_{1,3}+\beta_{1,3}(-1/2)\quad\Rightarrow\quad 1/6=\alpha_{1,3}(1+1/2)\quad\Rightarrow\quad\alpha_{1,3}=1/9\quad\Rightarrow\quad\beta_{1,3}=-1/9\\
+        p_{2,1}^1&=3/4=\alpha_{2,1}+\beta_{2,1}(-1/2)\quad\Rightarrow\quad 3/4=\alpha_{2,1}(1+1/2)\quad\Rightarrow\quad\alpha_{2,1}=1/2\quad\Rightarrow\quad\beta_{2,1}=-1/2\\
+        p_{2,2}^1&=0=\alpha_{2,2}+\beta_{2,2}(-1/2)\quad\Rightarrow\quad 0=1-3/2\beta_{2,2}\quad\Rightarrow\quad\beta_{2,2}=2/3\quad\Rightarrow\quad\alpha_{2,2}=1/3\\
+        p_{2,3}^1&=1/4=\alpha_{2,3}+\beta_{2,3}(-1/2)\quad\Rightarrow\quad 1/4=\alpha_{2,3}(1+1/2)\quad\Rightarrow\quad\alpha_{2,3}=1/6\quad\Rightarrow\quad\beta_{2,3}=-1/6\\
+        p_{3,1}^1&=0=\alpha_{3,1}+\beta_{3,1}(-1/2)\quad\Rightarrow\quad 0=\alpha_{3,1}(1+1/2)\quad\Rightarrow\quad\alpha_{3,1}=0=\beta_{2,1}\\
+        p_{3,2}^1&=1=\alpha_{3,2}+\beta_{3,2}(-1/2)\quad\Rightarrow\quad 1=\alpha_{3,2}(1+1/2)\quad\Rightarrow\quad\alpha_{3,2}=2/3\quad\Rightarrow\quad\beta_{3,2}=-2/3\\
+        p_{3,3}^1&=0=\alpha_{3,3}+\beta_{3,3}(-1/2)\quad\Rightarrow\quad 0=1-3/2\beta_{3,3}\quad\Rightarrow\quad\beta_{3,3}=2/3\quad\Rightarrow\quad\alpha_{3,3}=1/3
+    \end{align*}
+    allowing us to write out the $n$ step transition probability matrix
+    \begin{align*}
+        P^n=\begin{pmatrix}
+            6/9+3/9(-1/2)^n & 2/9 -2/9(-1/2)^n & 1/9 - 1/9(-1/2)^n\\
+            3/6 - 3/6(-1/2)^n & 2/6+4/6(-1/2)^n & 1/6 - 1/6(-1/2)^n\\
+            0 & 2/3 - 2/3(-1/2)^n & 1/3 + 2/3(-1/2)^n
+        \end{pmatrix}
+    \end{align*}
+    where in particular we observe that $P^n$ is indeed a stochastic matrix for any $n\geq 0$. Finally, denote $\lambda_n:S\rightarrow[0,1]$ be the probability mass function of
+    $X_n$ for $n\geq 0$. That is, $\lambda_n(j)=P(X_n=j)$ for $n\geq 0$. Then the Chapman-Kolmogorov equation furnishes us with $\lambda_n$.
+    \begin{align*}
+        \lambda_n&=\lambda^T P^n\\
+        &=\begin{pmatrix}
+            1/2, & 1/6, & 1/3
+        \end{pmatrix}\begin{pmatrix}
+            6/9+3/9(-1/2)^n & 2/9 -2/9(-1/2)^n & 1/9 - 1/9(-1/2)^n\\
+            3/6 - 3/6(-1/2)^n & 2/6+4/6(-1/2)^n & 1/6 - 1/6(-1/2)^n\\
+            0 & 2/3 - 2/3(-1/2)^n & 1/3 + 2/3(-1/2)^n
+        \end{pmatrix}\\
+        &=\begin{pmatrix}
+            15/36+3/36(-1/2)^n, & 14/36 - 8/36(-1/2)^n, & 7/36 + 5/36(-1/2)^n
+        \end{pmatrix}
+    \end{align*}
+    where, just for fun, we find the limiting distribution $\lambda_\infty$ to be
+    \[\lambda_\infty\lim_{n\rightarrow\infty}(15/36+3/36(-1/2)^n, 14/36 - 8/36(-1/2)^n, 7/36 + 5/36(-1/2)^n)=(15/36,14/36,7/36).\]
+    and we are done.\hfill{$\qed$}
+\end{document}

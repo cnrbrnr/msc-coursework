@@ -1,0 +1,113 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1} Let $d$ be a positive integer and $\beta>0$. For each $x=(x_1,x_2,\dots,x_d)\in S=\{0,1\}^d$, define
+    \[m(x)=\sum_{i=1}^{d-1}\mathbbm{1}_{\{x_i\neq x_{i+1}\}},\quad\pi_\beta(x)=C^{-1}_\beta\exp(\beta m(x)),\]
+    where $\mathbbm{1}_{\{a\neq b\}}$ is 1 if $a\neq b$ and $0$ otherwise, and $C_\beta$ is a constant so that $\sum_{x\in S}\pi_\beta(x)=1$.
+    Use the Markov chain Monte Carlo method to compute $\mc{V}(d,\beta)=\sum_{x\in S}m(x)\pi_\beta(x)$ for the specified configurations of $(d,\beta)$.\\[10pt]
+    {\bf Solution} Following the Metropolis-Hastings procedure, we first specify a transition kernel $T$, which for $x=(x_1,\dots,x_d),\,z=(z_1,\dots,z_d)\in S$
+    we define
+    \[T(z|x)=\begin{cases}
+        1/d\quad&\text{if $\sum_{j=1}^d\mathbbm{1}_{z_j\neq x_j}=1$}\\
+        0\quad&\text{{\it o.w.}}
+    \end{cases}\]
+    which is clearly symmetric, so that $T(z|x)=T(x|z)$ for all $x,z\in S$. As such, this kernel does not impact 
+    the rejection probabilities computed at each step, and so we only implement it algorithmically to propose new states. That is,
+    supposing that $x$ is the current state at some step, we sample a discrete random variable $A$ equiprobable on the support $\{1,2,\dots,d\}$, and use it to propose
+    a new state $z=(z_1,\dots,z_d)\in S$ defined by
+    \[z_j=\begin{cases}
+        x_j\quad&\text{if $a\neq j$}\\
+        1 - x_j\quad&\text{{\it o.w.}}
+    \end{cases}\quad\text{for $j=1,2,\dots, d$}\]
+    where $a$ is a randomly sampled value of $A$. With this as the newly proposed state, we compute the rejection probability $r$ by
+    \[r(z,x)=\min\left\{1,\;\frac{\pi_\beta(z)}{\pi_\beta(x)}\right\}\]
+    and sample $\mc{U}\sim\text{Uniform(0,1)}$, setting $z$ as the next state in the chain if, given $\{\mc{U}=u\}$, $u<r(z,x)$. Otherwise, $x$ is set as the subsequent
+    state of the chain. This Metropolis-Hastings process admits a unique invariant distribution $\pi_\beta:=\{\pi_\beta(x):x\in S\}$ so that, by the ergodic theorem,
+    \[\frac{1}{N}\sum_{n=1}^Nm(x_n)\longrightarrow \sum_{x\in S}m(x)\pi_\beta(x)=\mc{V}(d,\beta)\quad\text{{\it w.p.} 1 as $N\rightarrow\infty$}\]
+    which holds since the chain is irreducible and $m(x)<\infty$ $\forall x\in S$. We implement this algorithm in Python 3.11.5, and summarize the output in Table 1. Please see Appendix A.1
+    for the code used to do this.\\[10pt]
+    {\bf Table 1.} Estimates of $\mc{V}(d,\beta)$ for $(d,\beta)\in\{60, 120\}\times\{0.4,0.8,1.2\}$, computed using the Metropolis-Hastings algorithm over $10^6$ iterates, a burn in period of $5\times 10^3$
+    iterates, and a thinning parameter of $60$ for each simulation. Estimates are rounded to four points of precision.
+    \begin{center}
+        \begin{tabular}{@{}l|c|c|c|c@{}}\toprule
+            $\mc{V}(d,\beta)$ & $\beta=0.4$ & $\beta=0.8$ & $\beta=1.2$ \\\midrule
+            $d=60$ & 35.3405 & 40.7057 & 45.3689\\\midrule
+            $d=120$ & 71.2358 & 82.0352 & 91.4342\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Code used for problem 1}
+    \begin{verbatim}
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        # Set process parameters
+        dim = 120
+        beta = 0.4
+
+        # Set simulation parameters
+        T = 1e6 # number of steps
+        burnin = 5e3 # duration of burn-in period
+        thinning = dim # steps between samples
+        np.random.seed(196883) 
+
+        # Symmetric transition kernel
+        def trans_kernel(X, indices):
+            '''Perturb 1D Boolean array in random index'''
+            ind = np.random.choice(indices)
+            perturbation = np.zeros_like(X)
+            perturbation[ind] = 1
+
+            return np.abs(X - perturbation)
+
+        # Process functions
+        m_x = lambda X: np.sum(np.abs(np.diff(X))) # m:S-->{1,2,...,d-1}
+        pi_x = lambda X: np.exp(beta * m_x(X)) # pi:S-->R+
+
+        # Initialize simulation
+        state = np.zeros((dim,))
+        inds = np.arange(state.shape[0])
+        chain = []
+        for i in range(int(T)):
+
+            prop = trans_kernel(state, inds) # propose new state
+            r = np.min([1, pi_x(prop)/pi_x(state)]) # acceptance probability
+
+            u = np.random.uniform() # decision variable
+            if u <= r:
+                state = prop # accept
+            else:
+                pass # reject
+
+            # Store sample for time average according to burn-in/thinning procedure
+            if (i > burnin) and (i % thinning == 0):
+                chain.append(m_x(state))
+
+        # Print results
+        print('Burn-in: {}\t Thinning: {}\t Duration: {}\t Samples: {}\n'.format(burnin, thinning, T, len(chain)))
+        print("Estimate of nu with d = {} and beta = {}: {}".format(dim, beta, round(np.mean(chain), 4)))
+    \end{verbatim}
+\end{document}

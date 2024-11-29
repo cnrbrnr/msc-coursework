@@ -1,0 +1,232 @@
+% ====================
+% ===== PREAMBLE =====
+% ====================
+
+% Global formatting
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+
+% General packages
+\usepackage{graphicx} % Required for inserting images
+\graphicspath{{./images/}}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+
+% Simple custom macros
+\newcommand{\bs}[1]{\boldsymbol{#1}} % Bold math symbols
+\newcommand{\mbb}[1]{\mathbb{#1}} % Set font
+\newcommand{\mc}[1]{\mathcal{#1}} % Caligraphic font
+
+% Title formatting
+\title{MTHE 430 Lab 2 Report - Controllability and Observability}
+\author{Hanna Gamelin$\qquad$Connor Braun$\qquad$Anthony Pasion}
+\date{October 2023}
+
+% ====================
+% ===== DOCUMENT =====
+% ====================
+\begin{document}
+\maketitle
+\section*{Introduction}
+Depending on their formulation and complexity, the controllability and observability properties of dynamical systems can vary dramatically. Informally speaking, a system is controllable if there exists a control function which moves the system state between two specified states in finite time. Likewise, a system is observable if we are able to discern from the output when two evolutions of the system are associated with different initial conditions. Further, when a system is not globally controllable or observable we are often interested in determining the state subspaces on which it is -- which can be determined (at least for linear time invariant (LTI) systems) using relatively simple analyses.\\[10pt]
+Herein we report such analyses of controllability and observability for a simple LTI system: a parallel
+capacitor inductor circuit (figure 1) and compare predictions therefrom with results from simulation. In
+particular, we will derive a formalization for the LTI control system, determine conditions for global
+controllability and observability, characterize controllable and observable subspaces when these conditions are not met and simulate the system in the controllable and uncontrollable regime to determine if these
+agree with our theoretical results.\\[10pt]
+The system of interest is depicted in figure 1 below.\\[10pt]
+\begin{center}
+    \makebox[\textwidth]{\includegraphics[width=90mm]{images/circuit-diagram.png}}
+\end{center}
+{\bf Figure 1.} Parallel inductor capacitor circuit diagram.\\[10pt]
+Where $E$ indicates the voltage applied to the system, and serves as the control input $u$, $I$ is the resulting current flowing into the circuit and is the system output $y$, and the state variables $x_1$, $x_2$ are the capacitor voltage $V_c$ (not shown) and inductor current $I_L$ respectively. Additionally, the capacitor is associated with a capacitance parameter $C$, and each resistor with resistance parameters $R_1$, $R_2$. $I_C$ is the current flowing into the capacitor branch.\\[10pt]
+\subsection*{System formalization}
+We begin with the following well known relationships
+\[V_L=L\frac{dI_L}{dt},\quad I_C=C\frac{dV_C}{dt},\quad V_{R_i}=I_{R_i}R_i,\quad\text{for $i=1,2$}\]
+where $V_L$ is the inductor voltage induced by a change in $I_L=x_2$, $L$ is an inductance parameter, $V_C=x_1$ is the capacitor voltage and $V_{R_i}, I_{R_i}$ are the voltage and current (respectively) corresponding to resistor $i$ for $i=1,2$. The first relationship is a consequence of Faraday's law of induction, the second is from the definition of capacitance and the third is a result of Ohm's law. By Kirchoff's voltage law, voltage across each branch (labelled $(i)$, $(ii)$ in figure 1) must be equal to $E=u$, so
+\begin{align*}
+    V_C+I_{R_1}R_1=u\quad&\text{and}\quad V_L+I_{R_2}R_2=u\tag{1}\\
+    \Rightarrow\quad V_C+C\frac{dV_C}{dt}R_1=u\quad&\text{and}\quad L\frac{dI_L}{dt}+I_{R_2}R_2=u\tag{$I_{R_1}=I_C$}\\
+    \Rightarrow\quad \dot{x}_1=-\frac{1}{R_1C}x_1+\frac{1}{R_1C}u\quad&\text{and}\quad \dot{x}_2=-\frac{R_2}{L}x_2+\frac{1}{L}u\tag{$V_C=x_1$ and $I_L=x_2$.}
+\end{align*}
+whence we obtain the system given by
+\begin{align*}
+    \begin{pmatrix}
+        \dot{x}_1\\
+        \dot{x}_2
+    \end{pmatrix}=\begin{pmatrix}
+        -1/R_1C & 0\\
+        0 & -R_2/L
+    \end{pmatrix}\begin{pmatrix}
+        x_1\\
+        x_2
+    \end{pmatrix}+\begin{pmatrix}
+        1/R_1C\\
+        1/L
+    \end{pmatrix}u.
+\end{align*}
+To derive an expression for the output we appeal to Kirchoff's current law, which says that the current $I=y$ is equal to the current entering each branch of the circuit. That is
+\begin{align*}
+    y&=I_C+I_L\\
+    &=\frac{1}{R_1}(u-V_C)+I_L\tag{$I_{R_1}=I_C$ and $I_{R_1}=(1/R_1)(u-V_C$, by (1)}\\
+    &=-\frac{1}{R_1}V_C+I_L+\frac{1}{R_1}u\\
+    &=\begin{pmatrix}
+        -1/R_1 & 1
+    \end{pmatrix}\begin{pmatrix}
+        x_1\\
+        x_2
+    \end{pmatrix}+\frac{1}{R_1}u.\tag{$V_C=x_1$ and $I_L=x_2$}
+\end{align*}
+Thus, the full system is given by
+\begin{align*}
+       \begin{pmatrix}
+        \dot{x}_1\\
+        \dot{x}_2
+    \end{pmatrix}&=\begin{pmatrix}
+        -1/R_1C & 0\\
+        0 & -R_2/L
+    \end{pmatrix}\begin{pmatrix}
+        x_1\\
+        x_2
+    \end{pmatrix}+\begin{pmatrix}
+        1/R_1C\\
+        1/L
+    \end{pmatrix}u\\
+    y&=\begin{pmatrix}
+        -1/R_1 & 1
+    \end{pmatrix}\begin{pmatrix}
+        x_1\\
+        x_2
+    \end{pmatrix}+\frac{1}{R_1}u
+\end{align*}
+which we will more compactly express as
+\begin{align*}
+    \begin{array}{c}
+        \dot{\bs{x}}=A\bs{x}+Bu\\
+        y=\bs{c}^T\bs{x}+Du
+    \end{array}\tag{2}
+\end{align*}
+where we have set
+\[A=\begin{pmatrix}
+    -1/R_1C & 0\\
+    0 & -R_2/L
+\end{pmatrix}\quad B=\begin{pmatrix}
+    1/R_1C\\
+    1/L
+\end{pmatrix}\quad\bs{c}=\begin{pmatrix}
+    -1/R_1\\
+    1
+\end{pmatrix}\quad\text{and}\quad D=1/R_1\]
+thus concluding our formalization.
+\section*{Controllability} 
+Next we determine the conditions under which the system (2) is controllable. For this we need to construct the controllability matrix $\mc{C}_{A,B}$, which for our system is given by
+\[\mc{C}_{A,B}=\begin{pmatrix}
+    B & AB
+\end{pmatrix}=\begin{pmatrix}
+    1/R_1C & -1/R_1^2C^2\\
+    1/L & -R_2/L^2
+\end{pmatrix}.\]
+An LTI system is controllable if and only if the corresponding controllability matrix is full rank, which in the case of a square matrix is equivalent to $\mc{C}_{A,B}$ having nonzero determinant. Thus, we compute
+\[\det\mc{C}_{A,B}=\frac{-R_2}{R_1CL^2}+\frac{1}{R_1^2C^2L}=\frac{L-R_2R_1C}{R_1^2R_2^2L^2}.\]
+All parameters in the above expression are physical, and strictly greater than zero, thus
+\[\det\mc{C}_{A,B}=0\quad\Leftrightarrow\quad L-R_2R_1C=0\quad\Leftrightarrow\quad L=R_1R_2C\]
+so our system is controllable if and only if $L\neq R_1R_2C$ and is uncontrollable otherwise.\\[10pt]
+Suppose that $L=R_1R_2C$ so that our system is uncontrollable. Then let
+\[\tilde{A}=A\big|_{L=R_1R_2C}=\begin{pmatrix}
+    -1/R_1C & 0\\
+    0 & -1/R_1^2R_2C^2
+\end{pmatrix}\quad\text{and}\quad \tilde{B}=B\big|_{L=R_1R_2C}=\begin{pmatrix}
+    1/R_1C\\
+    1/R_1R_2C
+\end{pmatrix}\]
+so that
+\[\mc{C}_{\tilde{A},\tilde{B}}=\begin{pmatrix}
+    1/R_1C & -1/R_1^2C^2\\
+    1/R_1R_2C & -1/R_1^2R_2C^2
+\end{pmatrix}.\]
+We define the controllable subspace to be $\text{Im}\,(\mc{C}_{\tilde{A},\tilde{B}})$, the columnspace of the controllability matrix. This is due to the fact that we are analyzing a LTI system, so we have
+\[\text{Im}\,(W(t_0,t_1))=\text{Im}\,(\mc{C}_{\tilde{A},\tilde{B}})\]
+with $W(t_0,t_1)$ the controllability Gramian associated to the pair of times $(t_0,t_1)$ (that is, the controllability of LTI systems is independent of the initial and end times $t_0$, $t_1$). Thus, to find the controllable subspace of (2) when $L=R_1R_2C$, we solve for a basis of the row space of $\mc{C}^T_{\tilde{A},\tilde{B}}$ which is equal to the column space of $\mc{C}_{\tilde{A},\tilde{B}}$.
+\begin{align*}
+    \mc{C}^T_{\tilde{A},\tilde{B}}=\begin{pmatrix}
+        1/R_1C & 1/R_1R_2C\\
+        -1/R_1^2C^2 & -1/R_1^2R_2C^2
+    \end{pmatrix}\overset{r_2+(1/R_1C)r_1}{\xrightarrow{\hspace{1.5cm}}}\begin{pmatrix}
+        1/R_1C & 1/R_1R_2C\\
+        0 & 0
+    \end{pmatrix}\overset{(R_1R_2C)r_1}{\xrightarrow{\hspace{1.5cm}}}\begin{pmatrix}
+        R_2 &  1\\
+        0 & 0
+    \end{pmatrix}
+\end{align*}
+where we denote the rows with $r_i$, $i=1,2$ when indicating the row operations used. Thus, we have
+\[\text{Im}\,\mc{C}_{\tilde{A},\tilde{B}}=\text{span}\,\left\{\begin{pmatrix}
+    R_2\\
+    1
+\end{pmatrix}}\right\}\]
+which tells us that no matter how we define $u$ we expect to observe the linear relationship
+\[x_2=R_2x_1\]
+between the two state variables. It is this prediction which we will test by way of simulation.\\[10pt]
+\vspace{12pt}
+Anthony parts c-e
+
+\section*{Observability}
+Just as for controllability, we can determine the conditions under which the system (2) is observable. For this we construct the observability matrix $\mc{O}_{A,\bs{c}^T}$, which for our system is given by
+\[\mc{O}_{A,\bs{c}^T}=\begin{pmatrix}
+    \bs{c}^T\\
+    \bs{c}^TA
+\end{pmatrix}=\begin{pmatrix}
+    -1/R_1 & 1\\
+    1/R_1^2 & -R_2/L
+\end{pmatrix}.\]
+Just as for controllability, an LTI system is observable if and only if the corresponding observability matrix is full rank, which in the case of the square matrix we have here is equivalent to $\mc{O}_{A,\bs{c}^T}$ having nonzero determinant. Thus, we compute
+\[\det\mc{O}_{A,\bs{c}^T}=\frac{R_2}{R_1L}-\frac{1}{R_1^2C}=\frac{R_1R_2C-L}{R_1^2LC}.\]
+Since all parameters of the system are physical and strictly greater than zero, we get
+\[\del\mc{O}_{A,\bs{c}^T}=0\quad\Leftrightarrow\quad R_1R_2C-L=0\quad\Leftrightarrow L=R_1R_2C\]
+so our system is observable if and only if $L\neq R_1R_2C$ and is unobservable otherwise -- the exact same criterion as was found for controllability.\\[10pt]
+Suppose that $L=R_1R_2C$ so that the system is unobservable. Then let
+\[\tilde{A}=A\big|_{L=R_1R_2C}=\begin{pmatrix}
+    -1/R_1C & 0\\
+    0 & -1/R_1^2R_2C^2
+\end{pmatrix}\quad\text{and}\quad \tilde{\bs{c}}=\bs{c}\big|_{L=R_1R_2C}=\begin{pmatrix}
+    -1/R_1\\
+    1
+\end{pmatrix}\]
+so that
+\[\mc{O}_{\tilde{A},\tilde{\bs{c}}^T}=\begin{pmatrix}
+    -1/R_1 & 1\\
+    1/R_1^2C & -1/R_1C
+\end{pmatrix}.\]
+Where we define the {\it un}observable subspace to be $\ker(\mc{O}_{\tilde{A},\tilde{\bs{c}}^T})$. That is, the set of indistinguishable initial conditions given the output $y$ is $\ker(\mc{O}_{\tilde{A},\tilde{\bs{c}}^T})$. We can solve for this subspace using elementary row operations on the augmented matrix
+\begin{align*}
+    \begin{pmatrix}
+        \begin{array}{cc|c}
+            -1/R_1 & 1 & 0\\
+            1/R_1^2C & -1/R_1C & 0
+        \end{array}
+    \end{pmatrix}\overset{r_2+(1/R_1C)r_1}{\xrightarrow{\hspace{1.5cm}}}
+    \begin{pmatrix}
+        \begin{array}{cc|c}
+            -1/R_1 & 1 & 0\\
+            0 & 0 & 0
+        \end{array}
+    \end{pmatrix}\overset{(-R_1)r_1}{\xrightarrow{\hspace{1.5cm}}}
+    \begin{pmatrix}
+        \begin{array}{cc|c}
+            1 & -R_1 & 0\\
+            0 & 0 & 0
+        \end{array}
+    \end{pmatrix}
+\end{align*}
+so we have a free variable $x_2=s\in\mbb{R}$ and the linear relationship
+\[x_1=R_1x_2\quad\Rightarrow\quad\ker(\mc{O}_{\tilde{A},\tilde{\bs{c}}^T})=\text{span}\,\left\{\begin{pmatrix}
+    R_1\\
+    1
+\end{pmatrix}}\right\}\]
+which says that for any pair of initial conditions $\bs{u}^\ast=(u_1^\ast,u_2^\ast)^T\in\mbb{R}^2$, $\bs{v}^\ast=(v_1^\ast,v_2^\ast)^T\in\mbb{R}^2$ satisfying 
+\[u_1^\ast=R_1u_2^\ast\quad\text{and}\quad v_1^\ast=R_1v_2^\ast\]
+we expect to obtain indistinguishable output data from the systems evolving from either of these over the same time extent. It is this prediction which we will test by way of simulation.
+\\[10pt]
+Hanna parts c-e
+
+
+\end{document}

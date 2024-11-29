@@ -1,0 +1,89 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 5} Let $\mc{I}=\{0,1,2,\dots\}$ be all non-negative integers and $f:I\rightarrow[0,\infty)$ be a non-negative function so that $\sum_{i\in\mc{I}}f(i)=1$
+    , $f(0)=0$ and $f(i)>0$ for any $i\geq 1$. Let $\{Y_n:n\geq 0\}$ be a discrete-time Markov chain with state space $\mc{I}$ and transition matrix $\Pi$ given by
+    \[\Pi_{0,i}=f(i)\;\;\text{for $i\geq 1$;}\quad\Pi_{i,i-1}=1\;\;\text{for $i\geq 1$.}\]
+    Let $\{T_n:n\geq 1\}$ be a sequence of independent and identically distributed random variables with the common distribution being the exponential distribution with rate 1.
+    Define $J_0=0$ and for each integer $n\geq 1$,
+    \[J_n=\sum_{m=1}^nT_m.\]
+    {\bf a)} Show that $\{Y_n:n\geq 0\}$ is recurrent, and conclude that $P(\lim_{n\rightarrow\infty}J_n=\infty)=1$.\\[10pt]
+    {\bf Proof} First, we show that the jump chain is irreducible. To see this, fix $i\in\mc{I}$, $i\neq 0$. Then $\Pi_{0,i}=f(i)>0$, so $0\longrightarrow i$.
+    Of course, then $P(Y_0=i,Y_1=i-1,\dots,Y_i=0)=\Pi_{i,i-1}\Pi_{i-1,i-2}\cdots\Pi_{1,0}=1>0$, so $i\longrightarrow 0$, and further $i\longleftrightarrow 0$.
+    But this holds for any $i\neq 0$, so $\forall j\in\mc{I}$, $i\longleftrightarrow 0$, and $j\longleftrightarrow 0$, so by transitivity of communication, $i\longleftrightarrow j$,
+    and the chain is indeed irreducible.\\[10pt]
+    Now, let $T=\inf\{n>0:Y_n=0\}$ be the first passage time associated to $0$, and $h_0=P_0(T<\infty)$. Then
+    \[h_0=1-P_0(T=\infty)=1-\lim_{r\rightarrow\infty}P_0(T>r)\]
+    where the last equality holds by the continuity of probability and the observation that $\{T>r\}\searrow\{T=\infty\}$ as $r\rightarrow\infty$. Now, fixing $r\in\mbb{N}$ for the moment, we have
+    \begin{align*}
+        P_0(T>r)&=\sum_{i\in\mc{I}}P_0(T>r|Y_1=i)P_0(Y_1=i)\tag{law of total probability}\\
+        &=\sum_{i\in\mc{I}}\mathbbm{1}_{\{i\geq r\}}f(i)\tag{3}\\
+        &=\sum_{i=r}^\infty f(i)
+    \end{align*}
+    where (3) holds since, conditioning on $\{Y_0=0,Y_1=i\}$, we have $T=i+1$ {\it w.p.} 1 for $i\in\mc{I}$. Further, we get $T>r$ {\it w.p.} 1 if $i\geq r$ and $T\leq r$ {\it w.p.} 1 otherwise. Now, writing
+    \[P_0(T>r)=\sum_{i=r}^\infty f(i)=\sum_{i=1}^\infty f(i) - \sum_{i=1}^{r-1}f(i)\]
+    we get
+    \[\lim_{r\rightarrow\infty}P_0(T>r)=\lim_{r\rightarrow\infty}\sum_{i=r}^\infty f(i)=\sum_{i=1}^\infty f(i)-\lim_{r\rightarrow\infty}\sum_{i=1}^{r-1}f(i)=\sum_{i=1}^\infty f(i)-\sum_{i=1}^\infty f(i)=1-1=0\]
+    so that
+    \[h_0=1-\lim_{r\rightarrow\infty}P_0(T>r)=1\]
+    which is true if and only if the state $0$ is recurrent. But by the irreducibility of $\{Y_n:n\geq 0\}$, we get that $\forall j\in\mc{I}$, $j$ must be recurrent also. Since the jump chain $\{Y_n:n\geq 0\}$ is recurrent, we conclude that $P(\lim_{n\rightarrow\infty}J_n=\infty)=1$, as desired.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $Z$ be a discrete random variable with probability mass function given by $f$. Assume $\mbb{E}[Z]<\infty$. For each $t\geq 0$, define $X_t=Y_n$ if $J_n\leq t<J_{n+1}$ for some integer $n\geq 0$.
+    Show that the invariant distribution for the continuous time markov chain $\{X_t:t\geq 0\}$ is given by
+    \[\pi_i=P(Z\geq i)/(1+\mbb{E}[Z])\quad\text{for $i\in\mc{I}$}.\]
+    {\bf Proof} We begin by constructing a Q-matrix $Q$ for the process. Note that, by construction, the $n$th holding time, $n\geq 1$, is given by
+    \[J_{n}-J_{n-1}=\begin{cases}
+        \sum_{m=1}^{n}T_m-\sum_{m=1}^{n-1}T_m=T_{n}\sim\text{Exp}(1)\quad&\text{if $n\geq 2$}\\
+        T_1\sim\text{Exp}(1)\quad&\text{{\it o.w.}}
+    \end{cases}\]
+    which tells us that the diagonals of the Q-matrix are all $-\nu_i=-1$. Further, we can use these to determine the elements of $Q$ by the formula
+    \[q_{i,j}=\Pi_{i,j}\nu_i\;\;\forall i\neq j\]
+    Thus, the process has Q-matrix $Q=\{q_{i,j}:i,j\in\mc{I}\}$ defined by
+    \[q_{i,i}=-1\;\forall i\in\mc{I};\quad q_{i,i-1}=1\;\forall i\geq 1;\quad q_{0,j}=f(j)\;\forall j\geq 1.\]
+    Equipped with this, we set $\pi=(\pi_i:i\in\mc{I})$, which is an invariant distribution for the continuous time Markov chain if
+    \[\pi Q=0\quad\Leftrightarrow\quad \sum_{i\in\mc{I}}\pi_iq_{ij}=0\;\;\forall j\in\mc{I}\quad\text{and}\quad\sum_{i\in\mc{I}}\pi_i=1.\]
+    We proceed by solving these equations. Observe that when $j=0$, we have
+    \[0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0q_{0,0}+\pi_1q_{1,0}=-\pi_0+\pi_1\quad\Rightarrow\quad \pi_1=\pi_0\]
+    similarly, when $j=1$, we get
+    \[0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0q_{0,1}+\pi_1q_{1,1}+\pi_2q_{2,1}=\pi_0f(1)+-\pi_1+\pi_2\quad\Rightarrow\quad \pi_2=\pi_0(1-f(1)).\]
+    Treating these as a basis, suppose that for some $j\geq 0$ we have $\pi_j=\pi_0(1-\sum_{i=0}^{j-1}f(i))$. Then
+    \begin{align*}
+        0=\sum_{i\in\mc{I}}\pi_iq_{i,j}=\pi_0f(j)-\pi_{j}+\pi_{j+1}\quad\Rightarrow\quad \pi_{j+1}&=\pi_j-\pi_0f(j)\\
+        &=\pi_0\left(1-\sum_{i=0}^{j-1}f(i)\right)-\pi_0f(j)\\
+        &=\pi_0\left(1-\sum_{i=0}^jf(i)\right)
+    \end{align*}
+    so, by the principle of induction, we have $\pi_j=\pi_0(1-\sum_{i=0}^{j-1}f(i))$ for all $j\geq 0$. However, observe that
+    \[\sum_{i=0}^{j}f(i)=\sum_{i=0}^{j}P(Z=i)=P(Z\leq j)\]
+    so that for $j\geq 0$ we in fact have
+    \[\pi_j=\pi_0P(Z\geq j).\tag{4}\]
+    With an expression for each element of $\pi$ in terms of $\pi_0$, we use the normalization condition to fix $\pi_0$ uniquely:
+    \begin{align*}
+       1=\sum_{j\in\mc{I}}\pi_j=\pi_0+\sum_{j=1}^\infty\pi_j=\pi_0+\pi_0\sum_{j=1}^\infty P(Z\geq j)=\pi_0\left(1+\sum_{j=1}^\infty P(Z\geq j)\right)
+    \end{align*}
+    where since $Z$ is a non-negative integer-valued random variable, this gives us
+    \[\pi_0=\frac{1}{1+\sum_{j=1}^\infty P(Z\geq j)}=\frac{1}{1+\mbb{E}[Z]}.\]
+    But now we are done, since by (4), this gives us
+    \[\pi_j=\frac{P(Z\geq j)}{1+\mbb{E}[Z]}\]
+    for all $j\in\mc{I}$ defines an invariant distribution on $\mc{I}$ for this process.\hfill{$\qed$}\\[10pt]
+\end{document}

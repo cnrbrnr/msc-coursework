@@ -1,0 +1,89 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \noindent{\bf Problem 3}\\[5pt]
+    Let $(\Omega,\mc{F},P)$ be the probability space where $\Omega=[0,1]$, $\mc{F}$ is the Borel $\sigma$-field and $P$ is the Lebesgue measure. Fix $a>0$ and define
+    $X$, $(X_n)_{n\geq 2}$ so that $X(\omega)=2a\1{[\tfrac{1}{2},1]}(\omega)$ and $X_n(\omega)=-2na\1{(\tfrac{1}{2}-\tfrac{1}{n},\tfrac{1}{2})}(\omega)+X(\omega)$ for $n\geq 2$.
+    Show that $(X_n)_{n\geq 2}$ converges to $X$ almost surely as $n\rightarrow\infty$ but $\lim_{n\rightarrow\infty}\E(X_n)\neq \E(X)$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix $\varepsilon>0$ and let $A^\varepsilon_k:=\{\omega\in\Omega:\forall n\geq k,\;|X_n(\omega)-X(\omega)|<\varepsilon\}$. Observing both that $|X_n(\omega)-X(\omega)|=2na\1{(1/2-1/n,1/2)}(\omega)$ for any $\omega\in\Omega$, and $A_n\subset A_{n+1}$ for $n\geq 2$, we have
+    \begin{align*}
+        P\bp{\bigcup_{N=2}^\infty\bigcap_{n\geq N}\{\omega\in\Omega:|X_n(\omega)-X(\omega)|<\varepsilon\}}=P\bp{\bigcup_{N=2}^\infty A_N^\varepsilon}&=\lim_{N\rightarrow\infty}P(A_N^\varepsilon)\tag{since $A_n\subset A_{n+1}$, for $n\geq 2$}\\
+        &=\lim_{N\rightarrow\infty}P\bp{\bigcap_{n\geq N}\{\omega\in\Omega:2na\1{(1/2-1/n,1/2)}(\omega)<\varepsilon\}}\\
+        &=\lim_{N\rightarrow\infty}P\bp{\bigcap_{n\geq N}([0,1/2-1/n]\cup[1/2,1])}\tag{taking $\varepsilon<2a$}\\
+        &=\lim_{N\rightarrow\infty}P([0,1/2-1/N]\cup[1/2,1])\\
+        &=\lim_{N\rightarrow\infty}\frac{1}{2}+\frac{1}{2}-\frac{1}{N}\\
+        &=1.
+    \end{align*}
+    So the event $\Omega_\varepsilon:=\cup_{N=2}^\infty\cap_{n\geq N}\{|X_n-X|<\varepsilon\}\subset\Omega$ where $(X_n)_{n\geq 2}$ is eventually $\varepsilon$-close to $X$ occurs $\wip$ $1$. Since $\varepsilon>0$ was arbitrary, for any $q\in\mbb{Q}$ with $q>0$
+    we may similarly define $\Omega_q:=\cup_{N=2}^\infty\cap_{n\geq N}\{|X_n-X|<q\}$ which also occurs $\wip$ $1$. Then
+    \begin{align*}
+        P\bp{X_n\underset{n\rightarrow\infty}{\longrightarrow}X}=P\bp{\{\omega\in\Omega:\lim_{n\rightarrow\infty}X_n(\omega)=X(\omega)\}}&=P\bp{\bigcap_{\substack{q\in\mbb{Q} \\ q>0}}\bigcup_{N=2}^\infty\bigcap_{n\geq N}\{\omega\in\Omega:|X_n(\omega)-X(\omega)|<q\}}\\
+        &=P\bp{\bigcap_{\substack{q\in\mbb{Q} \\ q>0}}\Omega_q}\\
+        &=1
+    \end{align*}
+    which says that $X_n\overunderset{\as}{n\rightarrow\infty}{\longrightarrow} X$. Here we used the fact that an up to countable intersection of events with probability $1$ also has probability $1$. We may now compute
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\E(X_n)&=\lim_{n\rightarrow\infty}\int_0^1-2na\1{(1/2-1/n,1/2)}(\omega)+X(\omega)P(d\omega)\\
+        &=\lim_{n\rightarrow\infty}-2a\int_{0}^1n\1{(1/2-1/n,1/2)}(\omega)P(d\omega)+\int_0^1X(\omega)P(d\omega)\\
+        &=\E(X)-2a\lim_{n\rightarrow\infty}n\int_{\tfrac{1}{2}-\tfrac{1}{n}}^{\tfrac{1}{2}}P(d\omega)\\
+        &=\E(X)-2a\lim_{n\rightarrow\infty}n\bp{\frac{1}{2}-\frac{1}{2}+\frac{1}{n}}\\
+        &=\E(X)-2a
+    \end{align*}
+    so that $\E(X_n)\nrightarrow\E(X)$ as $n\rightarrow\infty$. Thus, the sequence $(X_n)_{n\geq 2}$ converges almost surely to $X$, and yet the sequence of first moments $(\E(X_n))_{n\geq 2}$ does not converge to $\E(X)$.\hfill{$\qed$}\\[5pt]
+\end{document}

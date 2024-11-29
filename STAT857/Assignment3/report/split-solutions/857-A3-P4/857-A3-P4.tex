@@ -1,0 +1,70 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 3} \hfill {\bf Connor Braun} \hfill {\bf 2024-03-03}
+    \end{center}
+    \noindent{\bf Problem 4}\\[5pt]
+    Let $\sigma(z)=\log(1+e^{-z})$ for $x\in\mbb{R}$. By differentiating, show that it is a convex function. Further, show that for a fixed $\beta\in\mbb{R}^p$, the function
+    $f(x)=\log(1+e^{-\beta^Tx})$ for $x\in\mbb{R}^p$ is convex.\\[5pt]
+    {\bf Proof}\hspace{5pt} Observing first that $\text{dom}(\sigma)=\mbb{R}$ and $\text{dom}(f)=\mbb{R}^p$ are both convex sets, we may proceed directly by differentiating $\sigma$ twice to find
+    \begin{align*}
+        \sigma^\prime(z)=\frac{-e^{-z}}{1+e^{-z}},\qquad \sigma^{\prime\prime}(z)=\frac{e^{-z}(1+e^{-z})+e^{-z}(-e^{-z})}{(1+e^{-z})^2}=\frac{e^{-z}+e^{-2z}-e^{-2z}}{(1+e^{-z})^2}=\frac{e^{-z}}{(1+e^{-z})^2}>0\quad\forall z\in\mbb{R}
+    \end{align*}
+    so indeed, $\sigma$ is strictly convex on $\mbb{R}$. Next, let $\alpha\in[0,1]$ and $x,y\in\mbb{R}^p$. Then, setting $z_1=\beta^Tx$ and $z_2=\beta^Ty$ we get
+    \begin{align*}
+        f(\alpha x+(1-\alpha y))=\log\bp{1+e^{-\beta^T(\alpha x+(1-\alpha)y)}}&=\log\bp{1+e^{-(\alpha z_1+(1-\alpha)z_2)}}\\
+        &=\sigma(\alpha z_1+(1-\alpha)z_2)\\
+        &<\alpha\sigma(z_1)+(1-\alpha)\sigma(z_2)\tag{since $\sigma$ strictly convex}\\
+        &=\alpha\log\bp{1+e^{-\beta^Tx}}+(1-\alpha)\log\bp{1+e^{-\beta^Ty}}\\
+        &=\alpha f(x)+(1-\alpha)f(y)
+    \end{align*}
+    which says that $f$ is also strictly convex on $\mbb{R}^p$.\hfill{$\qed$}
+\end{document}

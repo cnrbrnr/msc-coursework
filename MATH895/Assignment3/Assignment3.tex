@@ -1,0 +1,431 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Aspects of the solutions presented are the result of collaboration with colleagues. Of particular help were Osman Bicer (problem 1, bounding the probability of rolling 7 below to obtain a contradiction), Yichen Zhou (problem 7, for helping with the form of sequence of densities), Anthony Pasion (problems 5, for pointing out that $p$ is an integer in the computation of the moments of $Y_a^p$; problem 10, for
+            much discussion on possible solution strategies) and Qixia Liu (problem 10, for suggesting the use of one-sided derivatives in the computation of $\varphi_{S_n}$). I would also like to acknowledge Professor Cellarosi for his help during office hours and in particular the method of handling the $o\bp{\frac{\pi}{nx}}$ term in problem 8; the same used in the proof of the local limit theorem presented in lecture.
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    {\bf Problem 1}\\[5pt]
+    Prove that you cannot load two dice in such a way that the probabilities of all sums from 2 to 12 are the same.\\[5pt]
+    {\bf Proof}\hspace{5pt} Define $D=\{1,2,3,4,5,6\}$ with random variables $X_1,X_2$ so that
+    $P(X_1=k)=p_k$ and $P(X_2=k)=q_k$ for $k\in D$. To be pedantic, we can specify $X_i:(D,2^D,P)\rightarrow (\mbb{R},\mc{B}(\mbb{R}))$ with $X_i(k)=k$ for all $k\in D$, $i=1,2$.\\[5pt]
+    Now, define $S=\{m+n:m,n\in D\}$ and assume for the purpose of deriving a contradiction that for $k\in D$, $\exists p_k,q_k$, with $\sum_{k\in D}p_k=\sum_{k\in D}q_k=1$ so that $\mathcal{L}(X_1+X_2)(\{\ell\})=\tfrac{1}{|S|}=\tfrac{1}{11}$ $\forall \ell\in S$.
+    But from our construction, the laws of the die are given by
+    \begin{align*}
+        \mc{L}(X_1)=\sum_{k\in D}p_k\delta_k,\quad\text{and}\quad\mc{L}(X_2)=\sum_{k\in D}q_k\delta_k
+    \end{align*}
+    so that, for $\{\ell\}\in S$, we may compute the probability of the sum by convolving the laws
+    \begin{align*}
+        \frac{1}{11}=\mc{L}(X_1+X_2)(\{\ell\})&=\int_\mbb{R}\mc{L}(X_1)(\{\ell\}-x)d\mc{L}(X_2)(x)\\
+        &=\int_\mbb{R}\bp{\sum_{k\in D}p_k\delta_k(\{\ell\}-x)}d\bp{\sum_{t\in D}q_t\delta_t(x)}\\
+        &=\sum_{k\in D}\sum_{t\in D}\int_\mbb{R}p_kq_t\delta_k(\{\ell\}-x)d\delta_t(x)\\
+        &=\sum_{t\in D}p_{\ell-t}q_t
+    \end{align*}
+    where the final equality holds by the so-called sifting property of the Dirac delta function [3]. We adopt the convention that $p_n=0$ whenever $n\notin D$. This gives us
+    \[\frac{1}{11}=\mc{L}(X_1+X_2)(\{2\})=p_1q_1\quad\Rightarrow\quad p_1=\frac{1}{11q_1}\quad\text{and}\quad\frac{1}{11}=\mc{L}(X_1+X_2)(\{12\})=p_6q_6\quad\Rightarrow\quad p_6=\frac{1}{11q_6}\]
+    where we with which we can produce an interesting lower bound on $P(X_1+X_2=7)$:
+    \begin{align*}
+        \frac{1}{11}=\mc{L}(X_1+X_2)(\{7\})=\sum_{k\in D}p_{7-k}q_k
+        &\geq p_6q_1+p_1q_6\\
+        &=\frac{1}{11}\bp{\frac{q_1}{q_6}+\frac{q_6}{q_1}}\\
+        &=\frac{1}{11}\bp{\frac{q_1^2+q_6^2}{q_6q_1}}\\
+        &\geq \frac{2}{11}
+    \end{align*}
+    which the last equality holding since $0\leq (q_1-q_6)^2=q_1^2-2q_1q_6+q_6^2$, so $2q_1q_6\leq q_1^2+q_6^2$. Thus, we have a contradiction and conclude that there is no such choice of $p_i,q_i$ for $i\in D$ so that the probabilities of all sums from 2 to 12 are the same.\\[5pt]
+    Importantly, no valid loading of the die could allow $q_i=0$ or $p_i=0$ for $i=1,6$, since then
+    the probabilities of rolling a sum of 2 or 12 would be zero, forcing the probabilities of sums 3 to 11 to be zero as well, so all dice faces would occur with probability zero on at least one of them -- another contradiction.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 2}\\[5pt]
+    Let the real-valued random variable $X$ have density $f$. Let $\alpha,\beta\in\mbb{R}$ with $\alpha\neq 0$. Suppose that $Y=\alpha X+\beta$. Find the density of $Y$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Let $\lambda$ be the Lebesgue measure on $\mc{B}(\mbb{R})$. Then we proceed by finding the Radon-Nikodym derivative of $\mc{L}(Y)$. For this, take $A\in\mc{B}(\mbb{R})$. Then,
+    \begin{align*}
+        \mc{L}(Y)(A)=P(Y^{-1}(A))=P((\alpha X+\beta)^{-1}(A))=P\bp{X^{-1}\bp{\frac{A-\beta}{\alpha}}}=\mc{L}(X)\bp{\frac{A-\beta}{\alpha}}
+    \end{align*}
+    where we define $\tfrac{A-\beta}{\alpha}=\{x\in\mbb{R}:\alpha x+\beta\in A\}$ and used $\{\alpha X+\beta\in A\}=\{X\in\tfrac{A-\beta}{\alpha}\}$ to justify the second-to-last equality. With this, we have
+    \begin{align*}
+        \mc{L}(Y)(A)=\mc{L}(X)\bp{\frac{A-\beta}{\alpha}}&=\int_{\frac{A-\beta}{\alpha}}f(x)\lambda(dx)\\
+        &=\int_A\frac{1}{\alpha}f\bp{\frac{t-\beta}{\alpha}}\lambda(dt)
+    \end{align*}
+    having applied the change of variables $t=\alpha x+\beta$ so that $x\in\tfrac{A-\beta}{\alpha}$ implies that $t\in A$. Of course, if $A$ were to be such that $\lambda(A)=0$, then by the above expression $\mc{L}(Y)(A)=0$ too, so $L(Y)\ll\lambda$ and $\tfrac{d\mc{L}(Y)}{d\lambda}(x)=\frac{1}{\alpha}f\bp{\tfrac{x-\beta}{\alpha}}$ is
+    the density of $Y$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 3}\\[5pt]
+    Let $X$ be a real-valued random variable whose distribution function $F$ is continuous. Find the distribution function of $Y=F(X)$.\\[5pt]
+    {\bf Solution}\hspace{5pt} With $x<0$, we have $P(Y\leq x)=P(F(X)\leq x)=0$, since $F(t)\geq 0$ $\forall t\in\mbb{R}$. Similarly, when $1\leq x$, $P(Y\leq x)=P(F(X)\leq x)=1$.
+    More interesting is the case where $0\leq x<1$. For this, let $\mc{T}_x=\{t\in\mbb{R}:F(t)\leq x\}$ and $s_x=\sup\mc{T}_x$. Take $(t_n)_{n\geq 1}\subset\mc{T}_x$ with $t_n\rightarrow s_x$ as $n\rightarrow\infty$. Then
+    \[F(t_n)\leq x\quad\forall n\geq 1\quad\Rightarrow\quad\lim_{n\rightarrow\infty}F(t_n)=F(s_x)\leq x\tag{1}\]
+    since $F$ is continuous. That is, $s_x\in\mc{T}_x$. Further, if $t<s_x$, then $F(t)\leq F(s_x)\leq x$ since $F$ is monotonically increasing, so $t\in\mc{T}_x$. Thus, we have
+    $\mc{T}_x=(-\infty,s_x]$. This allows us to write
+    \[\{\omega\in\Omega:F(X(\omega))\leq x\}=\{\omega\in\Omega:X(\omega)\in\mc{T}_x\}=\{\omega\in\Omega:X(\omega)\in(-\infty,s_x]\}.\tag{2}\]
+    Now set $\{x_n\}_{n\geq 1}$ so that $x_n\searrow s_x$ and $\{x_n\}_{n\geq 1}\subset\mbb{R}\setminus\mc{T}_x$. We have
+    \[F(x_n)\geq x\quad\forall n\geq 1\quad\Rightarrow\quad\lim_{n\rightarrow\infty}F(x_n)=F(s_x)\geq x\]
+    since $F$ continuous. With this and (1), we obtain $F(s_x)=x$ and so
+    \begin{align*}
+        P(Y\leq x)=P(F(X)\leq x)&=P(X\leq s_x)\tag{by (2)}\\
+        &=F(s_x)\\
+        &=x.
+    \end{align*}
+    With this, we may write the distribution function of $Y$: 
+    \begin{align*}
+        P(Y\leq x)=\begin{cases}
+            0\quad&\text{if $x<0$}\\
+            x\quad&\text{if $0\leq x<1$}\\
+            1\quad&\text{if $1\leq x$}
+        \end{cases}
+    \end{align*}
+    which is precisely the distribution of a standard uniform random variable.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 4}\\[5pt]
+    Let $\alpha,\beta>0$. Recall that a real-valued random variable $X$ with density
+    \begin{align*}
+        f_{\alpha,\beta}(x)=\begin{cases}
+            \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha-1}e^{\beta x}\quad&\text{if $x\geq 0$,}\\
+            0\quad&\text{if $x<0$.}
+        \end{cases}
+    \end{align*}
+    is called a gamma random variable with shape $\alpha$ and rate $\beta$. Let $\alpha_1,\alpha_2,\beta>0$ and suppose that $X_1,X_2$ are independent gamma random variables,
+    where $X_i$ has shape $\alpha_i$ and rate $\beta$ for $i=1,2$. Show that $X_1+X_2$ is a gamma random variable with rate $\alpha_1+\alpha_2$ and rate $\beta$.\\[5pt]
+    {\bf Proof}\hspace{5pt} We may compute the density of $\mc{L}(X_1+X_2)=\mc{L}(X_1)\ast\mc{L}(X_2)$ directly to verify the claim. Let $h$ be the density of $\mc{L}(X_1+X_2)$. Take $x\in\mbb{R}$
+    \begin{align*}
+        h(x)=\int_{\mbb{R}}f_{\alpha_1,\beta}(x-y)f_{\alpha_2,\beta}(y)dy
+        &=\int_0^x\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}(x-y)^{\alpha_1-1}e^{-\beta(x-y)}y^{\alpha_2-1}e^{-\beta y}dy
+    \end{align*}
+    where we restrict the region of integration since $f_{\alpha_1,\beta}(x-y)f_{\alpha_2,\beta}(y)\geq 0\;\Leftrightarrow\;x\geq y\geq 0$, so we further require $x\geq 0$. Continuing,
+    \begin{align*}
+        h(x)&=\int_0^x\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}(x-y)^{\alpha_1-1}e^{-\beta(x-y)}y^{\alpha_2-1}e^{-\beta y}dy
+        =\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}e^{-\beta x}\int_0^x(x-y)^{\alpha_1-1}y^{\alpha_2-1}dy\\
+    \end{align*}
+    and now focusing on the computation of the integral:
+    \begin{align*}
+        \int_0^x(x-y)^{\alpha_1-1}y^{\alpha_2-1}dy&=\int_0^1(x-tx)^{\alpha_1-1}(tx)^{\alpha_2-1}xdt\tag{substituting $y=tx$}\\
+        &=x^{\alpha_1+\alpha_2-1}\int_0^1(1-t)^{\alpha_1-1}t^{\alpha_2-1}dt\\
+        &=x^{\alpha_1+\alpha_2-1}B(\alpha_1,\alpha_2)
+    \end{align*}
+    where for $z,w>0$ we define $B(z,w):=\int_0^1(1-t)^{z-1}t^{w-1}dt$ the beta function which satisfies the identity [1]
+    \[B(z,w)=\frac{\Gamma(z)\Gamma(w)}{\Gamma(z+w)}\] 
+    so that our density function can now be written
+    \begin{align*}
+        h(x)=\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}\frac{\Gamma(\alpha_1)\Gamma(\alpha_2)}{\Gamma(\alpha_1+\alpha_2)}x^{\alpha_1+\alpha_2-1}e^{-\beta x}=\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1+\alpha_2)}x^{\alpha_1+\alpha_2-1}e^{-\beta x}=f_{\alpha_1+\alpha_2,\beta}(x).
+    \end{align*}
+    Of course, when $x<0$, the original integral vanishes and $h(x)=0$. Thus, the density of $\mc{L}(X_1+X_2)$ is the gamma density with shape $\alpha_1+\alpha_2$ and rate $\beta$, as claimed.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 5}\\[5pt]
+    Let $X$ be a standard normal random variable, i.e. the density of $X$ is $\tfrac{1}{\sqrt{2\pi}}e^{-x^2/2}$, $x\in\mbb{R}$. Let $Y=e^X$. We say that $Y$ is a {\it log-normal} random variable.
+    Prove that the density of $Y$ is $f(x)=\tfrac{1}{x\sqrt{2\pi}}e^{-(\log(x))^2/2}\1{(0,\infty)}(x)$. Let now $a\in\mbb{R}$ with $|a|\leq1$. Define $f_a(x)=(1+a\sin(2\pi\log(x)))f(x)$. Show that $f_a$ is the density of a random variable $Y_a$
+    with $\E{(Y_a^p)}<\infty$ for all $p\geq0$, and that none of the moments depend on $a$.\\[5pt]
+    {\bf Proof} We can identify the density of $Y$ by finding the Radon-Niokdym derivative of its law. Let $(\Omega,\mc{F},P)$ be the probability space on which all random variables are defined. Observe that $Y=e^X$ means that $Y$ is $(0,\infty)$-valued,
+    so we may take $A\in\mc{B}(\mbb{R})$ satisfying $A\cap(0,\infty)=A$ in the computations that follow:
+    \begin{align*}
+        \mc{L}(Y)(A)=P(Y^{-1}(A))=P(\{\omega\in\Omega:e^{X(\omega)}\in A\})P(\{\omega\in\Omega:X(\omega)\in\log(A)\})&=\mc{L}(X)(\log(A))\\
+        &=\int_{\log(A)}\frac{1}{\sqrt{2\pi}}e^{-x^2/2}dx\\
+        &=\int_A\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}
+    \end{align*}
+    where the last equality holds by making a change of variables $x=\log(t)$. But this holds for every $A\in\mc{B}((0,\infty))$, so we find the density of $Y$ to be
+    \begin{align*}
+        f(x)=\frac{1}{x\sqrt{2\pi}}e^{-(\log(x))^2/2}\1{(0,\infty)}(x)
+    \end{align*}
+    as desired. Taking $|a|\leq1$, we may show that $f_a$ corresponds to the density of a random variable by establishing that it defines a valid distribution function. We define
+    \[F_a(x)=\int_{-\infty}^xf_a(t)dt=\int_{0}^x(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt.\] 
+    First, observe that $F_a(x)=0$ $\forall x\leq 0$, so $\lim_{x\rightarrow-\infty}F_a(x)=0$. Next, we have $\forall x\in\mbb{R}$,
+    \begin{align*}
+        a\sin(2\pi\log(x))\geq -a\quad\Rightarrow\quad 1+a\sin(2\pi\log(x))\geq 1-a\geq 0
+    \end{align*}
+    and further $f(x)\geq 0$ so that $f_a\geq 0$ on $\mbb{R}$, and thus $F_a$ is monotonically increasing on $\mbb{R}$. Next we have
+    \begin{align*}
+        \lim_{x\rightarrow\infty}F_a(x)=\int_{-\infty}^\infty f_a(t)dt&=\int_0^\infty(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=\int_{-\infty}^\infty f(t)dt+a\int_{0}^\infty \sin(2\pi\log(t))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=1+a\int_{-\infty}^\infty\sin(2\pi u)\frac{1}{\sqrt{2\pi}}e^{-u^2/2}du\tag{setting $u=\log(t)$}\\
+        &=1
+    \end{align*}
+    with the last equality holding since we are integrating the product of an odd and even function over $\mbb{R}$. Lastly, we must establish the right-continuity of $F_a$. For this, take $x\in\mbb{R}$ and a sequence $\{x_n\}_{n\geq 1}$ with $x_n\searrow x$ as $n\rightarrow\infty$. We may impose $x\geq0$ and $\{x_n\}_{n\geq 1}\subset(0,\infty)$,
+    since otherwise we will have trivial limiting behavior in the sense that $\exists N\in\mbb{N}$ so that $n\geq N$ implies $F_a(x_n)=0$. Then we find
+    \begin{align*}
+        \lim_{n\rightarrow\infty}F_a(x_n)=\lim_{n\rightarrow\infty}\int_0^{x_n}f_a(t)dt&=\lim_{n\rightarrow\infty}\int_0^{x_n}(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=\lim_{n\rightarrow\infty}\int_{\mbb{R}}(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\1{(0,x_n]}dt\\
+        &=\int_0^x(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\tag{dominated convergence}\\
+        &=F_a(x)
+    \end{align*} 
+    where the dominated convergence theorem is applicable since $(1+a(\sin(2\pi\log(t))))\tfrac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\1{(0,x_n)}(t)$ is non-negative and dominated by $f_a$, which itself is $L^1$ integrable. Furthermore, since $(0,x_n]\supset (0,x_{n+1}]$ for $n\geq 1$, $\lim_{n\rightarrow\infty}(0,x_n]=(0,x]$ and so $\lim_{n\rightarrow\infty}\1{(0,x_n]}=\1{(0,x]}$, yielding the above result.
+    \\[5pt]
+    We have established that $F_a(x)$ is monotonically increasing on $\mbb{R}$, approaching zero as $x\rightarrow-\infty$ and one as $x\rightarrow\infty$, and is right-continuous, so it is
+    a distribution function and corresponds to the law of a random variable, which we shall designate $Y_a$.\\[5pt]
+    Take $p\in\mbb{N}\cup\{0\}$, and let us compute the $p$-th moment of $Y_a$.
+    \begin{align*}
+        \E{(Y_a^p)}=\int_\mbb{R}t^p(1+a\sin(2\pi\log(t)))f(t)dt&=\int_\mbb{R}t^pf(t)dt+a\int_\mbb{R}t^pf(t)\sin(2\pi\log(t))dt\\
+        &=\int_0^\infty\frac{t^p}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt+a\int_0^\infty\frac{t^p}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\sin(2\pi\log(t))dt\\
+        &=\int_{-\infty}^\infty \frac{e^{pu}}{\sqrt{2\pi}}e^{-u^2/2}du+a\int_{-\infty}^\infty\frac{e^{pu}}{\sqrt{2\pi}}e^{-u^2/2}\sin(2\pi u)du\tag{setting $u=\log(t)$}
+    \end{align*}
+    completing the square, we get $u^2-2pu=(u-p)^2-p^2$, such that the above becomes
+    \begin{align*}
+        \E{(Y_a^p)}&=\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-(u^2-2pu)/2}du+a\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-(u^2-2pu)/2}\sin(2\pi u)du\\
+        &=e^{p^2/2}\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-(u-p)^2/2}du+ae^{p^2/2}\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-(u-p)^2/2}\sin(2\pi u)du\\
+        &=e^{p^2/2}\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-y^2/2}dy+ae^{p^2/2}\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-y^2/2}\sin(2\pi p+2\pi y)dy.
+    \end{align*}
+    The integral in the first term is just the standard gaussian density over the real line and thus equals one. In the second integral, $\sin(2\pi p+2\pi y)=\sin(2\pi y)$ since $p$ is a fixed integer, so this is actually just the integral of the product of an even function (the Gaussian kernel) with an odd function ($\sin(2\pi y)$) and is thus zero. With this, we arrive at
+    \[\E{(Y_a^p)}=e^{p^2/2}<\infty\]
+    which does not depend on the selection of $a$. This holds for any non-negative integer $p$ and real $a$ with $|a|\leq 1$, so we have constructed an uncountable family of random variables with mutually distinct laws but all moments equal.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 6}\\[5pt]
+    For each $n\geq 1$, let $P_n$ be a probability measure on $\mc{B}(\mbb{R})$ with density $f_n(x)=(1+\sin(2\pi nx))\1{[0,1]}(x)$, $x\in\mbb{R}$. Let $P$ be a probability measure on $\mc{B}(\mbb{R})$ with density $\1{[0,1]}(x)$, $x\in\mbb{R}$. Prove or disprove: $P_n\Longrightarrow P$ as $n\rightarrow\infty$.\\[5pt]
+    The statement is true.\\[5pt]
+    {\bf Proof}\hspace{5pt} Pointwise convergence of characteristic functions is equivalent to weak convergence of the corresponding measures. Thus, we will show that the sequence of characteristic functions $\{\varphi_n\}_{n\geq 1}$ corresponding to the laws $\{P_n\}_{n\geq 1}$ converge pointwise on $\mbb{R}$ to $\varphi$, the characteristic function of $P$.\\[5pt]
+    For $n\geq 1$, we find that
+    \begin{align*}
+        \varphi_n(t)=\int_\mbb{R}e^{itx}P_n(dx)=\int_\mbb{R}e^{itx}f_n(x)dx&=\int_0^1e^{itx}(1+\sin(2\pi nx))dx\\
+        &=\int_0^1e^{itx}+(\cos(tx)+i\sin(tx))\sin(2\pi nx)dx\\
+        &=\int_\mbb{R}e^{itx}\1{[0,1]}(x)dx+\int_0^1\cos(tx)\sin(2\pi nx)dx+i\int_0^1\sin(tx)\sin(2\pi nx)dx.
+    \end{align*}
+    The first term here is just $\varphi(t)$, so we need only compute the second two integrals. Using trigonometric product-sum identities [1], we compute
+    \begin{align*}
+        \varphi_n(t)-\varphi(t)&=\int_0^1\cos(tx)\sin(2\pi nx)dx+i\int_0^1\sin(tx)\sin(2\pi nx)dx\\
+        &=\frac{1}{2}\int_0^1\sin((2\pi n+t)x)+\sin((2\pi n-t)x)dx+\frac{i}{2}\int_0^1\cos((2\pi n-t)x)-\cos((2\pi n+t)x)dx\\
+        &=\frac{-\cos((2\pi n+t)x)-i\sin((2\pi n+t)x)}{4\pi n+2t}\bigg|_0^1+\frac{-\cos((2\pi n-t)x)+i\sin((2\pi n -t)x)}{4\pi n-2t}\bigg|_0^1\\
+        &=\frac{-\cos(2\pi n+t)-i\sin(2\pi n+t)+1}{4\pi n+2t}+\frac{-\cos(2\pi n-t)+i\sin(2\pi n -t)+1}{4\pi n-2t}\\
+        &=\frac{-\cos(t)-i\sin(t)+1}{4\pi n+2t}+\frac{-\cos(-t)+i\sin(-t)+1}{4\pi n-2t}
+    \end{align*}
+    since $\sin$ and $\cos$ are $2\pi$-periodic. Thus, for any $t\in\mbb{R}$ we have
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\varphi_n(t)-\varphi(t)=\lim_{n\rightarrow\infty}\bp{\frac{-\cos(t)-i\sin(t)+1}{4\pi n+2t}+\frac{-\cos(-t)+i\sin(-t)+1}{4\pi n-2t}}=0
+    \end{align*}
+    so indeed, $\varphi_n\rightarrow\varphi$ pointwise on $\mbb{R}$ as $n\rightarrow\infty$, and we conclude that $P_n\Longrightarrow P$ as $n\rightarrow\infty$, as claimed.\hfill{$\qed$\\[5pt]}
+    {\bf Problem 7}\\[5pt]
+    Let $a_1,a_2,a_3\dots$ be a sequence of non-negative real numbers such that $\sum_{i=1}^\infty a_i=1$. Let $P$ be the measure on $\mc{B}(\mbb{R})$ defined as $\sum_{i=1}^\infty a_i\delta_i$. Find a sequence of probability measures $(P_n)_{n\geq 1}$, each having density
+    with respect to the Lebesgue measure on $\mbb{R}$, such that $P_n\Longrightarrow P$ as $n\rightarrow\infty$\\[5pt]
+    {\bf Solution}\hspace{5pt} For $n\geq 1$, define the function $f_n:\mbb{R}\rightarrow[0,1]$ by
+    \begin{align*}
+        f_n(x)=\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\1{\left[k-\tfrac{1}{n},k+\tfrac{1}{n}\right]}(x).
+    \end{align*}
+    Next, define a sequence of functions $\{F_n\}_{n\geq 1}$ with
+    \begin{align*}
+        F_n(x)=\int_{-\infty}^xf_n(t)dt=\int_{-\infty}^x\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\1{\left[k-\tfrac{1}{n},k+\tfrac{1}{n}\right]}(t)dt.
+    \end{align*}
+    We will show that $F_n$ is a distribution function, implying that $f_n$ is the corresponding density for $n\geq 1$. First, for $n\geq 1$ we have
+    \begin{align*}
+        \lim_{x\rightarrow\infty}F_n(x)=\int_{-\infty}^\infty\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\1{\left[k-\tfrac{1}{n},k+\tfrac{1}{n}\right]}(t)dt=\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\int_{k-\tfrac{1}{n}}^{k+\tfrac{1}{n}}dt=\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\frac{2}{n}=1
+    \end{align*}
+    and
+    \begin{align*}
+        \lim_{x\rightarrow-\infty}F_n(x)=\lim_{x\rightarrow-\infty}\int_{-\infty}^xf_n(t)dt=0.
+    \end{align*}
+    Further, $f_n$ is non-negative on $\mbb{R}$, so $F_n$ is non-decreasing on $\mbb{R}$. To establish the right-continuity of $F_n$, take some $\alpha\in\mbb{R}$ and $\{x_n\}_{n\geq 1}$ with $x_n\searrow\alpha$ as $n\rightarrow\infty$. Then $(-\infty,x_n]\supset(-\infty,x_{n+1}]$ for all $n\geq 1$, so $\lim_{n\rightarrow\infty}(-\infty,x_n]=\cap_{n\geq 1}(-\infty,x_n]=(-\infty,x]$, and thus $\lim_{n\rightarrow\infty}\1{(-\infty,x_n]}=\1{(-\infty,x]}$. Fixing $n\geq 1$ for the moment, we find
+    \begin{align*}
+        \lim_{k\rightarrow\infty}F_n(x_k)=\lim_{k\rightarrow\infty}\int_{-\infty}^{x_k}f_n(t)dt&=\lim_{k\rightarrow\infty}\int_{-\infty}^\infty f_n(t)\1{(-\infty,x_k]}(t)dt\\
+        &=\int_{-\infty}^\infty \lim_{k\rightarrow\infty}f_n(t)\1{(-\infty,x_k]}(t)dt\tag{by dominated convergence}\\
+        &=\int_{-\infty}^\infty f_n(t)\1{(-\infty,x]}(t)dt\\
+        &=\int_{-\infty}^xf_n(t)dt\\
+        &=F_n(x)
+    \end{align*}
+    so indeed, $F_n$ is right-continuous. The dominated convergence theorem is applicable here, since $\forall k\geq 1$, $|f_n(t)\1{(-\infty,x_k]}(t)|\leq f_n(t)\in L^1(\mbb{R})$. \\[5pt]
+    With this finding, we conclude that $\forall n\geq 1$, $F_n$ is a distribution corresponding to some random variable (call it $X_n$)
+    admitting a density $f_n$. We can also compute the distribution function corresponding to $P$, which we shall denote $F$. For $x\in\mbb{R}$, we have
+    \begin{align*}
+        F(x)=\int_{-\infty}^xP(dx)=\int_{-\infty}^x\sum_{i=1}^\infty a_i\delta_i(dx)=\sum_{i\in\mbb{N}:i\leq x}a_i
+    \end{align*}
+    with points of discontinuity at all $i\in\mbb{N}$. We proceed by establishing the antecedent of the Helly-Bray theorem. For this, take $x\in\mbb{R}\setminus\mbb{N}$. If $x<1$, then $F_n(x)=0$ $\forall n\geq 1$ and $F(x)=0$, and we have trivial convergence of $F_n(x)$ to $F(x)$ as $n\rightarrow\infty$ at this point.
+    Instead, let us take $x$ positive so that $m<x<m+1$ for some $m\in\mbb{N}$. Then, take $N\in\mbb{N}$ sufficiently large so that $x\notin\left[m-\tfrac{1}{n},m+\tfrac{1}{n}\right]\cup\left[(m+1)-\tfrac{1}{n},(m+1)+\tfrac{1}{n}\right]$ and $n>x$ whenever $n\geq N$. Taking $n\geq N$, we find
+    \begin{align*}
+        F_n(x)&=\int_{-\infty}^x\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^n a_j}\frac{n}{2}\1{\left[k-\tfrac{1}{n},k+\tfrac{1}{n}\right]}(t)dt\\
+        &=\sum_{k=1}^n\frac{a_k}{\sum_{j=1}^na_j}\frac{n}{2}\int_{k-\tfrac{1}{n}}^{k+\tfrac{1}{n}}\1{(-\infty,x]}(t)dt\\
+        &=\sum_{k=1}^m\frac{a_k}{\sum_{j=1}^n a_j}\frac{n}{2}\frac{2}{n}\tag{3}\\
+        &=\frac{\sum_{k=1}^ma_k}{\sum_{j=1}^na_j}
+    \end{align*}
+    passing this expression to the limit:
+    \begin{align*}
+        \lim_{n\rightarrow\infty}F_n(x)=\lim_{n\rightarrow\infty}\frac{\sum_{k=1}^ma_k}{\sum_{j=1}^na_j}=\frac{\sum_{k=1}^ma_k}{\sum_{j=1}^\infty a_j}=\sum_{k\in\mbb{N}:k<x}a_k=F(x)
+    \end{align*}
+    so we have that $F_n\rightarrow F$ pointwise on $\mbb{R}\setminus\mbb{N}$ (where $\mbb{N}$ are the set of discontinuities of $F$) as $n\rightarrow\infty$. To see why (3) holds, observe that when our conditions on $x$ and $n$ hold we have:
+    \begin{align*}
+        \int_{k-\tfrac{1}{n}}^{k+\tfrac{1}{n}}\1{(-\infty,x]}(t)dt=\begin{cases}
+            \frac{2}{n}\quad&\text{if $\left[k-\tfrac{1}{n},k+\tfrac{1}{n}\right]\subset(-\infty,x]\;\Leftrightarrow\;k<x$}\\
+            0\quad&\text{if $k\geq x$.}
+        \end{cases}
+    \end{align*}
+    Of course, taking $n\geq N$ in our computations is of no consequence since we are interested in the limiting behavior of $F_n$. With all of this, and by the Helly-Bray theorem, we have that
+    $P_n\Longrightarrow P$ as $n\rightarrow\infty$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 8}\\[5pt]
+    A real-valued random variable is said to be {\it Cauchy} if its density is $f(x)=\frac{1}{\pi}\frac{1}{1+x^2}$, $x\in\mbb{R}$. Let $X_1,X_2,\dots$ be a sequence of $\iid$ Cauchy random variables, and
+    let $M_n=\max\{X_1,X_2\dots, X_n\}$. Prove that $\frac{\pi M_n}{n}$ converges in law as $n\rightarrow\infty$ to a random variable whose distribution function is $H(x)=e^{-1/x}\1{(0,\infty)}(x)$, $x\in\mbb{R}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Our goal is to apply the Helly-Bray theorem to establish weak convergence via convergence in distribution. Let us first obtain the distribution function of $\frac{\pi M_n}{n}$, calling it $F_n$.
+    \begin{align*}
+        F_n(x)=P\bp{\frac{\pi M_n}{n}\leq x}=P\bp{M_n\leq \frac{nx}{\pi}}=P\bp{X_1\leq \frac{nx}{\pi},X_2\leq\frac{nx}{\pi},\dots,X_n\leq\frac{nx}{\pi}}=\bp{P\bp{X_1\leq\frac{nx}{\pi}}}^n
+    \end{align*}
+    with the last equality holding under the assumption that $X_1,\dots,X_n$ are $\iid$ Computing the probability on the right hand side:
+    \begin{align*}
+        P\bp{X_1\leq\frac{nx}{\pi}}=\frac{1}{\pi}\int_{-\infty}^{\frac{nx}{\pi}}\frac{1}{1+x^2}dx=\frac{1}{\pi}\bp{\arctan(x)}\bigg|_{-\infty}^{\frac{nx}{\pi}}=\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}
+    \end{align*}
+    so the distribution function $F_n$ may be expressed
+    \begin{align*}
+        F_n(x)&=\bp{\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}}^n\tag{5}\\
+        &=\bp{\frac{1}{\pi}\bp{\frac{\pi}{2}-\arctan\bp{\frac{\pi}{nx}}}+\frac{1}{2}}^n\tag{6}\\
+        &=\bp{1-\frac{1}{\pi}\arctan\bp{\frac{\pi}{nx}}}^n.
+    \end{align*}
+    Where in (6) we assumed $x>0$ and used the fact that for $y\in\mbb{R}$, $\arctan(y)+\arctan(1/y)=\frac{\pi}{2}$ [1, p 79]. Turning our attention to (5) and supposing $x\leq 0$, we have $-\tfrac{\pi}{2}\leq\arctan(nx/\pi)\leq 0$, so $\tfrac{1}{2}\leq\tfrac{1}{\pi}\arctan(nx/\pi)\leq 0$ and so
+    \[0\leq \bp{\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}}^n=F_n(x)\leq\bp{\frac{1}{2}}^n\rightarrow 0=H(x)\quad\text{as\;$n\rightarrow\infty$}\]
+    so we find that $F_n(x)\rightarrow0$ for all $x\leq 0$ as $n\rightarrow\infty$. In the computations to follow we take $x>0$. For this, let us first obtain the exact first order Taylor expansion of $\arctan$, say at some $y\in\mbb{R}$:
+    \begin{align*}
+        \arctan(y)=\arctan(0)+\frac{d}{dx}\arctan(y)\big|_{y=0}(y-0)+o(y)=y+o(y)
+    \end{align*}
+    where $o(y)$ is such that $o(y)/y\rightarrow 0$ as $y\rightarrow 0$. Substituting this into (6) we obtain
+    \begin{align*}
+        F_n(x)=\bp{1-\frac{1}{\pi}\bp{\frac{\pi}{nx}+o\bp{\frac{\pi}{nx}}}}^n=\bp{1-\frac{1}{nx}+o\bp{\frac{\pi}{nx}}}^n.\tag{7}
+    \end{align*}
+    Now, consider the following bound
+    \begin{align*}
+        \left|\bp{1-\frac{1}{nx}+o\bp{\frac{\pi}{nx}}}^n-\bp{1-\frac{1}{nx}}^n\right|\leq\sum_{i=1}^no\bp{\frac{\pi}{nx}}=\frac{nx}{\pi}o\bp{\frac{\pi}{nx}}\frac{\pi}{x}\rightarrow 0\quad\text{as $n\rightarrow \infty$.}
+    \end{align*}
+    so, as $n$ grows large, (7) can be approximated arbitrarily well by $(1-\tfrac{1}{xn})^n$. Thus,
+    \[\lim_{n\rightarrow\infty}F_n(x)=\lim_{n\rightarrow\infty}\bp{1-\frac{1}{nx}}^n=e^{-1/x}\]
+    and we already established that $F_n(x)\rightarrow 0$ when $x\leq 0$, so we have the result
+    \[\lim_{n\rightarrow\infty}F_n(x)=e^{-1/x}\1{(0,\infty)}(x)=H(x)\]
+    for all $x\in\mbb{R}$, so by the Helly-Bray theorem, $\tfrac{\pi M_n}{n}$ converges in law to a random variable with distribution function is $H(x)$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 9}\\[5pt]
+    Let $\varphi_Z(t)=\E{(e^{itZ})}$ denote the characteristic function of the random variable $Z$. Prove the following.\\[5pt]
+    {\bf Theorem}\hspace{5pt} Let $X$, $Y$ be two independent, real-valued random variables. Then for every $t\in\mbb{R}$, we have $\varphi_{X+Y}(t)=\varphi_X(t)\varphi_Y(t)$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $t\in\mbb{R}$. Then
+    \begin{align*}
+        \varphi_{X+Y}(t)=\E{(e^{it(X+Y)})}=\E{(e^{itX}e^{itY})}=\E{(e^{itX})}\E{(e^{itY})}=\varphi_X(t)\varphi_Y(t)
+    \end{align*}
+    where the penultimate equality holds due to the independence of $X$ and $Y$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 10}\\[5pt]
+    Let $(X_k)_{k\geq 1}$ be a sequence of $\iid$ uniform random variables on $\left[-\tfrac{1}{2},\tfrac{1}{2}\right]$. Consider the sequence of random variables $(S_n)_{n\geq 1}$, defined as
+    $S_n=\tfrac{1}{n}\sum_{k=1}^n\tfrac{1}{X_k}$. Find the limit (in law) of $S_n$ as $n\rightarrow\infty$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Denote the characteristic functions of $S_n$, $1/X_n$ as $\varphi_{S_n}$, $\varphi_{X_n^{-1}}$ respectively. Then, using the previous result, we have
+    \begin{align*}
+        \varphi_{S_n}(t)=\E{\bp{e^{\tfrac{it}{n}\sum_{k=1}^n\tfrac{1}{X_k}}}}=\E{\bp{\prod_{k=1}^ne^{i\tfrac{t}{n}X_k^{-1}}}}=\prod_{k=1}^n\varphi_{X_k^{-1}}(t/n)=(\varphi_{X_1^{-1}}(t/n))^n
+    \end{align*}
+    with the last equality holding since the uniform random variables are $\iid$ Now, define $\varphi_{X_1^{-1}}^{+\prime}(t)$ and $\varphi_{X_1^{-1}}^{-\prime}$ to be the right- and left-sided derivatives of $\varphi_{X_1^{-1}}$ evaluated at $t\in\mbb{R}$, respectively. Specifically,
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{+\prime}(0)=\lim_{h\rightarrow 0^+}\frac{\varphi_{X_1^{-1}}(h)-\varphi_{X_1^{-1}}(0)}{h}=\lim_{h\rightarrow 0^+}\frac{1}{h}\bp{\int_\mbb{R}e^{\tfrac{ih}{x}}dx-1}=\lim_{h\rightarrow 0^+}\frac{1}{h}\bp{\int_{-1/2}^{1/2}e^{\tfrac{ih}{x}}dx-1}
+    \end{align*}
+    and identically,
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{-\prime}(0)=\lim_{h\rightarrow 0^-}\frac{1}{h}\bp{\int_{-1/2}^{1/2}e^{\tfrac{ih}{x}}dx-1}.
+    \end{align*}
+    In fact, we can simplify the integrands involved in both expressions somewhat:
+    \begin{align*}
+        \int_{-1/2}^{1/2}e^{\tfrac{ih}{x}}dx=\int_{-1/2}^{1/2}=\cos(h/x)+i\sin(h/x)dx=\int_{-1/2}^{1/2}\cos(h/x)dx
+    \end{align*}
+    but no further -- we turn to Wolfram Alpha to compute this integral, and obtain the result [4]:
+    \begin{align*}
+        \int_{-1/2}^{1/2}\cos(h/x)dx&=2h\int_0^{2h}\frac{\sin(t)}{t}dt+\cos(2h)-\pi|h|.
+    \end{align*}
+    Equipped with this expression, we may compute the one-sided derivatives of $\varphi_{X_1^{-1}}$ at $0$.
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{+\prime}(0)=\lim_{h\rightarrow 0^+}\frac{1}{h}\bp{2h\int_0^{2h}\frac{\sin(t)}{t}dt+\cos(2h)-\pi|h|-1}&=\lim_{h\rightarrow 0^+}2\int_0^{2h}\frac{\sin(t)}{t}dt-\frac{\pi h}{h}+\lim_{h\rightarrow 0^+}\frac{\cos(2h)-1}{h}.
+    \end{align*}
+    This last term, irrespective of the side the limit is taken from, may be computed via L'H\^opital's rule:
+    \begin{align*}
+        \lim_{h\rightarrow 0}\frac{\cos(2h)-1}{h}=\lim_{h\rightarrow 0}\frac{-2\sin(2h)}{1}=0
+    \end{align*}
+    so that we may continue on to find
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{+\prime}(0)=\lim_{h\rightarrow 0^+}2\int_0^{2h}\frac{\sin(t)}{t}dt-\pi=-\pi
+    \end{align*}
+    in precisely the same manner, we also obtain
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{-\prime}(0)=\lim_{h\rightarrow 0^-}\frac{1}{h}\bp{2h\int_0^{2h}\frac{\sin(t)}{t}dt+\cos(2h)-\pi|h|-1}=\lim_{h\rightarrow 0^-}2\int_0^{2h}\frac{\sin(t)}{t}dt+\pi=\pi
+    \end{align*}
+    noting that the side from which we took the limit only alters the result through the $-\pi|h|$ term present in both expressions. This has shown us that the derivative of $\varphi_{X_1^{-1}}$ does not exist at zero,
+    but we may restrict its domain to $\mbb{R}_{>0}$ or $\mbb{R}_{<0}$ separately and use one-sided derivatives to approximate the function. To see why, consider the following:
+    \begin{align*}
+        \varphi_{X_1^{-1}}^{+\prime}(0)=\lim_{h\rightarrow 0^+}\frac{\varphi_{X_1^{-1}}(h)-\varphi_{X_1^{-1}}(0)}{h}\quad\Rightarrow\quad\varphi_{X_1^{-1}}(h)=1+\varphi_{X_1^{-1}}^{+\prime}(0)h+o(h)\tag{8}
+    \end{align*}
+    which furnishes an approximation when $h>0$ which becomes exact when $h\rightarrow 0^+$. Thus, taking $t>0$, we have
+    \begin{align*}
+        \varphi_{S_n}(t)=(\varphi_{X_1^{-1}}(t/n))^n=\bp{1+\varphi_{X_1^{-1}}^{+\prime}(0)\frac{t}{n}+o(t/n)}^n=\bp{1+\frac{-\pi t+no(t/n)}{n}}^n\longrightarrow e^{-\pi t}\quad\text{as $n\rightarrow\infty$}\tag{9}
+    \end{align*}
+    where the $no(t/n)$ term has vanished in the limit as $n\rightarrow\infty$. An identical expression to (8) can be derived for the left-derivative:
+    \begin{align*}
+        \varphi_{X_1^{-1}}(h)=1+\varphi_{X_1^{-1}}^{-\prime}(0)h+o(h)
+    \end{align*}
+    holding when $h<0$, and so we take $t<0$ and find a similar result:
+    \begin{align*}
+        \varphi_{S_n}(t)=(\varphi_{X_1^{-1}}(t/n))^n=\bp{1+\varphi_{X_1^{-1}}^{-\prime}(0)\frac{t}{n}+o(t/n)}^n=\bp{1+\frac{\pi t+no(t/n)}{n}}^n\longrightarrow e^{\pi t}\quad\text{as $n\rightarrow\infty$}.\tag{10}
+    \end{align*}
+    Before stating the conclusion, we need to compute the limit when $t=0$:
+    \begin{align*}
+        \varphi_{S_n}(0)=(\varphi_{X_1^{-1}}(0/n))^n=1\tag{11}
+    \end{align*}
+    so, $\forall t\in\mbb{R}$, the limit of $\varphi_{S_n}(t)$ as $n\rightarrow\infty$ is summarized
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\varphi_{S_n}(t)=e^{-\pi|t|}.
+    \end{align*}
+    This says that the law of $S_n$ converges weakly to the law of some random variable $\xi$ with characteristic function $\varphi_\xi(t)=e^{-\pi|t|}$. 
+    The law of a Cauchy random variable is given by $e^{-|t|}$ [2], so we claim that $\xi$ is a Cauchy random variable with scale parameter $\pi$. Such a random variable has density
+    \begin{align*}
+        f_\xi(x)=\frac{1}{\pi}\frac{1}{\pi(1+(x/\pi)^2)}
+    \end{align*} 
+    so to verify the claim, we compute the characteristic function of $\xi$:
+    \begin{align*}
+        \varphi_\xi(t)=\int_\mbb{R}e^{itx}\frac{1}{\pi^2(1+(x/\pi)^2)}dx&=\frac{1}{\pi^2}\int_\mbb{R}e^{it\pi u}\frac{\pi}{1+u^2}du\tag{setting $u=x/\pi$}\\
+        &=\int_\mbb{R}e^{it\pi u}\frac{1}{\pi}\frac{1}{1+u^2}du\tag{12}
+    \end{align*}
+    where $1/(\pi(1+u^2))$ is the density of a standard Cauchy random variable, (12) is the characteristic function of such a random variable evaluated at $t\pi$. That is, $\forall t\in\mbb{R}$,
+    \begin{align*}
+        \varphi_\xi(t)=e^{-|\pi t|}=e^{-\pi|t|}=\lim_{n\rightarrow\infty}\varphi_{S_n}(t)
+    \end{align*}
+    so finally, we have $\mc{L}(S_n)\Longrightarrow\mc{L}(\xi)$ as $n\rightarrow\infty$, a Cauchy random variable with scale parameter $\pi$.\hfill{$\qed$}\\[15pt]
+    \begin{center}
+        {\bf\large References}
+    \end{center}
+    \begin{enumerate}
+        \item M. Abramowitz, I. Stegun, and D. Miller, {\it Handbook of mathematical functions with formulas, graphs and mathematical tables (National Bureau of Standards Applied Mathematics Series No. 55)}, J. Appl. Mech. (1965), \textbf{32}, 239-239.
+        \item R. Dudley, {\it Real Analysis and Probability}, Cambridge Studies in Advanced Mathematics, Cambridge University Press, Cambridge, 2002.
+        \item J. Richards and H. Youn, {\it The theory of distributions}, Cambridge University Press, Cambridge, 1990.
+        \item Wolfram Research, Inc., Wolfram|Alpha, Champaign, IL (2024) URL: https://www.wolframalpha.com/calculators/integral-calculator/.
+    \end{enumerate}
+\end{document}

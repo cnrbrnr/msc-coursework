@@ -1,0 +1,84 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Information Theory: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent{\bf Problem 5} Prove the following.\\[10pt]
+{\bf a)} Given arbitrary $x_1,x_2,\dots x_n$, we have that
+\[(x_1x_2\cdots x_n)^{1/n}\leq\frac{1}{n}\sum_{i=1}^nx_i.\]
+{\bf Proof} We first note that $-\log x$ is convex on $(0,\infty)$ since
+\[\frac{d^2}{dx^2}-\log x=\frac{1}{x^2}\geq 0\quad\forall x\in(0,\infty).\]
+Further, we have that $\sum_{i=1}^n1/n=1$, and $x_i\in(0,\infty)$ for $i=1,2,\dots,n$, so
+\begin{align*}
+    -\log\left(\sum_{i=1}^n\frac{x_i}{n}\right)&\leq \sum_{i=1}^n-\frac{1}{n}\log x_i\tag{by convexity of $-\log x$ on $(0,\infty)$}\\
+    &=-\sum_{i=1}^n\log x_i^{1/n}\\
+    &=-\log\left(\prod_{i=1}^nx_i\right)^{1/n}
+\end{align*}
+which implies that
+\begin{align*}
+    \log\left(\prod_{i=1}^nx_i\right)^{1/n}&\leq\log\left(\sum_{i=1}^n\frac{x_i}{n}\right)\quad\Leftrightarrow (x_1x_2\cdots x_n)^{1/n}\leq\frac{1}{n}\sum_{i=1}^nx_i\tag{since $\log$ is monotonic increasing}
+\end{align*}
+and we are done.\hfill{$\qed$}\\[10pt]
+{\bf b)} Consider two distributions $P_1$ and $P_2$ defined on a common alphabet $\mc{X}$ (where both $P_1(a)$,$P_2(s)>0$ $\forall x\in\mc{X}$).
+Let $M:=1/2P_1+1/2P_2$ be a mixture distribution. Then
+\[D(P_1\|P_2)\geq 2D(P_1\|M).\]
+{\bf Proof} This result follows from the convexity of the Kullback-Leibler divergence in both of its arguments. That is,
+\begin{align*}
+    D(P_1\|M)&=D(1/2P_1+1/2P_1\|1/2P_1+1/2P_2)\\
+    &\leq \frac{1}{2}D(P_1\|P_2)+\frac{1}{2}D(P_1\|P_1)\\
+    &=\frac{1}{2}D(P_1\|P_2)\tag{since $D(P_1\|P_1)=0$}\\
+    \Rightarrow\quad 2D(P_1\|M)&\leq D(P_1\|P_2)
+\end{align*}
+and we are done.\hfill{$\qed$}\\[10pt]
+{\bf c) (2.28)} Let $X$ and $Y$ be two jointly distributed random variables with finite respective alphabets $\mc{X}$ and $\mc{Y}$ and
+joint probability mass function $P_{XY}$ defined on $\mc{X}\times\mc{Y}$. For any fixed $\varepsilon>0$, $Y$ is said to be $\varepsilon$-{\it independent}
+from $X$ if
+\[\sum_{x\in\mc{X}}P_X(x)\sum_{y\in\mc{Y}}|P_{Y|X}(y|x)-P_Y(y)|<\varepsilon,\tag{7}\]
+where $P_X$ and $P_Y$ are the marginal probability mass functions of $X$ and $Y$ respectively and $P_{Y|X}$ is the conditional probability mass function
+of $Y$ given $X$. If
+\[I(X;Y)<\frac{\log_2(e)}{2}\varepsilon^2\]
+then $Y$ is $\varepsilon$-independent from $X$.\\[10pt]
+{\bf Proof} First note that (7) can be rewritten
+\[\sum_{x\in\mc{X}}P_X(x)\sum_{y\in\mc{Y}}|P_{Y|X}(y|x)-P_Y(y)|=\sum_{x\in\mc{X}}P_X(x)\|P_{Y|X}-P_Y\|\]
+where $\|P_{Y|X}-P_Y\|$ is the variational distance between the conditional distribtuion $P_{Y|X}$ and the marginal distribution $P_Y$. Modifying Pinsker's inequality (Lemma 2.37)
+we get an upper bound for $\|P_{Y|X}-P_Y\|$.
+\[\|P_{Y|X}-P_Y\|^2\cdot\frac{\log_2e}{2}\leq D(P_{Y|X}\|P_Y|P_X)\quad\Rightarrow\quad\|P_{Y|X}-P_Y\|\leq\left(\frac{2}{\log_2e}D(P_{Y|X}\|P_Y|P_X)\right)^{1/2}.\tag{8}\]
+However, by expanding $D(P_{Y|X}\|P_Y|P_X)$ we find that
+\begin{align*}
+    D(P_{Y|X}\|P_Y|P_X)&=\sum_{x\in\mc{X}}P_X(x)\sum_{y\in\mc{Y}}P_{Y|X}(y|x)\log_2\frac{P_{Y|X}(y|x)}{P_Y(y)}\\
+    &=\sum_{x\in\mc{X}}\sum_{y\in\mc{Y}}P_{Y|X}(y|x)P_X(x)\log_2\frac{P_{Y|X}(y|x)P_X(x)}{P_Y(y)P_X(x)}\\
+    &=\sum_{x\in\mc{X}}\sum_{y\in\mc{Y}}P_{XY}(y,x)\log_2\frac{P_{XY}(y,x)}{P_Y(y)P_X(x)}\\
+    &=D(P_{XY}\|P_YP_X)\\
+    &=I(X;Y)
+\end{align*}
+which allows us to rewrite the variational distance upper bound in (8) as
+\[\|P_{Y|X}-P_Y\|\leq\left(\frac{2}{\log_2e}I(X;Y)\right)^{1/2}.\]
+Finally, fixing $\varepsilon>0$ and supposing that $I(X;Y)<\frac{\log_2e}{2}\varepsilon^2$, we have
+\begin{align*}
+    \sum_{x\in\mc{X}}P_X(x)\sum_{y\in\mc{Y}}|P_{Y|X}(y|x)-P_Y(y)|&=\sum_{x\in\mc{X}}P_X(x)\|P_{Y|X}-P_Y\|\\
+    &\leq\sum_{x\in\mc{X}}P_X(x)\left(\frac{2}{\log_2e}I(X;Y)\right)^{1/2}\\
+    &<\sum_{x\in\mc{X}}P_X(x)\left(\frac{2}{\log_2e}\frac{\log_2e}{2}\varepsilon^2\right)^{1/2}\\
+    &=\sum_{x\in\mc{X}}P_X(x)\varepsilon\\
+    &=\varepsilon
+\end{align*}
+which implies that $Y$ is $\varepsilon$-independent from $X$.\hfill{$\qed$}
+\end{document}

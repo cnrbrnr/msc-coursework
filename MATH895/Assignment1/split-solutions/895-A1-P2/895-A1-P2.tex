@@ -1,0 +1,110 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 2}\\[5pt]
+    Suppose we wish to estimate an integral $\mc{I}=\int_0^1f(x)dx$, where $0\leq f(x)\leq 1$ $\forall x\in[0,1]$. \\[5pt]
+    For this, let $([0,1],\mc{F},\lambda)$ be a probability space, with $\lambda$ the Lebesgue measure, and $X,Y:([0,1],\mc{F},\lambda)\rightarrow([0,1],\mc{F})$ be independent
+    (uniform) random variables. Then $(X,Y)$ is taken to be a random variable on the product probability space $\Omega=[0,1]\times[0,1]$ with uniform measure taken to be
+    the 2-dimensional Lebesgue measure.\\[5pt]
+    Now consider the following three candidate {\it estimators} of $\mc{I}$:
+    \begin{itemize}
+        \item $U=\1{Y\leq f(X)}$
+        \item $V=f(X)$
+        \item $W=\frac{1}{2}(f(X)+f(1-X))$.
+    \end{itemize}
+    Prove first that $\E(U)=\E(V)=\E(W)=\mc{I}$, and then $\Var(W)\leq\Var(V)\leq \Var(U)$. In other words, $W$ is the most 'efficient' estimator of $\mc{I}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} The expectations of our three estimators can be found directly. Starting with $U$, define $Z:=(X,Y)$, $g:[0,1]\times[0,1]\rightarrow\{0,1\}$ with $g(x,y)=\1{y\leq f(x)}$, and let $P$ be the 2-dimensional Lebesgue measure on $\Omega$. Then
+    \begin{align*}
+        \E(U)=\int_\Omega\1{Y(\omega)\leq f(X(\omega))}P(d\omega)=\int_\Omega (g\circ Z)(\omega)P(d\omega)&=\int_{[0,1]\times[0,1]}g(x,y)(P\circ Z^{-1})(dx, dy)\\
+        &=\int_{[0,1]\times[0,1]}\1{y\leq f(x)}\mc{L}((X,Y))(dx, dy)\\
+        &=\int_{[0,1]\times[0,1]}\1{y\leq f(x)}\mc{L}(Y)(dy)\mc{L}(X)(dx)\tag{independence of $X$ and $Y$}\\
+        &=\int_{[0,1]}\int_{[0,1]}\1{y\leq f(x)}\lambda(dy)\lambda(dx)\tag{Fubini-Tonelli theorem}\\
+        &=\int_0^1\int_0^{f(x)}\lambda(dy)\lambda(dx)\tag{4}\\
+        &=\int_{0}^1\lambda([0,f(x)])\lambda(dx)\\
+        &=\int_0^1f(x)\lambda(dx)
+    \end{align*}
+    which is precisely $\mc{I}$. Note that $\mc{L}(X)=\lambda$ since $X^{-1}(A)=A$ for any $A\in\mc{F}$, and likewise for $Y$. Additionally, (4) holds because $\forall x\in[0,1]$, $0\leq f(x)\leq 1$, so $[0,f(x)]\in\mc{F}$. These finer points aside, we continue to the
+    (relatively) simpler calculations for $\E(V)$ and $\E(W)$.
+    \begin{align*}
+        \E(V)=\int_{[0,1]}f(X(\omega))\lambda(d\omega)=\int_{[0,1]}(f\circ X)(\omega)\lambda(d\omega)=\int_0^1f(x)(\lambda\circ X^{-1})(dx)=\int_0^1f(x)\lambda(dx)=\mc{I}\tag{5}
+    \end{align*}
+    and lastly
+    \begin{align*}
+        \E(W)=\frac{1}{2}\bp{\int_{[0,1]}f(X(\omega))\lambda(d\omega)+\int_{[0,1]}f(1-X(\omega))\lambda(d\omega)}\tag{6}
+    \end{align*}
+    where the first term in parentheses is exactly (5), so we need only show that $\int_{[0,1]}f(1-X(\omega))\lambda(d\omega)=\mc{I}$ too. For this, first define a new random variable $Q=1-X$. Then
+    \begin{align*}
+        \int_{[0,1]}f(1-X(\omega))\lambda(d\omega)=\int_{[0,1]}(f\circ Q)(\omega)\lambda(d\omega)=\int_{[0,1]}f(x)(\lambda\circ Q^{-1})(dx)\tag{7}
+    \end{align*}
+    but if $A\in\mc{F}$, then $Q^{-1}(A)=\{\omega\in[0,1]:Q(\omega)=1-X(\omega)\in A\}=\{\omega\in[0,1]:X(\omega)\in 1-A\}$, and $1-A:=\{1-a:a\in A\}$. It turns out that both
+    $1-A\in\mc{F}$ and $\lambda(1-A)=\lambda(A)$ (see Appendix A.1) giving us $\lambda(Q^{-1}(A))=\lambda(X^{-1}(1-A))=\lambda(1-A)=\lambda(A)$. With this invariance, (7) becomes
+    \begin{align*}
+        \int_{[0,1]}f(x)(\lambda\circ Q^{-1})(dx)=\int_0^1f(x)\lambda(dx)
+    \end{align*}
+    so that (combining the above with (6)) $\E(W)=\mc{I}$ as well.\\[5pt]
+    Having established that each estimator is unbiased, we now rank their variances. For this, we need only rank their second moments since $\E(W)=\E(V)=\E(U)$ and $\Var(\mc{X})=\E(\mc{X}^2)-\E(\mc{X})^2$ for $\mc{X}$ an arbitrary random variable.
+    We will need the fact that for $a,b\in\mbb{R}$, $2ab\leq a^2+b^2$, which is easily deduced from the observation that $0\leq (a-b)^2=a^2-2ab+b^2$.
+    \begin{align*}
+        \E(W^2)=\frac{1}{4}\int_{[0,1]}(f(X(\omega))+f(1-X(\omega)))^2\lambda(d\omega)&=\frac{1}{4}\int_{[0,1]}f^2(X(\omega))+2f(X(\omega))f(1-X(\omega))+f^2(1-X(\omega))\lambda(d\omega)\\
+        &\leq \frac{1}{4}\int_{[0,1]}2f^2(X(\omega))+2f^2(1-X(\omega))\lambda(d\omega)\\
+        &=\frac{1}{2}\int_{0}^1f^2(X(\omega))\lambda(d\omega)+\frac{1}{2}\int_{[0,1]}f^2(x)(\lambda\circ Q^{-1})(dx)\\
+        &=\int_0^1f^2(x)\lambda(dx)\tag{8}
+    \end{align*}
+    with (8) following by precisely the same logic as was applied to (7). But (8) is exactly $\E(V^2)$, so $\E(W^2)\leq\E(V^2)$. Finally, we work backwards from $\E(U^2)$.
+    \begin{align*}
+        \E(U^2)=\int_\Omega(\1{Y(\omega)\leq f(X(\omega))})^2dP(d\omega)=\int_\Omega\1{Y(\omega)\leq f(X(\omega))}dP(d\omega)=\E(U)&=\int_0^1f(x)\lambda(dx)\\
+        &\geq\int_0^1f^2(x)\lambda(dx)\tag{since $0\leq f(x)\leq 1$ $\forall x\in[0,1]$}
+    \end{align*}
+    which is, again, exactly $\E(V^2)$. Thus, we have established the ranking $E(W^2)\leq\E(V^2)\leq\E(U^2)$, where since these estimators are unbiased (and in particular have equal expected values) we get
+    \[\E(W^2)\leq\E(V^2)\leq\E(U^2)\quad\Leftrightarrow\quad \E(W^2)-\E(W)^2\leq \E(V^2)-\E(V)^2\leq\E(U^2)-\E(U)^2\quad\Leftrightarrow\quad\Var(W)\leq\Var(V)\leq\Var(U)\]
+    as desired.\hfill{$\qed$}\\[5pt]
+\end{document}

@@ -1,0 +1,100 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage{calrsfs}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+
+\graphicspath{{./images/}}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+
+
+\newcommand{\ex}[1]{\mathbb{E}\left(#1\right)}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\bbm}[1]{\mathbbm{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf MATH895: Assignment I}
+\author{\bf Connor Braun}
+
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1}\\[10pt]
+    {\bf a)} Let $(\Omega, \mc{F},P)$ be a probability space, and let $A_1,\dots, A_n\in\mc{F}$ be $n\geq 1$ events.
+    Prove the so-called {\it inclusion-exclusion formula}
+    \[P\left(\bigcup_{i=1}^nA_i\right)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{1}\]
+    {\bf Proof} We proceed by induction. First, consider the basis where we fix $n=1$. Then, trivially,
+    \[P\left(\cup_{i=1}^n A_i\right)=P(A_1)=\sum_{k=1}^1(-1)^{k+1}P(A_1)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\]
+    Now supposing that (1) holds for any subcollection of $\mc{F}$ of size $n\geq 1$, we aim to show that for $A_1,\dots,A_{n+1}\in\mc{F}$
+    \[P\left(\bigcup_{i=1}^{n+1}A_i\right)=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{2}\]
+    For this, first observe that for any pair of sets $A,B\in\mc{F}$, we have
+    \[P(A\cup B)=P(A\cup (B\setminus A))=P(A)+P(B\setminus A)=P(A)+P(B\setminus (A\cap B))\]
+    which, when applied to (2), gives us
+    \begin{align*}
+        P\left(\bigcup_{i=1}^{n+1}A_i\right)&=P\bp{\bigcup_{i=1}^n A_i}+P\bp{A_{n+1}\setminus\bp{\bp{\bigcup_{i=1}^nA_i}\cap A_{n+1}}}\\
+        &=P\bp{\bigcup_{i=1}^n A_i}+P\bp{A_{n+1}\setminus\bigcup_{i=1}^n(A_i\cap A_{n+1})}+P\bp{\bigcup_{i=1}^n (A_i\cap A_{n+1})}-P\bp{\bigcup_{i=1}^n(A_i\cap A_{n+1})}\\
+        &=P\bp{\bigcup_{i=1}^n A_i}+P\bp{\bp{A_{n+1}\setminus\bp{\bigcup_{i=1}^n (A_i\cap A_{n+1})}}\cup\bp{\bigcup_{i=1}^n (A_i\cap A_{n+1})}}-P\bp{\bigcup_{i=1}^n(A_i\cap A_{n+1})}\\
+        &=P\bp{\bigcup_{i=1}^n A_i}+P(A_{n+1})-P\bp{\bigcup_{i=1}^n(A_i\cap A_{n+1})}
+    \end{align*}
+    where now, since $A_i\cap A_{n+1}\in \mc{F}$ for $i=1,\dots n$, the inductive hypothesis gives us
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=P(A_{n+1})+\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots A_{i_k})\\
+        &\quad+\sum_{k=1}^n(-1)^{k+2}\sum_{1\leq i_1<\dots<i_k\leq n}P(A_{i_1}\cap\dots A_{i_k}\cap A_{n+1}).\tag{3}
+    \end{align*}
+    This is, in fact, the desired expression. To make this apparent, we will work backwards, decomposing (2) to find
+    \begin{align*}
+        P\left(\bigcup_{i=1}^{n+1}A_i\right)&=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k})\\
+        &=\sum_{k=1}^{n+1}P(A_i)+\sum_{k=2}(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k})\\
+        &=P(A_{n+1})+\sum_{k=1}^{n}P(A_i)+\sum_{k=1}^{n+1}(-1)^{k+2}\sum_{1\leq i_1<\dots <i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k})
+    \end{align*}
+    wherefrom we need only extract all terms containing $A_{n+1}$ from the last term and recombine what remains with $\sum_{i=1}^nP(A_i)$ to get the expression in (3).\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 2}\\[10pt]
+    Our goal is to estimate the integral $\mc{I}=\int_0^1f(x)dx$, where $0\leq f(x)\leq 1$ for all $0\leq x\leq 1$. Let $X$, $Y$ be two independent, uniform random variables on
+    $[0,1]$, such that $(X,Y)$ is a random variable on the product probability space $\Omega=[0,1]\times[0,1]$, with the uniform probability measure given by the 2-dimensional Lebesgue measure.\\[10pt]
+    For this, we consider three possible estimators of $\mc{I}$, given by
+    \begin{align*}
+        i)\quad & U=\mathbbm{1}_{Y\leq f(X)}\\
+        ii)\quad & V=f(X)\\
+        iii)\quad & W=\frac{1}{2}(f(X)+f(1-X)).
+    \end{align*}
+    Prove that $\ex{U}=\ex{V}=\ex{W}=\mc{I}$ and that $\var{W}\leq\var{V}\leq\var{U}$. That is, $W$ is the most 'efficient' estimator of the bunch.\\[10pt]
+    {\bf Proof} For clarity, we have $X,Y:([0,1],\mc{F},\lambda)\rightarrow ([0,1],\mc{F})$ and $(X,Y):(\Omega,\mc{F}\otimes\mc{F},P)\rightarrow([0,1]\times[0,1],\mc{F}\otimes\mc{F})$. Let $Z:=(X,Y)$ whereby the independence of $X$ and $Y$, we have
+    $P\circ Z^{-1}=\mc{L}(X,Y)=\mc{L}(X)\times\mc{L}(Y)=\lambda\circ X^{-1}\times\lambda\circ Y^{-1}$. With this, we find first that
+    \begin{align*}
+        \ex{U}=\int_{\Omega}\mathbbm{1}_{Y\leq f(X)}dP=\int_{\Omega}(\mathbbm{1}_{y\leq f(x)}\circ Z)dP&=\int_{[0,1]\times[0,1]}\mathbbm{1}_{y\leq f(x)}d(P\circ Z^{-1})\tag{change of variables}\\
+        &=\int_{[0,1]\times[0,1]}\mathbbm{1}_{y\leq f(x)}d\mc{L}(X,Y)\\
+        &=\int_{[0,1]\times[0,1]}\mathbbm{1}_{y\leq f(x)}d\mc{L}(Y)d\mc{L}(X)\\
+        &=\int_0^1\int_0^1\mathbbm{1}_{y\leq f(x)}d\lambda(y)d\lambda(x)\tag{Fubini-Tonelli}\\
+        &=\int_0^1\int_{0}^{f(x)}d\lambda(y)d\lambda(x)\tag{since $[0,f(x)]$ measurable $\forall x\in[0,1]$}\\
+        &=\int_0^1\lambda([0,f(x)])d\lambda(x)\\
+        &=\int_{0}^1f(x)d\lambda(x)\\
+        &=\mc{I}
+    \end{align*}
+    and also
+    \begin{align*}
+        \ex{V}=\int_{[0,1]}f(X)d\lambda=\int_{[0,1]}f(x)d(\lambda\circ X^{-1})=\int_0^1f(x)d\lambda(x)=\mc{I}.
+    \end{align*}
+    To compute $\ex{W}$, define $T:=1-X$. Then,
+    \begin{align*}
+        \ex{W}
+    \end{align*}
+
+    If $f\in L^1(\Omega,\mc{F},P)$ is independent of $\mc{G}\subset\mc{F}$, then $\mbb{E}(f|\mc{G})=\mbb{E}(f)$.
+    
+    
+    
+\end{document}

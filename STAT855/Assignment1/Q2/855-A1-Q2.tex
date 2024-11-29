@@ -1,0 +1,120 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    {\noindent \bf Problem 2.} Suppose there are $n$ types of coupon $\{c_1,c_2,\dots,c_n\}$ and that the type obtained is 1) independent of all past selections and 2) equally likely to be any of the $n$ types.
+    Denote by $T$ the number of collected coupons (counting multiplicity) until a complete set is obtained.\\[10pt]
+    {\bf a)} Write $\mbb{E}[T]$ as a function of $n$.\\[10pt]
+    {\bf Solution.} We endeavor to express $T$ as a linear combination of random variables with known expectation. First, let $\mathcal{C}=\{c_i\}_{i=1}^n$ be the complete set of pairwise unique coupons, $X_j$ be the $j$th coupon drawn (with realization $x_j\in\mathcal{C}$),
+    and $\mathcal{C}_j=\{c\in\mathcal{C}|\exists k\leq j:c=x_k\;\text{and}\;c\neq x_m\;\text{for}\;m<k\}$ for $j=1,2,3,\dots$. That is, $\mathcal{C}_j$ is the set of pairwise unique coupons obtained by the $j$th draw. As such, it is natural to define $\mathcal{C}_0=\emptyset$.\\[10pt]
+    Next, define the {\it r.v.} $T_k$ (with realization $t_k$) to be the draw on which the $k$th new coupon is obtained, where $k=1,2,\dots,n$. In particular, $T_k=t$ if both $x_t\notin \mathcal{C}_{t-1}$ and $|\mathcal{C}_{t-1}|=k-1$. Note, however, that for $j,k=1$ we have
+    \[|\mathcal{C}_{1-1}|=|\mathcal{C}_0|=|\emptyset|=0=1-1=k-1\]
+    and, regardless the value of $x_1$, we get
+    \[x_1\notin\emptyset\Rightarrow x_1\notin\mathcal{C}_0\Rightarrow x_1\notin\mathcal{C}_{1-1}\]
+    implying that
+    \[P(T_1=1)=1.\]
+    An unsurprising result, since this just says that {\it w.p.} 1 the first coupon we draw will be new to our collection. We now turn our attention to $T_k$ for $k\geq 2$.
+    In order for $T_k$ to be realized, $T_{k-1}$ must have been, at which point we have $|\mathcal{C}_{t_{k-1}}|=k-1$ until $T_k$ occurs.
+    This guarantees that on the support $\tau_k=\{t_{k-1}+1,t_{k-1}+2,\dots\}$ of $T_k$, $P(|\mathcal{C}_{\tau-1}|=k-1)=1$ $\forall\tau\in\tau_k$. Henceforth, we shall restrict the support of $T_k$ to $\tau_k$ for $2\leq k\leq n$,
+    allowing us to say that $T_k=t$ if $x_t\notin\mathcal{C}_{t-1}$.\\[10pt]
+    To complete the solution, we note that for $\tau\in\tau_k$, $k\geq 2$ and any $c\in\mathcal{C}$,
+    \[P(X_{\tau}=c)=\frac{1}{n},\quad\text{so}\quad P(X_\tau\in\mathcal{C}_{\tau-1})=\frac{|\mathcal{C}_{\tau-1}|}{n}=\frac{k-1}{n}\quad\text{and}\quad P(X_\tau\notin \mathcal{C}_{\tau-1})=1-\frac{|\mathcal{C}_{\tau-1}|}{n}=\frac{n-k+1}{n}.\]
+    which we get from the fact that the probability of obtaining any coupon is uniformly distributed on $\mathcal{C}$. Further, by the independence of each draw (i.e. $X_j\perp X_i$ for $i,j\in\mathbb{N}$, $i\neq j$) we can compute the probability that $T_k=t\in\tau_k$.
+    \[P(T_k=t)=P(X_t\notin\mathcal{C}_{t-1})\prod_{j=t_{k-1}+1}^{t-1}P(X_j\in\mathcal{C}_{j-1})=\left(\frac{n-k+1}{n}\right)\left(\frac{k-1}{n}\right)^{t-1}\] 
+    which is exactly the probability mass function of a geometric random variable with success probability $p_k=(n-k+1)/n$. Note that this also works for $T_1$, since then
+    $p_1=(n-1+1)/n=1$, giving us the previous result that $P(T_1=1)=1$. So we have found that for $1\leq k\leq n$, $T_k\sim geometric(p_k)$, with $p_k=(n-k+1)/n$.\\[10pt]
+    This finally allows us to compute $\mbb{E}[T]$. Noting that
+    \[T=\sum_{k=1}^nT_k\]
+    we have
+    \[\mbb{E}[T]=\mbb{E}\left[\sum_{k=1}^nT_k\right]=\sum_{k=1}^n\mbb{E}[T_k]=\sum_{k=1}^n\frac{n}{n-k+1}=n(\frac{1}{n}+\frac{1}{n-1}+\dots+\frac{1}{2}+1)=n\sum_{k=1}^n\frac{1}{k}.\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Denote by $X_i$ the number of collected coupons of type $c_i$ until a complete set is obtained, for $i=1,2,\dots,n$. Let $X=\max_{1\leq i\leq n}X_i$ be the maximal number. Define
+    \[\mu_1(n)=\mbb{E}[T]\quad\text{and}\quad \mu_2(n)=\mbb{E}[X].\]
+    Use the Monte Carlo method to estimate $\mu_1(n)$ and $\mu_2(n)$ for $n\in\{10,20\}$. For each $n$, the number of Monte Carlo repeats should be at least $10^5$. Report your estimates and the associated
+    standard deviations.\\[10pt]
+    {\bf Solution.} We proceed precisely as in problem 1, denoting our estimates of $\mu_i(n)$ with $\hat{\mu}_i(n)$ for $i=1,2$ and $n\in\{10,20\}$. We will obtain {\it i.i.d.} samples $\bs{X}=\{\chi_1,\chi_2,\dots,\chi_R\}$
+    and $\bs{T}=\{\mathcal{T}_1,\mathcal{T}_2,\dots,\mathcal{T}_R\}$, where $\mathcal{T}_j=T$ and $\chi_j=\max_{1\leq i\leq n}X_i$ for the $j$th simulation with $n\in\{10,20\}$ and $1\leq j\leq R=10^5$. Then we compute our estimates
+    \[\hat{\mu}_1(n)=\frac{1}{R}\sum_{j=1}^R\mathcal{T}_j\quad\text{and}\quad\hat{\mu}_2(n)=\frac{1}{R}\sum_{j=1}^R\chi_j\]
+    with standard deviations
+    \[SD(\hat{\mu}_1(n))=SD(\bs{T})/\sqrt{R}\quad\text{and}\quad SD(\hat{\mu}_2(n))=SD(\bs{X})/\sqrt{R}\]
+    for both $n=10$ and $n=20$.\\[10pt]
+    {\bf Table 2.} Empirical estimates of $\mu_1(n)$ and $\mu_2(n)$ along with the associated standard deviations obtained by simulating the coupon collection process
+    $R=10^5$ times for each of $n\in\{10,20\}$. Reported values have been rounded to three decimal places.
+    \begin{center}
+        \begin{tabular}{@{}l|rrrr@{}}\toprule
+                & \multicolumn{2}{c}{$n=10$} & \multicolumn{2}{c}{$n=20$}\\
+            \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+                & $\hat{\mu}_1(n)$ & $\hat{\mu}_2(n)$ & $\hat{\mu}_1(n)$ & $\hat{\mu}_2(n)$\\\midrule
+            Value & 29.285 & 5.715 & 71.967 & 7.466 \\ 
+            SD & 0.036 & 0.007 & 0.075 & 0.007 \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.2 Simulation and output for problem 2}
+    \begin{verbatim}
+        collect_coupons <- function(n){
+
+            collection_size = 0
+            coupon_counter = matrix(0, n, 1)
+            coupons = 1:n
+            T = 0
+
+            while(collection_size < n){
+                c = sample(coupons, 1)
+                if(coupon_counter[c,] == 0){
+                    collection_size = collection_size + 1
+                }
+                coupon_counter[c,] = coupon_counter[c,] + 1
+                T = T + 1
+            }
+            return(c(T, max(coupon_counter)))
+        }
+
+        set.seed(196883)
+        n_vals = c(10, 20) # number of coupons to try
+        R = 10^5 # number of Monte Carlo repeats
+        for(n in n_vals){
+            res = matrix(0, R, 2) # matrix to store results
+            for(r in 1:R){
+                res[r, ] = collect_coupons(n) # simulate, sample T_i and M_i
+            }
+            # Report E[T], E[M] along with SDs
+            cat(
+                '\nn=', n,
+                '\nE[T]=', mean(res[,1]), ', SD(T)=', sd(res[,1])/sqrt(R),
+                '\nE[X]=', mean(res[,2]), ', SD(X)=', sd(res[,2])/sqrt(R)
+            )
+        }
+    \end{verbatim} 
+    The above program generates the following output:
+    \begin{verbatim}
+        n= 10 
+        E[T]= 29.28456 , SD(T)= 0.03544535 
+        E[X]= 5.71524 , SD(X)= 0.006816992
+        n= 20 
+        E[T]= 71.96648 , SD(T)= 0.07520682 
+        E[X]= 7.46607 , SD(X)= 0.007124282> 
+    \end{verbatim}
+\end{document}
+\end{document}

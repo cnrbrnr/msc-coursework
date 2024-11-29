@@ -1,0 +1,111 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment III}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document} 
+    \maketitle
+    \noindent{\bf Problem 5} Let $S=\{0,1,\dots\}$ be the set of non-negative integers. Let $\{X_n\}_{n\geq 0}$ be a Markov chain with state space $S$ and transition probabilities given by
+    \[p_{i,i+1}=p_i,\quad\text{and}\quad p_{i,0}=1-p_i\quad\text{for $i\in S$}\]
+    where $\{p_i:i\geq 0\}$ is a sequence of real numbers in $[0,1]$.\\[10pt]
+    {\bf a)} Provide one choice of $\{p_i:i\geq 0\}$ so that the Markov chain is irreducible and transient.\\[10pt]
+    {\bf Solution} Let $j\in S$. Then 
+    \begin{align*}
+        P_0(X_j=j)&=\sum_{i_1,i_2,\dots,i_{j-1}\in S}P_0(X_j=j,X_{j-1}=i_{j-1},\dots,X_2=i_2,X_1=i_1)\\
+        &\geq P_0(X_j=j,X_{j-1}=j-1,\dots,X_2=2,X_1=1)\\
+        &=p_0p_1\cdots p_{j-1}
+    \end{align*}
+    so, provided $p_i>0$ for $i< j$, $P_0(X_j=j)>0$, so $0\longrightarrow j$. By constraining $i>0$ $\forall i\in S$, we thus have $0\longrightarrow j$ $\forall j\in S$. Taking another $j\in S$, we have
+    \[P_j(X_1=0)=1-p_j\]
+    so that, if $p_j <1$, we can guarantee that $j\longrightarrow 0$ for any $j\in S$. We thus have a sufficient condition for the irreducibility of the Markov chain: if $\forall i\in S$ we have $p_i\in(0,1)$, then $\forall j\in S$, $0\longrightarrow j$ and $j\longrightarrow 0$, so $0\longleftrightarrow j$.
+    But then for any other state $k\in S$, we also have $0\longleftrightarrow k$, so by the transitivity of communication, we have $k\longleftrightarrow j$. In other words, $\forall k,j\in S$
+    \[p_i\in(0,1)\;\;\;\forall i\in S\quad\Rightarrow\quad k\longleftrightarrow j.\]
+    Furthermore, provided our choice of $\{p_i:i\geq 0\}$ satisfies this condition, we need only show that a particular state is transient to conclude that the entire chain is.\\[10pt]
+    We proceed by finding a sequence $\{p_i:i\geq 0\}$ so that $0\in S$ is transient. Recall the first return time to state zero is defined $T_0^{(1)}=\inf\{n>0:X_n=0\}$ (we will just write $T_0$ for notational convenience) and observe that
+    \begin{align*}
+        P_0(T_0<\infty)&=1-P_0(T_0=\infty)=1-\lim_{r\rightarrow\infty}P(T_0>r)
+    \end{align*}
+    so that $0\in S$ is transient if $\lim_{r\rightarrow\infty}P_0(T_0>r)>0$. However, the structure of the transition probabilities allow us to write an expression for $P_0(T_0>r)$:
+    \[P_0(T_0>r)=p_0p_1\cdots p_{r-1}=\prod_{j=0}^{r-1}p_j\]
+    so that we search for $\{p_i:i\geq 0\}$ such that
+    \[\lim_{r\rightarrow\infty}\prod_{j=0}^{r-1}p_j=\prod_{j=0}^{\infty}p_j>0.\]
+    To accomplish this, we define a sequence $\{\alpha_r\}_{r\geq 0}$ and set the terms so that it converges to a positive limit on the interval $(0,1)$. Then we solve for the sequence $\{p_i:i\geq 0\}$ producing the equality
+    \[\prod_{j=0}^rp_j=\alpha_j.\]
+    To this end, for $r\geq 0$ set
+    \[\alpha_r=(1/3)+(1/3)^{r+1}\]
+    which immediately induces $p_0=1/3+(1/3)^1=2/3$. Then for $r\geq 1$ we find
+    \[\alpha_r=\prod_{j=0}^rp_j=p_r\prod_{j=0}^{r-1}p_j=p_r\alpha_{r-1}\quad\Rightarrow\quad p_r=\frac{\alpha_r}{\alpha_{r-1}}=\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^{r}}.\]
+    additionally,
+    \[0<1/3+(1/3)^1=p_0<1\quad\text{and}\quad 0<\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^r}=p_r<1\;\;\text{for $r\geq 1$}\]
+    so under this choice of $\{\alpha_r\}_{r\geq 0}$ the resulting $\{p_i\}_{i\geq 0}$ satisfies $p_i\in(0,1)$ $\forall i\in S$ and the resulting chain is irreducible. Further, we get
+    \begin{align*}
+        P_0(T_0=\infty)&=\lim_{r\rightarrow\infty}P_0(T_0>r)\\
+        &=\lim_{r\rightarrow\infty}\prod_{j=0}^rp_j\\
+        &=\lim_{r\rightarrow\infty}\left(\frac{1/3+(1/3)^1}{1}\frac{1/3+(1/3)^2}{1/3+(1/3)^1}\frac{1/3+(1/3)^3}{1/3+(1/3)^2}\cdots\frac{1/3+(1/3)^r}{1/3+(1/3)^{r-1}}\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^r}\right)\\
+        &=\lim_{r\rightarrow\infty}1/3+(1/3)^{r+1}\\
+        &=\lim_{r\rightarrow\infty}\alpha_r\tag{$\ast$}\\
+        &=1/3
+    \end{align*}
+    so that we have the original probability of interest
+    \begin{align*}
+        P_0(T_0<\infty)&=1-P_0(T_0=\infty)
+        =1-1/3
+        =2/3
+        <1
+    \end{align*}
+    which says that the choice of $\{p_i\}_{i\geq 0}$ here renders $0\in S$ transient. But this choice also makes the chain irreducible, and since transience is a class property, we have that $\forall j\in S$, $j$ is transient with this choice.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Provide one choice of $\{p_i:i\geq 0\}$ so that the Markov chain is irreducible and null recurrent.\\[10pt]
+    We have already established a sufficient condition for the irreducibility of the Markov chain -- and thus require $p_i\in(0,1)$ for $i\in S$. Provided the process is irreducible, we need only show that a particular state is null recurrent, since
+    null recurrence is a class property. Thus, we endeavor to identify $\{p_i\}_{i\geq 0}$ so that
+    \[\mbb{E}_0\left[T_0\right]=\infty\]
+    where $T_0$, as before, is the first return time to state $0\in S$. Since $T_0$ takes values in $\{1,2,3,\dots\}$, we can rewrite this expectation
+    \[\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty P(T_0>n)=\sum_{n=0}^\infty\prod_{j=0}^{n-1}p_j.\]
+    As before, for $n\geq 0$ we set
+    \[\prod_{j=0}^np_j=\alpha_n\quad\text{but now with}\quad\alpha_{n}=\frac{1}{n+2}\quad\text{so that}\quad\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty\frac{1}{n+1}=\infty\]
+    as desired. We need only use this to solve for $\{p_i\}_{i\geq 0}$. Just as in 5a, for $n\geq 1$ we have $p_n=\alpha_n/\alpha_{n-1}$, so
+    \[p_0=\alpha_0=\frac{1}{2}\in(0,1)\quad\text{and for $n\geq 1$,}\quad p_n=\frac{\alpha_n}{\alpha_{n-1}}=\frac{n+1}{n+2}\in(0,1)\]
+    so this choice once again renders the process irreducible.\\[10pt]
+    In this case the process is recurrent: since $\alpha_n\rightarrow 0$ as $n\rightarrow\infty$, by ($\ast$), we get $P_0(T_0=\infty)=0$, which further implies $0$ is recurrent. Then, since recurrence is a class property and the chain is irreducible, $\forall i\in S$, $i$ is also recurrent (following precisely the logic used in 5a).\\[10pt]
+    However, as shown above, we also get $\mbb{E}_0\left[T_0\right]=\infty$, so the state $0\in S$ is null recurrent. But null recurrence is a class property, and since the process is irreducible we can additionally conlude that $\forall k\in S$, $k$ is also null recurrent.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Provide one choice of $\{p_i\}_{i\geq 0}$ so that the Markov chain is irreducible and positive recurrent. Further, for your choice, find the invariant distribution.\\[10pt]
+    {\bf Solution} Once more we require $p_i\in(0,1)$ for all $i\in S$ as a sufficient condition for irreducibility. Then, granted this, we need only show $0\in S$ is positive recurrent to conclude that all states are, since positive recurrence is a class property.\\[10pt]
+    We again have the formula 
+    \[\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty P(T_0>n)=\sum_{n=0}^\infty\prod_{j=0}^{n-1}p_j.\]
+    Then, for $n\geq 0$, we set
+    \[\prod_{j=0}^np_j=\alpha_n\quad\text{and}\quad\alpha_{n}=\frac{1}{3^{n+1}}\quad\text{so that}\quad\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty\frac{1}{3^n}=\frac{1}{1-1/3}=\frac{3}{2}<\infty\]
+    as desired. Solving for $p_i$ by the same method as above,
+    \[p_0=\alpha_0=\frac{1}{3}\in(0,1)\quad\text{and for $n\geq 1$,}\quad p_n=\frac{\alpha_n}{\alpha_{n-1}}=\frac{3^n}{3^{n+1}}=\frac{1}{3}\in(0,1)\]
+    so that the Markov chain is indeed irreducible and the state $0\in S$ is positive recurrent, so all states are.\\[10pt]
+    Note also that the process is recurrent: since $\alpha_n\rightarrow 0$ as $n\rightarrow\infty$, by ($\ast$) we get $P_0(T_0=\infty)=0$, which further implies $0$ is recurrent. Then, since recurrence is a class property and the chain is irreducible, $\forall i\in S$, $i$ is also recurrent (following precisely the logic used in 5a).\\[10pt]
+    From this, we know that an invariant distribution for this process exists. Let $\pi=\{\pi_i:i\in S\}$ denote this distribution. We find its elements with the formula:
+    \[\pi_0=\frac{1}{\mbb{E}_0[T_0]}\quad\text{and, for $i\geq 1$}\quad\pi_i=\frac{\gamma^0_i}{\mbb{E}_0[T_0]}\]
+    where 
+    \[\gamma^0_i=\mbb{E}_0\left[\sum_{n=0}^{T_0-1}\mathbbm{1}_{X_n=i}\right]\]
+    where for any event $A$, $\mathbbm{1}_A$ is the indicator function over $A$. However, due to the nature of this process,  we have
+    \[\sum_{n=0}^{T_0-1}\mathbbm{1}_{X_n=i}=\begin{cases}
+        1\quad\text{if $T_0>i$}\\
+        0\quad\text{{\it o.w.}}
+    \end{cases}=\mathbbm{1}_{T_0>i}\]
+    so that we simplify the expression for $\gamma^0_i$ $i\geq 1$ to be
+    \[\gamma^0_i=\mbb{E}_0[\mathbbm{1}_{T_0>i}]=P_0(T_0>i)=\prod_{j=0}^{i-1}p_j=\frac{1}{3^i}.\]
+    And, of course, $\gamma_0^0=1$. But from this we obtain the invariant distribution; for $i\in S$
+    \[\text{it $i\geq 1$,}\quad\pi_i=\frac{2}{3}\frac{1}{3^i}=\frac{2}{\cdot 3^{i+1}}\quad\text{and if $i=0$,}\quad\pi_i=\frac{2}{3}.\]
+    To conclude, $\pi=\{\pi_i:i\in S\}$ is the invariant distribution on the Markov chain when $p_i=1/3$ for all $i\in S$. As shown above, this choice of $\{p_i\}_{i\geq 0}$ also renders the process irreducible and positive recurrent.\hfill{$\qed$}
+\end{document}

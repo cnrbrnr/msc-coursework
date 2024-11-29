@@ -1,0 +1,84 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 5.} Let $X$ be a random variable and denote by $F(\cdot)$ its cumulative distribution function (CDF), i.e.,
+    \[F(t)=P(X\leq t)\quad \text{for $t\in\mbb{R}$}\]
+    and by $F^{-1}(\cdot)$ its quantile function (QF), i.e.,
+    \[F^{-1}(p)=\inf\{t\in\mbb{R}:F(t)\geq p\}\quad \text{for $p\in(0,1)$}.\]
+    {\bf a)} Show that $F(F^{-1}(p))\geq p$ for any $p\in(0,1)$.\\[10pt]
+    {\bf Proof.} Let $p\in(0,1)$ and define $T_p=\{t\in\mbb{R}:F(t)\geq p\}$. Now, since $F$ is monotonically increasing, $\forall t\in T_p$, if $t^\prime\geq t$, then $F(t^\prime)\geq F(t)\geq p$, so $F(t^\prime)\geq p$, so $t^\prime\in T_p$ too.
+    Now fix $\varepsilon>0$ and let $F^{-1}(p)=t^\ast$. By definition of the infimum, $\exists t\in T_p:$ $t^\ast\leq t\leq t^\ast+\varepsilon$. But $t^\ast+\varepsilon\geq t$, so $t^\ast+\varepsilon\in T_p$. Thus we have 
+    \[F(t^\ast+\varepsilon)\geq p\]
+    and by the right-continuity of $F$
+    \[\lim_{\varepsilon\longrightarrow 0^+}F(t^\ast+\varepsilon)=F(t^\ast).\]
+    Now let $\{\varepsilon_n\}_{n=1}^\infty$ be a positive sequence with $\varepsilon_n\longrightarrow 0$ and $\varepsilon_n\geq\varepsilon_{n+1}$ for all $n\in\mbb{N}$. Then for all $n$, $\varepsilon_n>0$ so $\exists t_n\in T_p:$
+    \[t^\ast+\varepsilon_n\geq t_n\quad\Rightarrow\quad t^\ast+\varepsilon_n\in T_p\quad\Rightarrow\quad F(t^\ast+\varepsilon_n)\geq p\]
+    whereby the sequential characterization of continuity we get
+    \[F(t^\ast)=\lim_{\varepsilon\longrightarrow 0^+}F(t^\ast+\varepsilon)=\lim_{n\longrightarrow+\infty}F(t^\ast+\varepsilon_n).\]
+    To complete the proof, we need the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} For any sequence $\{a_n\}_{n=1}^\infty$, if $\forall n,$ $a_n\geq b$ and $a_n\longrightarrow a$, then $a\geq b$.\\[10pt]
+            {\bf Proof.} Assume for the purpose of deriving a contradiction that $a<b$. Then $\exists\delta>0$: $a+\delta\in(a,b)$, so $a+\delta<b$. Now, since
+            $a_n\longrightarrow a$, $\exists N:$ $|a_n-a|<\delta$ $\forall n\geq N$. But then $a_n<a+\delta<b$, so we have an element of the sequence strictly less than $b$ --
+            a contradiction stemming from our supposition that $a<b$. We conclude that $a\geq b$.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    But now we are done, since $F(t^\ast+\varepsilon_n)\geq p$ $\forall n$, so $\lim_{n\rightarrow+\infty}F(t^\ast+\varepsilon_n)=\lim_{\varepsilon\rightarrow 0^+}F(t^\ast+\varepsilon)=F(t^\ast)=F(F^{-1}(p))\geq p$,
+    with the inequality holding due to the above lemma.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $p\in(0,1)$ and $x\in\mbb{R}$. Show that $F^{-1}(p)\leq x$ iff $p\leq F(x)$.\\[10pt]
+    {\bf Proof.} For the forward implication, suppose that $F^{-1}(p)\leq x$. Then $F(F^{-1}(p))\leq F(x)$, since $F$ is monotonically increasing.
+    But from part {\bf a)}, $p\leq F(F^{-1}(p))\leq F(x)$, so $p\leq F(x)$ as needed.\\[10pt]
+    Now for the backward implication, suppose instead that $p\leq F(x)$. Then $F^{-1}(F(x))=\inf\{t\in\mbb{R}:F(t)\geq F(x)\}$. But $F(x)\geq F(x)$, so $x\in\{t\in\mbb{R}:F(t)\geq F(x)\}$. Thus,
+    $F^{-1}(F(x))\leq x$. To complete the proof, we need the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} $F^{-1}$ is weakly monotonically increasing on $(0,1)$.\\[10pt]
+            {\bf Proof.} Let $a,b\in(0,1)$ with $a\leq b$. Then $\{t\in\mbb{R}:F(t)\geq a\}\supseteq\{t\in\mbb{R}:F(t)\geq b\}$, since $F$ is
+            weakly monotonically increasing. But then $\inf\{t\in\mbb{R}:F(t)\geq a\}\leq\inf\{t\in\mbb{R}:F(t)\geq b\}$, so $F^{-1}(a)\leq F^{-1}(b)$.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    But then we have $F^{-1}(p)\leq F^{-1}(F(x))\leq x$, where the first inequality holds due to the above lemma, and thus $F^{-1}(p)\leq x$, as needed, and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf c)} If $U$ is a random variable that is uniformly distributed on $(0,1)$, then the CDF of the random variable $F^{-1}(U)$ is given by $F$.\\[10pt]
+    {\bf Proof.} Let $U\sim Uniform(0,1)$, with CDF given by
+    \begin{align*}
+        F_U(x)=\begin{cases}
+            \frac{x-0}{1-0}=x,\quad\text{if $0\leq x\leq1$}\\
+            0,\qquad\text{if $x<0$}\\
+            1,\qquad\text{if $x>1$}
+        \end{cases}\tag{5.1}
+    \end{align*}
+    Now define the random variable $\mc{Z}=F^{-1}(U)$, and denote its CDF by $F_\mc{Z}$. Then we have
+    \begin{align*}
+        F_\mc{Z}(t)&=P(F^{-1}(U)\leq t)\\
+        &=P(U\leq F(t))\tag{by part {\bf b)}}.
+    \end{align*}
+    But $0\leq F(t)\leq 1$, so we further get
+    \begin{align*}
+        F_\mc{Z}(t)&=P(U\leq F(t))\\
+        &=F_U(F(t))\\
+        &=F(t)\tag{by 5.1}
+    \end{align*}
+    which says that the CDF $F_\mc{Z}$ of $\mc{Z}=F^{-1}(U)$ is given by $F$.\hfill{$\qed$}\\[10pt]
+\end{document}

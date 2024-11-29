@@ -1,0 +1,270 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Analysis I: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1.} Let $S=\{x\in\mbb{R}:x^2+x<3\}$. Find $\sup S$ and $inf S$.\\[10pt]
+    {\bf Solution.} Let $\alpha=(-1-\sqrt{13})/2$ and $\beta=(-1+\sqrt{13})/2$. We claim that $S$ is actually the interval
+    $(\alpha,\beta)$. To see this, first suppose that $t\in(\alpha,\beta)$. Then we have
+    \[t^2+t<\left(\frac{-1+\sqrt{13}}{2}\right)^2+\left(\frac{-1+\sqrt{13}}{2}\right)=3.\]
+    So $t\in S$, too. Next, we suppose that $u\in S$, but assume for the purpose of deriving a contradiction that $u\notin(\alpha,\beta)$. Then it must
+    be the case that either $u\geq (-1+\sqrt{13})/2$ or $u\leq(-1-\sqrt{13})/2$. In the first case, we have
+    \[u^2+u\geq \left(\frac{-1+\sqrt{13}}{2}\right)^2+\left(\frac{-1+\sqrt{13}}{2}\right)=3\]
+    which contradicts our supposition that $u\in S$, since this implies $u^2+u<3$. Alternatively, if $u\leq (-1-\sqrt{13})/2$, we rely on the fact that $x^2-x$ is decreasing on $(-\infty,-1)$ to derive a contradiction.
+    To see why $x^2+x$ is decreasing, let $a,b\in(-\infty, -1)$, with $a\leq b$. Then
+    \begin{align*}
+        a^2+a-b^2+b&=a^2-b^2+a-b\\
+        &=(a-b)(a+b)+(a-b)\\
+        &=(a-b)(a+b+1)
+    \end{align*}
+    where in the last expression, $(a-b)\leq 0$ and $(a+b+1)<0$, so their product is at least zero and
+    \[a^2+a-b^2-b\geq 0\quad\Rightarrow\quad a^2+a\geq b^2+b\]
+    which says that $x^2+x$ is decreasing on $(-\infty,-1)$. With this, and recalling both $u\leq (-1-\sqrt{13})/2$ and $(-1-\sqrt{13})/2\in(-\infty,-1)$, we have
+    \[u^2+u\geq \left(\frac{-1-\sqrt{13}}{2}\right)^2+\left(\frac{-1-\sqrt{13}}{2}\right)=3\]
+    so once more we derive a contradiction -- we cannot suppose $u\in S$ and derive $u\notin (\alpha,\beta)$, so we have shown $u\in(\alpha,\beta)$ indirectly.
+    Having shown $S\subseteq(\alpha,\beta)$ and $S\supseteq (\alpha,\beta)$, we get $S=(\alpha,\beta)$. From here it is easy to show that $\alpha=\inf S$ and $\beta=\sup S$.\\[10pt]
+    By definition, $\forall x\in S$, $\alpha<x<\beta$, so $\alpha$ is a lower bound and $\beta$ is an upper bound of $S$. Now fix $\varepsilon>0$, but notice that if $\varepsilon\geq\sqrt{13}$, then
+    \[\alpha+\varepsilon\geq\alpha+\sqrt{13}=\beta\quad\text{and}\quad \beta-\varepsilon\leq\beta-\sqrt{13}=\alpha\]
+    so that $\alpha+\varepsilon$ and $\beta-\varepsilon$ cease to be lower and upper bounds, respectively. Thus, without loss of generality, we specify $0<\varepsilon<\sqrt{13}$.
+    Now, by the Archimedean property of $\mbb{R}$, $\exists n\in\mbb{N}$ so that $0<1/n<\varepsilon$. But then we get
+    \[\alpha+\varepsilon>\alpha+\frac{1}{n}\in S\quad\text{and}\quad\beta-\varepsilon<\beta-\frac{1}{n}\in S\]
+    so $\alpha+\varepsilon$ is not a lower bound of $S$, and $\beta-\varepsilon$ is not an upper bound of $S$. Thus $\alpha$ is the greatest lower bound, and $\beta$ is the least upper bound of $S$. That is,
+    \[\inf S=\frac{-1-\sqrt{13}}{2}\quad\text{and}\quad\sup S=\frac{-1+\sqrt{13}}{2}.\tag*{$\qed$}\]
+    {\bf Problem 2.} Suppose that $A$,$B\subset\mbb{R}$, with $A$,$B\neq\emptyset$ and both $A$ and $B$ bounded. Define
+    \[A+B:=\{x+y:x\in A\;\text{and}\;y\in B\}.\]
+    Then
+    \[\sup(A+B)=\sup A+\sup B.\]
+    {\bf Proof.} Let $x\in A+B$. Then $\exists a^\prime\in A$ and $b^\prime\in B$ so that $x=a^\prime+b^\prime$. But then
+    \[x=a^\prime+b^\prime\leq\sup A+\sup B\]
+    so $\sup A+\sup B$ is an upper bound of $(A+B)$. Now, fix $\varepsilon>0$. By definition, $\exists a^\ast\in A$ and $b^\ast\in B$ so that
+    \[a^\ast>\sup A-\frac{\varepsilon}{2}\quad\text{and}\quad b^\ast>\sup B-\frac{\varepsilon}{2}\]
+    since $\sup A$ and $\sup B$ are the least upper bounds of $A$ and $B$, respectively. But then $a^\ast+b^\ast\in(A+B)$, and
+    \[a^\ast+b^\ast>\sup A+\sup B -\varepsilon\]
+    so that, for an arbitrary choice of $\varepsilon$, $\sup A+\sup B-\varepsilon$ is not an upper bound of $(A+B)$. Thus, $\sup A+\sup B$ is the least upper bound of $(A+B)$, and
+    thus $\sup(A+B)=\sup A+\sup B$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 3.} Determine whether or not each of the following series is convergent. Justify your answer.\\[10pt]
+    {\bf a)} 
+    \[\sum_{n=1}^\infty(\sqrt{n+1}-\sqrt{n})\]
+    {\bf Solution.} The series is divergent.\\[10pt]
+    {\bf Proof.} Recalling that the series converges if and only if the sequence of partial sums does, and denoting the $N$th partial sum
+    \[S_N:=\sum_{n=1}^N(\sqrt{n+1}-\sqrt{n})\]
+    we see that $S_N$ is telescopic, that is
+    \begin{align*}
+        S_N&=\sqrt{2}-\sqrt{1}+\sqrt{3}-\sqrt{2}+\sqrt{4}-\sqrt{3}+\dots+\sqrt{N}-\sqrt{N-1}+\sqrt{N+1}-\sqrt{N}\\
+        &=\sqrt{N+1}-\sqrt{1}
+    \end{align*}
+    where by taking the limit as $N\rightarrow\infty$, we get
+    \[\lim_{N\rightarrow\infty}S_N=\lim_{N\rightarrow\infty}\sqrt{N+1}-\sqrt{1}=\infty.\]
+    Thus, since the sequence of partial sums diverges, the given series does as well.\hfill{$\qed$}\\[10pt]
+    {\bf b)}
+    \[\sum_{n=1}^\infty\frac{\sqrt{n+1}-\sqrt{n}}{n}\]
+    {\bf Solution.} The series is convergent.\\[10pt]
+    {\bf Proof.} Define the sequence $\{a_k\}_{k\geq 1}$ with $k$th element $a_k=(\sqrt{k+1}-\sqrt{k})/k$. First, note that $a_k\geq 0$ $\forall k\in \mbb{N}$, and then that
+    \begin{align*}
+        a_k&=\frac{\sqrt{k+1}-\sqrt{k}}{k}\\
+        &=\frac{(\sqrt{k+1}-\sqrt{k})(\sqrt{k+1}+\sqrt{k})}{k(\sqrt{k+1}+\sqrt{k})}\\
+        &=\frac{k+1-k}{k(k+1)^{1/2}+k^{3/2}}\\
+        &\leq\frac{1}{k^{3/2}}.
+    \end{align*}
+    Now, defining another nonnegative sequence $\{b_k\}_{k\geq 1}$ so that $b_k=1/k^{3/2}$ and decreasing, nonnegative function $f:[1,\infty)\rightarrow\mbb{R}$ with $f(x)=1/x^{3/2}$ and 
+    \[f(k)=\frac{1}{k^{3/2}}=b_k\quad\forall k\in\mbb{N}\]
+    we can show that $\sum_{k=1}^\infty b_k$ converges by the integral test. That is,
+    \begin{align*}
+        \lim_{m\rightarrow\infty}\int_{1}^mf(x)dx&=\lim_{m\rightarrow\infty}\int_1^m\frac{dx}{x^{3/2}}\\
+        &=\lim_{m\rightarrow\infty}-\frac{2}{x^{1/2}}\bigg|_{1}^{m}\\
+        &=\lim_{m\rightarrow\infty}-\frac{2}{\sqrt{m}}+2\\
+        &=2
+    \end{align*}
+    so $\int_{1}^\infty fdx$ converges$\Rightarrow \sum_{k=1}^\infty b_k$ converges. But then, since $|a_k|=a_k\leq b_k$ $\forall k\in\mbb{N}$ and $\sum_{k=1}^\infty b_k$ converges,
+    $\sum_{k=1}^\infty a_k$ converges by the comparison test.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 4.} Determine all real numbers $x$ for which the series
+    \[\sum_{k=2}^\infty\frac{1}{k(\log k)^x}\tag{1}\]
+    converges.\\[10pt]
+    {\bf Solution.} We proceed by partitioning $\mbb{R}$ and studying the convergence behavior of $\sum_{k=2}^\infty1/k(\log k)^x$ on each segment. First, consider $x\in(-\infty, 0]$.
+    In this case, we have $1/(\log k)^x\geq 1$ $\forall k\geq 2$, so 
+    \[\frac{1}{k(\log k)^x}\geq \frac{1}{k}>0\quad\forall k\geq 2\]
+    where, since $\sum_{k=2}^\infty 1/k$ diverges, we have that (1) diverges by direct comparison.\\[10pt]
+    Now consider $x\in(0,\infty)$. Then the function $f_x:[2,\infty)\rightarrow\mbb{R}$ given by
+    $f_x(t)=\frac{1}{t(\log t)^x}$ is such that
+    \[f_x(k)=\frac{1}{k(\log k)^x}\;\forall k\geq 2\quad\text{and}\quad \forall t_1,t_2\in[2,\infty),\;t_1\leq t_2\;\Rightarrow f_x(t_1)\geq f_x(t_2)\]
+    that is, $f_x$ interpolates the terms of our series and is decreasing, so we can use the integral test to characterize the convergence of (1).
+    \begin{align*}
+        \lim_{m\rightarrow\infty}\int_2^m f_x(t)dt&=\lim_{m\rightarrow\infty}\int_2^m\frac{dt}{t(\log t)^x}\\
+        &=\lim_{m\rightarrow\infty}\int_{\log 2}^m\frac{td\mu}{t\mu^x}\tag{letting $\mu=\log t\Rightarrow td\mu=dt$}\\
+        &=\begin{cases}
+            \lim_{m\rightarrow\infty}\frac{1}{1-x}(\log t)^{1-x}\big|_2^m\quad&\text{if $x\neq 1$}\\
+            \lim_{m\rightarrow \infty}\log\log t\big|_2^m\quad&\text{if $x=1$}
+        \end{cases}\\
+        &=\begin{cases}
+            \lim_{m\rightarrow\infty}\frac{1}{1-x}(\log m)^{1-x}-\frac{1}{1-x}(\log 2)^{1-x}\quad&\text{if $x\neq 1$}\\
+            \lim_{m\rightarrow \infty}\log\log m-\log\log 2\quad&\text{if $x=1$}
+        \end{cases}.\tag{2}
+    \end{align*}
+    Of course, the convergence behavior of this integral is then immediately available to us by computing these limits.
+    \begin{align*}
+        \begin{cases}
+            \lim_{m\rightarrow\infty}\frac{1}{1-x}(\log m)^{1-x}-\frac{1}{1-x}(\log 2)^{1-x}=\infty\quad&\text{if $x<1\;\Rightarrow 0<1-x$}\\
+            \lim_{m\rightarrow\infty}\frac{1}{1-x}(\log m)^{1-x}-\frac{1}{1-x}(\log 2)^{1-x}=-\frac{1}{1-x}(\log 2)^{1-x}\quad&\text{if $x>1\;\Rightarrow 0>1-x$}\\
+            \lim_{m\rightarrow\infty}\log\log m - \log\log 2=\infty\quad&\text{if $x=1$}
+        \end{cases}
+    \end{align*}
+    So, the integral converges only in the case that $x>1$ which, by the integral test, implies that (1) only converges if $x>1$ as well.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 5.} If $\sum_{k=1}^\infty a_k^2$ converges, then so does $\sum_{k=1}^\infty\frac{a_k}{k}.$\\[10pt]
+    {\bf Proof.} First notice that, for $k\in\mbb{N}$
+    \begin{align*}
+        0\leq \left(a_k-\frac{1}{k}\right)^2&\Rightarrow0\leq a_k^2-2\frac{a_k}{k}+\frac{1}{k^2}\\
+        &\Rightarrow\frac{a_k}{k}\leq a_k^2+\frac{1}{k^2}
+    \end{align*}
+    but also
+    \begin{align*}
+        0\leq \left(a_k+\frac{1}{k}\right)^2&\Rightarrow 0\leq a_k^2+2\frac{a_k}{k}+\frac{1}{k^2}\\
+        &\Rightarrow -2\frac{a_k}{k}\leq a^2_k+\frac{1}{k^2}\\
+        &\Rightarrow \frac{a_k}{k}\geq -\left(a_k^2+\frac{1}{k^2}\right)
+    \end{align*}
+    which gives us
+    \[-\left(a_k^2+\frac{1}{k^2}\right)\leq \frac{a_k}{k}\leq a_k^2+\frac{1}{k^2}\quad\Rightarrow\quad \left|\frac{a_k}{k}\right|\leq a_k^2+\frac{1}{k^2}.\tag{3}\]
+    Now fix $\varepsilon>0$. Since $\sum_{k=1}^\infty a_k^2$ and $\sum_{k=1}^\infty 1/k^2$ converge, $\exists N_1,N_2\in\mbb{N}:$ if $n_1>m_1\geq N_1$ and $n_2>m_2\geq N_2$, we have
+    \[\left|\sum_{k=m_1+1}^{n_1} a_k^2\right|<\frac{\varepsilon}{2}\quad\text{and}\quad\left|\sum_{k=m_2+1}^{n_2}\frac{1}{k^2}\right|<\frac{\varepsilon}{2}\]
+    since both series are Cauchy. Taking $N=\max\{N_1,N_2\}$ and $n>m\geq N$, we get
+    \begin{align*}
+        \left|\sum_{k=1}^n\frac{a_k}{k}-\sum_{k=1}^m\frac{a_k}{k}\right|&=\left|\sum_{k=m+1}^n\frac{a_k}{k}\right|\\
+        &\leq\sum_{k=m+1}^n\left|\frac{a_k}{k}\right|\tag{triangle inequality}\\
+        &\leq \sum_{k=m+1}^n\left|a_k^2+\frac{1}{k^2}\right|\tag{by (3)}\\
+        &\leq \sum_{k=m+1}^n\left|a_k^2\right|+\sum_{k=m+1}^n\left|\frac{1}{k^2}\right|\tag{triangle inequality}\\
+        &= \left|\sum_{k=m+1}^na_k^2\right|+\left|\sum_{k=m+1}^n\frac{1}{k^2}\right|\tag{since $a_k^2$, $1/k^2\geq 0$ $\forall k$}\\
+        &\leq\frac{\varepsilon}{2}+\frac{\varepsilon}{2}\\
+        &=\varepsilon.
+    \end{align*}
+    Thus, $\sum_{k=1}^\infty a_k/n$ satisfies the Cauchy criterion in $\mbb{R}$, so it converges.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 6.} Show that the series
+    \[\sum_{n=1}^\infty\left(\frac{1}{n^s}-\int_{n}^{n+1}\frac{dx}{x^s}\right)\]
+    converges for $s>0$.\\[10pt]
+    {\bf Solution.} Let $s>0$ and $a_n$, $n\geq 1$ be a sequence with
+    \[a_n=\frac{1}{n^s}-\int_n^{n+1}\frac{dx}{x^s}.\]
+    Each element of this sequence can be bounded below:
+    \[a_n=\frac{1}{n^s}-\int_n^{n+1}\frac{dx}{x^s}\geq\frac{1}{n^s}-\frac{1}{n^s}(n+1-n)=0\]
+    so that $a_k\geq 0$ $\forall k\in\mbb{N}$. We next endeavor to bound each element of the sequence from above.
+    \begin{align*}
+        \frac{1}{n^s}-\int_{n}^{n+1}\frac{dx}{x^s}&=\int_{n}^{n+1}\left(\frac{1}{n^s}-\frac{1}{x^s}\right)dx\\
+        &=\int_{n}^{n+1}\left(\int_{x}^n-st^{-s-1}dt\right)dx\tag{fundamental theorem of calculus}\\
+        &=\int_n^{n+1}\left(\int_{n}^xst^{-s-1}dt\right)dx\\
+        &\leq \int_n^{n+1}\left(\int_n^xsn^{-s-1}dt\right)dx\tag{since $t^{-s-1}$ decreasing on $(n,x)$}\\
+        &=\int_n^{n+1}sn^{-s-1}(x-n)dx\\
+        &\leq \int_n^{n+1}sn^{-s-1}(n+1-n)dx\\
+        &=sn^{-s-1}.
+    \end{align*}
+    Where $s\sum_{n=1}^\infty1/n^{s+1}$ converges since $s>0$ so $s+1>1$ (this can be shown by the integral test, precisely as in {\bf 3.b}). But then
+    $\sum_{n=1}^\infty a_n$ converges by direct comparison with $s\sum_{n=1}^{\infty}1/n^{s+1}$ since $0<|a_n|=a_n\leq s/n^{s+1}$ for all $n\in\mbb{N}$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 7.} Let 
+    \[f_n(x)=\frac{x}{1+n^2x^2},\quad n=1,2,\dots\]
+    and $x\in[-1,1]$. Show that
+    \[|f_n(x)|\leq \frac{1}{2n}\]
+    for all $n\geq 1$ and that $f_n$ converges uniformly on $[-1,1]$ to the zero function.\\[10pt]
+    {\bf Solution.} First, notice that both
+    \[0\leq (nx-1)^2\;\Rightarrow 0\leq n^2x^2-2nx+1\;\Rightarrow 2nx\leq 1+n^2x^2\]
+    and
+    \[0\leq (nx+1)^2\;\Rightarrow 0\leq n^2x^2+2nx+1\;\Rightarrow -2nx\leq 1+n^2x^2\;\Rightarrow 2nx\geq -(1+n^2x^2)\]
+    so that
+    \[|2nx|\leq 1+n^2x^2\tag{4}\]
+    Now, letting $n\in\mbb{N}$, when $x=0$ we have
+    \[f_n(x)=\frac{0}{1+n^20^2}=0\leq \frac{1}{2n}.\]
+    If instead $x\in[-1,1]\setminus\{0\}$, we have
+    \begin{align*}
+        f_n(x)&=\frac{x}{1+n^2x^2}\\
+        &\leq \frac{x}{2nx}\tag{by (4)}\\
+        &=\frac{1}{2n}.
+    \end{align*}
+    Where the above inequality holds due to (4) and the observation that if $x<0$, then $x/(1+n^2x^2)<0$ but $x/2nx>0$ (if $x>0$ then it holds by $2nx\leq 1+n^2x^2$, shown above). Now, fix $\varepsilon>0$, and let $N=\lceil1/2\varepsilon\rceil$. Then, provided $n\geq N$ we get
+    \[|f_n(x)-0|=\left|\frac{x}{1+n^2x^2}\right|=\frac{|x|}{1+n^2x^2}\leq \frac{|x|}{|2nx|}=\frac{|x|}{2n|x|}\leq \frac{2\varepsilon}{2}=\varepsilon\]
+    for arbitrary $x\in[-1,1]$. Thus, we have that $f_n$ converges uniformly to the zero function on $[-1,1]$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 8.} With $f_n$ as in the previous question, show the sequence $f_n^\prime$, $n\geq 1$ does not converge uniformly on $[-1,1]$.\\[10pt]
+    {\bf Solution.} Foremost, it will be useful to have an expression for $f_n^\prime(x)$ which, taking $n\in\mbb{N}$, we compute as
+    \[f_n^\prime(x)=\frac{d}{dx}\frac{x}{1+n^2x^2}=\frac{1+n^2x^2-2n^2x^2}{(1+n^2x^2)^2}=\frac{1-n^2x^2}{(1+n^2x^2)^2}.\]
+    Assume for the purpose of deriving a contradiction that $f^\prime_n$ converges uniformly on $[-1,1]$ to a function $f^\prime$. This implies that $f^\prime$ is continuous on $[-1,1]$, since each of the 
+    $f_n^\prime$ are for $n\geq 1$. Further, $f^\prime_n$ must also converge pointwise on $[-1,1]$ with
+    $\lim_{n\rightarrow\infty}f^\prime_n(x)=f^\prime(x)$ $\forall x\in[-1,1]$. 
+    Now, since $\lim_{n\rightarrow\infty}f^\prime_n(0)=f^\prime(0)$, we have
+    \[f^\prime(0)=\lim_{n\rightarrow\infty}f^\prime_n(0)=\lim_{n\rightarrow\infty}1=1.\]
+    In order to complete the proof, we introduce the following characterization of uniform convergence.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.90\linewidth}
+            {\bf Lemma.} A sequence of functions $g_n$, $n\geq 1$ converges uniformly to a function $g$ on $S$ if and only if
+            \[\lim_{n\rightarrow\infty}\sup_{x\in S}|g_n(x)-g(x)|=0.\]
+            {\bf Proof.} Suppose $g_n$ converges uniformly to $g$ on $S$. Then, fixing $\varepsilon>0$, $\exists N\in\mbb{N}:\;|g_n(x)-g(x)|<\varepsilon$ $\forall x\in S$ provided $n\geq N$.
+            Letting $n\geq N$, this clearly implies that
+            \[\sup_{x\in S}|g_n(x)-g(x)|\leq\varepsilon\tag{5}\]
+            since otherwise $\varepsilon$ would be a smaller upper bound of $\{|g_n(x)-g(x)|:x\in S\}$ than its supremum. The converse also holds, since if the supremum is bounded by $\varepsilon$
+            when $n\geq N$ then so is $|g_n(x)-g(x)|$ for every choice of $x\in S$. But then (5) is true if and only if
+            \[\lim_{n\rightarrow\infty}\sup_{x\in S}|g_n(x)-g(x)|=0\]
+            and we are done.\hfill{$\qed$} 
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    Armed with this, and since $f^\prime_n$ converges uniformly to $f^\prime$, for any sequence $\{x_n\}_{n\geq 1}\subset[-1,1]$ we find that
+    \[0\leq\lim_{n\rightarrow\infty}|f^\prime_n(x_n)-f^\prime(x_n)|\leq\lim_{n\rightarrow\infty}\sup_{x\in[-1,1]}|f^\prime_n(x)-f^\prime(x)|=0.\tag{6}\]
+    So $\lim_{n\rightarrow\infty}|f^\prime_n(x_n)-f^\prime(x_n)|=0$. However, taking $\{1/n\}_{n\geq 1}\subset[-1,1]$, we instead find
+    \begin{align*}
+        \lim_{n\rightarrow\infty}|f^\prime_n(1/n)-f^\prime(1/n)|&=\lim_{n\rightarrow\infty}\left|\frac{1-n^2(1/n^2)}{(1+n^2(1/n^2))^2}-f^\prime(1/n)\right|\\
+        &=\lim_{n\rightarrow\infty}\left|f^\prime(1/n)-0\right|\\
+        &=|f^\prime(\lim_{n\rightarrow\infty}1/n)|\tag{7}\\
+        &=|f^\prime(0)|\\
+        &=1.
+    \end{align*}
+    Where (7) utilizes the sequential characterization of continuity and the fact that
+    the Euclidean norm $|\cdot|:\mbb{R}\rightarrow\mbb{R}_{\geq 0}$ is continuous (so $|f^\prime|$ is too). But referring back to (6), this produces a contradiction:
+    \[1\leq\lim_{n\rightarrow\infty}\sup_{x\in[-1,1]}|f^\prime_n(x)-f^\prime(x)|=0\]
+    so it cannot be the case that the sequence $\{f_n^\prime\}_{n=1}^\infty$ converges uniformly on $[-1,1]$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 9.} Prove that $e^x\geq 1+x$ $\forall x\in\mbb{R}$ with equality if and only if $x=0$.\\[10pt]
+    {\bf Solution.} Let $x\in\mbb{R}$ and consider the difference
+    \[e^x-(x+1)=\sum_{n=2}^\infty\frac{x^n}{n!}.\tag{8}\]
+    Our goal is to bound the right hand side of (8) below by zero for any choice of $x\in\mbb{R}$. First consider $x>0$. Then $x^n/n!>0$ $\forall n\in\mbb{N}$, so
+    \[\sum_{n=2}^\infty\frac{x^n}{n!}>0.\]
+    Next, let $x=0$. Clearly then $x^n/n!=0$ $\forall n\in\mbb{N}$, so we get
+    \[e^x-(x+1)=0\quad\Rightarrow\quad e^x=x+1.\]
+    If instead $x<0$, some additional care is required to bound the right hand side of (8). First consider $-1<x<0$. Then $0<x+1$, and letting $k\in\mbb{N}$ we have
+    \[(x^{2k}+x^{2k+1})=x^{2k}(1+x)>0\]
+    since both $x^{2k}>0$ and $(1+x)>0$. This allows us to express the right hand side of (8) as a series of strictly positive terms
+    \[\sum_{n=2}^\infty\frac{x^n}{n!}=\sum_{n=1}^\infty\left(\frac{x^{2n}}{(2n)!}+\frac{x^{2n+1}}{(2n+1)!}\right)\geq\sum_{n=1}^\infty\frac{1}{(2n+1)!}\left(x^{2n}+x^{2n+1}\right)>0.\]
+    For the last case, consider $x\leq-1$. Then $x+1\leq 0$ and letting $k\in\mbb{N}$ we have
+    \[(x^{2k-1}+x^{2k})=x^{2k-1}(1+x)\geq 0\]
+    since both $x^{2k-1}<0$ and $1+x\leq 0$. Once more we can reexpress the right hand side of (8) to find
+    \[\sum_{n=2}^\infty\frac{x^n}{n!}=\frac{x^2}{2!}+\sum_{n=2}^\infty\left(\frac{x^{2n-1}}{(2n-1)!}+\frac{x^{2n}}{(2n)!}\right)\geq\frac{x^2}{2!}+\sum_{n=2}^\infty\frac{1}{(2n)!}\left(x^{2n-1}+x^{2n}\right)\geq\frac{x^2}{2!}>0.\]
+    So, we have found that whenever $x\neq 0$, $e^x-(x+1)>0$, and when $x=0$, we get $e^x-(x+1)=0$. We conclude that $e^x\geq 1+x$ for any $x\in\mbb{R}$, with
+    equality if and only if $x=0$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 10.} Show that the sequence 
+    \[S_n:=\sum_{k=1}^n\frac{n}{k^2+n^2}\]
+    converges and find its limit.\\[10pt]
+    {\bf Solution.} Our goal is to express the limit of $S_n$ as $n\rightarrow\infty$ as a definite Riemann integral, which we can evaluate directly. Define $f:[0,1]\rightarrow\mbb{R}$ with
+    \[f(x)=\frac{1}{1+x^2}\]
+    and notice that $f$ is continuous and thus integrable. Next, let $k\in\mbb{N}$ and define $\mc{P}_k=\{i/k\}_{i=0}^k$ to be a partition of the interval $[0,1]$ so that
+    $\Delta^k_i=i/k-(i-1)/k=1/k$ for $i=1,\dots,k$. Henceforth we will drop the subscript, writing $\Delta_i^k=\Delta^k=1/k$ for $i=1,\dots, k$. But then, the $n$th term of the sequence of interest can be expressed as
+    \[S_n=\sum_{k=1}^n\frac{n}{n^2+k^2}=\sum_{k=1}^n\frac{1}{n}\frac{1}{1+(k/n)^2}=\sum_{k=1}^nf(k/n)\Delta^n\]
+    with $k/n\in[k-1/n,k/n]\subseteq[0,1]$ for all $n\in\mbb{N}$ and $k\leq n$. Thus, this is a Riemann sum, and in the limit as $n\rightarrow\infty$, we get
+    \begin{align*}
+        \lim_{n\rightarrow\infty}S_n&=\lim_{n\rightarrow\infty}\sum_{k=1}^nf(k/n)\Delta^n\\
+        &=\int_0^1f(x)dx\\
+        &=\int_0^1\frac{1}{1+x^2}dx\\
+        &=\arctan(x)\bigg|^1_0\\
+        &=\frac{\pi}{4}.
+    \end{align*}
+    So we have that $S_n\rightarrow\pi/4$ as $n\rightarrow\infty$.\hfill{$\qed$}
+    
+\end{document}

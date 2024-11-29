@@ -1,0 +1,97 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Some solutions presented here were the product of collaboration with my fellow students. To be more precise, problems 4, 5, 7, 8 and 9 incorporate ideas presented to me during discussion with Anthony Pasion (problems 4 and 5),
+            Timothy Liu (problem 8) and Jack Heimrath (problems 7 and 9).
+            Problem 9 was completed with reference to [1]. 
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    \noindent{\bf Problem 1}\\[5pt]
+    Prove the following theorem using the so-called 'method of higher moments', as described in the provided steps.\\[5pt]
+    {\bf Theorem}\hspace{5pt} Let $(X_k)_{k\geq 1}$ be a sequence of independent, mean zero random variables. Suppose that $\exists C>0$ such that
+    for all $k\geq 1$ we have $|X_k|<C$ almost surely. Then
+    \[\frac{1}{n}\sum_{k=1}^nX_k\overunderset{\as}{n\rightarrow\infty}{\longrightarrow}0.\] 
+    {\bf a)}\hspace{5pt} Let $S_n=\sum_{k=1}^nX_k$. Prove that $\E\bp{\bp{\frac{S_n}{n}}^4}\leq \frac{4C^4}{n^2}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $\sigma^{(n)}_2:=\{(i,j):1\leq i,j\leq n,\;i\neq j\}$ and $\sigma_3^{(n)}:=\{(i,j,k):1\leq i,j,k\leq n\;i\neq j,\;j\neq k,\;i\neq k\}$ be the set of all permutations of two (respectively three) indices up to $n$.
+    By the multinomial theorem, we have
+    \begin{align*}
+        S_n^4=\bp{\sum_{k=1}^nX_k}^4&=\sum_{k=1}^nX_k^4+6\bp{\sum_{1\leq i<j\leq n}X_i^2X_j^2}\\
+        &\qquad+4\bp{\sum_{(i,j)\in\sigma_2^{(n)}}X_i^3X_j}+12\bp{\sum_{(i,j,k)\in\sigma_3^{(n)}}X_iX_jX_k^2}+24\bp{\sum_{1\leq i<j<k<\ell\leq n}X_iX_jX_kX_{\ell}}.
+    \end{align*}
+    In the following step, we simultaneously invoke the linearity of expectation, the independence of the random variables and the fact that $\E(X_n)=0$ for $n\geq 1$:
+    \begin{align*}
+        \E\bp{\frac{S_n^4}{n^4}}&=\frac{1}{n^4}\bp{\sum_{k=1}^n\E(X_k^4)+6\sum_{1\leq i<j\leq n}\E(X_i^2)\E(X_j^2)}\\
+        &\leq \frac{1}{n^4}\bp{nC^4+6\frac{n!}{(n-2)!2!}C^4}\\
+        &=\frac{1}{n^3}C^4\bp{3n-2}\\
+        &=\frac{4}{n^2}C^4\bp{\frac{3}{4}-\frac{1}{2n}}\\
+        &\leq \frac{4}{n^2}C^4
+    \end{align*}
+    as desired.\hfill{$\qed$}\\[5pt]
+    {\bf b)}\hspace{5pt} Use Beppo Levi's theorem to conclude the proof.\\[5pt]
+    {\bf Proof}\hspace{5pt} For $k\geq 1$, let $X_k$ be defined on a common probability space $(\Omega,\mc{F},P)$. From the previous part we have
+    \[\sum_{n=1}^\infty\E\bp{\bp{\frac{S_n}{n}}^4}\leq\sum_{k=1}^\infty\frac{4C}{n^2}<\infty\quad\Rightarrow\quad\sum_{n=1}^\infty\int_{\Omega}\bp{\frac{S_n}{n}}^4P(d\omega)<\infty.\]
+    Now, since $\left\{\bp{\tfrac{S_n}{n}}^4\right\}_{n=1}^\infty$ is a sequence of nonnegative, integrable functions on $\Omega$, by Beppo Levi's theorem we have
+    \begin{align*}
+        \sum_{k=1}^\infty\bp{\frac{S_k}{k}}^4<\infty\quad P-\ale
+    \end{align*} 
+    In particular, this implies that $\bp{\tfrac{S_n}{n}}^4\rightarrow 0$ $\as$ as $n\rightarrow\infty$, and further that $\tfrac{S_n}{n}\rightarrow 0$ $\as$ as $n\rightarrow\infty$, which is precisely the statement of the theorem.\hfill{$\qed$}\\[5pt]
+\end{document}

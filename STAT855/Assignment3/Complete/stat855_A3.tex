@@ -1,0 +1,580 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment III}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 1} Let $\mc{S}$ and $\mc{U}$ be finite sets, referred to as the state and action space respectively.
+    For each action $u\in\mc{U}$, it is associated with a transition matrix $P^{(u)}=\{P_{i,j}^{(u)}:i,j\in\mc{S}\}$. A policy is a mapping
+    $\mu:\mc{S}\rightarrow\mc{U}$ from the state to the action space.\\[10pt]
+    Fix a policy $\mu(\cdot)$. Consider the stochastic process ${(X_n,U_n):n\geq 0}$ with $X_n\in\mc{S}$ and $U_n\in\mc{U}$ for all $n\geq 0$.
+    Specifically, for $n\geq 0$
+    \[U_n=\mu(X_n)\]
+    and moreover, for $n\geq 1$ and $i_0,i_1,\dots,i_{n+1}\in\mc{S}$,
+    \[P(X_{n+1}=i_{n+1}|X_n=i_n,\dots,X_0=i_0)=P^{(u)}_{i_n,i_{n+1}},\quad\text{with $u=\mu(i_n)$}.\tag{1}\]
+    Next, let $c:\mc{S}\times\mc{U}\rightarrow\mbb{R}$ be a cost function, and define the $\gamma$-discounted cost function as
+    \[J^\mu(i)=\mbb{E}\left[\sum_{n=0}^\infty\gamma^nc(X_n,U_n)\bigg|X_0=i\right]\quad\text{for $i\in\mc{S}$}\tag{2}\]
+    where in particular we require $\gamma\in(0,1)$. We view $J^\mu=(J^\mu(i):i\in\mc{S})$ as a column vector of length $|\mc{S}|$.\\[10pt]
+    {\bf a)} Find a $|\mc{S}|\times 1$ vector $C$ and a $|\mc{S}|\times|\mc{S}|$ matrix $P^\mu$ so that
+    \[J^\mu=C+\gamma P^\mu J^\mu.\]
+    {\bf Solution} We begin by manipulating the $\gamma$-discounted cost function in (2). Let $i\in \mc{S}$. Then
+    \begin{align*}
+        J^\mu(i)&=\mbb{E}\left[\sum_{n=0}^\infty\gamma^n c(X_n,U_n)\bigg|X_0=i\right]\\
+        &=\mbb{E}\left[c(X_0,U_0)+\sum_{n=1}^\infty\gamma^n c(X_n,U_n)\bigg|X_0=i\right]\\
+        &=\mbb{E}[c(X_0,U_0)|X_0=i]+\sum_{j\in \mc{S}}P_{i,j}^{(\mu(i))}\mbb{E}\left[\sum_{n=1}^\infty\gamma^n c(X_n,U_n)\bigg|X_0=i,X_1=j\right]\tag{3}
+    \end{align*}
+    Where we have used the law of total expectation in (3). However, property (1) indicates that this process is Markovian. That is, for $n\geq 1$ and $i_0,i_1,\dots,i_{n+1}\in\mc{S}$,
+    \[P(X_{n+1}=i_{n+1}|X_n=i_n,\dots,X_0=i_0)=P^{(\mu(i_n))}_{i_n,i_{n+1}}=P(X_n=i_{n+1}|X_n=i_n)\]
+    so we can continue to simplify (3) by writing
+    \begin{align*}
+        J^\mu(i)&=\mbb{E}[c(X_0,U_0)|X_0=i]+\sum_{j\in \mc{S}}P_{i,j}^{(\mu(i))}\mbb{E}\left[\sum_{n=1}^\infty\gamma^n c(X_n,U_n)\bigg|X_0=i,X_1=j\right]\\
+        &=\mbb{E}[c(i,\mu(i))]+\gamma\sum_{j\in \mc{S}}P_{i,j}^{(\mu(i))}\mbb{E}\left[\sum_{n=1}^\infty\gamma^{n-1}c(X_n,U_n)\bigg|X_1=j\right]\\
+        &=c(i,\mu(i))+\gamma\sum_{j\in \mc{S}}P_{i,j}^{(\mu(i))}\mbb{E}\left[\sum_{n=0}^\infty\gamma^{n}c(X_n,U_n)\bigg|X_0=j\right]\\
+        &=c(i,\mu(i))+\gamma\sum_{j\in\mc{S}}P_{i,j}^{(\mu(i))}J^\mu(j).
+    \end{align*}
+    From this, for $i,j\in\mc{S}$ we define
+    \[C(i)=c(i,\mu(i))\quad\text{and}\quad P^\mu(i,j)=P^{(\mu(i))}_{i,j}\]
+    so as to view $C=\{C(i):i\in\mc{S}\}$ as a $|\mc{S}|\times 1$ vector and $P^\mu=\{P^\mu(i,j):i,j\in\mc{S}\}$ as a $|\mc{S}|\times|\mc{S}|$ matrix satisfying the relationship
+    \[J^\mu=C+\gamma P^\mu J^\mu.\tag*{$\qed$}\]
+    {\bf b)} Let $\mc{S}=\{1,2,3\}$ and $\mc{U}=\{1,2\}$. Further, let
+    \[P^{(1)}=\begin{pmatrix}
+        1/2 & 1/4 & 1/4\\
+        1/4 & 1/2 & 1/4\\
+        1/4 & 1/4 & 1/2
+    \end{pmatrix}\quad\text{and}\quad P^{(2)}=\begin{pmatrix}
+        1/3 & 1/3 & 1/3\\
+        1/3 & 1/3 & 1/3\\
+        1/3 & 1/3 & 1/3
+    \end{pmatrix}\]
+    and $c(s,u)=su$ for each pair $(s,u)\in\mc{S}\times\mc{U}$. Consider the following policy:
+    \[\mu(1)=1,\quad\mu(2)=2,\quad\mu(3)=1.\]
+    For $\gamma=0.8$, report $C$, $P^\mu$ and $J^\mu$.\\[10pt]
+    {\bf Solution} Using the expression found in the first part we can solve for $J^\mu$. Let $\mbb{I}$ be the identity matrix. Then
+    \[J^\mu=C+\gamma P^\mu J^\mu\quad\Rightarrow\quad J^\mu-\gamma P^\mu J^\mu=C\quad\Rightarrow\quad (\mbb{I}-\gamma P^\mu)J^\mu=C\quad\Rightarrow\quad J^\mu=(\mbb{I}-\gamma P^\mu)^{-1}C\] 
+    where in the last step we have assumed that the matrix $(\mbb{I}-\gamma P^\mu)$ is invertible. Of course, when we determine $(\mbb{I}-\gamma P^\mu)$ for the system at hand we will have to verify this is indeed the case.
+    Formulae for $C$ and $P^\mu$ are immediately available in the first part, so we simply compute them programmatically (see Appendix A.1 for the code).\\[10pt]
+    The program returns
+    \[P^\mu=\begin{pmatrix}
+        1/2 & 1/4 & 1/4\\
+        1/3 & 1/3 & 1/3\\
+        1/4 & 1/4 & 1/2
+    \end{pmatrix}\quad\text{and}\quad C=\begin{pmatrix}
+        1\\
+        4\\
+        3
+    \end{pmatrix}.\]
+    where now, rounding to five decimal places,
+    \[(\mbb{I}-\gamma P^\mu)=\begin{pmatrix}
+        0.60000 & -0.20000 & -0.20000\\
+        -0.26667 & 0.73333 & -0.26667\\
+        -0.20000 & -0.20000 & 0.60000
+    \end{pmatrix}\]
+    which is nonsingular as determined numerically. Thus we can compute the $\gamma$-discounted cost function, rounding to five decimal places once more, as
+    \[J^\mu=(\mbb{I}-\gamma P^\mu)^{-1}C=\begin{pmatrix}
+        10.89286\\
+        14.28571\\
+        13.39286
+    \end{pmatrix}\]
+    and we are done.\\[10pt]
+    \noindent{\bf Problem 2} Let $\{X_n,n\geq 0\}$ be a Markov chain with state space $S$. The stopping times below are associated with $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf a)} Let $T$ and $V$ be stopping times. Show that $U=\max\{T,V\}$ is also a stopping time.\\[10pt]
+    {\bf Solution} First we claim that for $n\geq 0$, 
+    \[\{U=n\}=\{\max\{T,V\}=n\}=\left(\{T=n\}\cap\{V\leq n\}\right)\cup\left(\{T\leq n\}\cap\{V=n\}\right).\]
+    To see this, suppose that $\omega\in\{U=n\}\subseteq\Omega$. Then $\max\{T,V\}=n$, so either $T=n$ or $V=n$, but also $T\leq n$ and $V\leq n$. That is, if $\omega\in\{T=n\}$, then $\omega\in\{V\leq n\}$, so $\omega\in\{T=n\}\cap\{V\leq n\}$, so 
+    $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$. If instead $\omega\in\{V=n\}$, then $\omega\in\{T\leq n\}$ so $\omega\in\{T\leq n\}\cap\{V=n\}$ and $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$, giving us
+    \[\{U=n\}\subseteq(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V\leq n\}).\]
+    Now suppose instead that $\omega\in(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\subseteq\Omega$. Then either $\omega\in(\{T=n\}\cap\{V\leq n\})$ or $\omega\in(\{T\leq n\}\cap\{V=n\})$. In the first case, we have $T=n$ and $V\leq n$, so $U=\max\{T,V\}=n$. If instead
+    $\omega\in\{T\leq n\}\cap\{V=n\}$, then $T\leq n$ and $V=n$, so $U=\max\{T,V\}=n$, so $\omega\in\{U=n\}$. Thus,
+    \[(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\subseteq\{U=n\}\]
+    and with both inclusions, we conclude $\{U=n\}=(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})$. 
+    Now, as we show in 2b, since both $T$ and $V$ are stopping times, $\exists B^\prime_n,C^\prime_n\subset S^{n+1}$ deterministic so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B^\prime_n\}\quad\text{and}\quad \{V\leq n\}=\{(X_0,X_1,\dots,X_n)\in C^\prime_n\}.\]
+    But by definition, $\exists B_n,C_n\subset S^{n+1}$ so that
+    \[\{T=n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}\quad\text{and}\quad\{V=n\}=\{(X_0,X_1,\dots,X_n)\in C_n\}.\]
+    From these facts, we find that
+    \begin{align*}
+        \{U=n\}&=\{\max\{T,V\}=n\}\\
+        &=(\{T=n\}\cap\{V\leq n\})\cup(\{T\leq n\}\cap\{V=n\})\\
+        &=(\{(X_0,X_1,\dots,X_n)\in B_n\}\cap\{(X_0,X_1,\dots,X_n)\in C_n^\prime\})\\
+        &\quad\cup(\{(X_0,X_1,\dots,X_n)\in B_n^\prime\}\cap\{(X_0,X_1,\dots,X_n)\in C_n\})\\
+        &=\{(X_0,X_1,\dots,X_n)\in (B_n\cap C_n^\prime)\cup(B_n^\prime\cap C_n)\}
+    \end{align*}
+    where $(B_n\cap C_n^\prime)\cup(B_n^\prime\cap C_n)\subset S^{n+1}$, so the event $\{U=n\}$ only depends on information up to $X_n$. Additionally, since $T$ and $V$ take values in $\{0,1,2,\dots\}\cup\{\infty\}$, $U=\max\{T,V\}$ does too. With both
+    of these properties, $U$ satisfies the definition of a stopping time.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $T$ be a random variable taking value in $\{0,1,2,\dots,\}\cup\{\infty\}$. Show that $T$ is a stopping time if and only if for any $n\geq 0$, $\{T\leq n\}$ is an event only involving $X_0,X_1,\dots,X_n$, i.e., $\exists B_n\subset S^{n+1}$ so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    {\bf Solution} Suppose that $T$ is a stopping time. Then, $\forall n\geq 0$, $\exists B_n\subset S^{n+1}$ so that
+    \[\{T= n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    Now fix $n\geq 0$, and set $B_i^\prime=B_i\times S^{n-i}\subset S^{n+1}$ for $i=0,1,2,\dots,n-1$. Also take $B_n=B_n^\prime$ for notational convenience. Then
+    \begin{align*}
+        \{T\leq n\}&=\bigcup_{j=0}^n\{(X_0,X_1,\dots,X_j)\in B_j\}\\
+        &=\bigcup_{j=0}^n\{(X_0,X_1,\dots,X_n)\in B_j^\prime\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in\cup_{j=0}^n B_j^\prime\}
+    \end{align*}
+    which completes the first part of the proof. Conversely now, suppose that $\forall n\geq 0$, $\exists B_n\subset S^{n+1}$ so that
+    \[\{T\leq n\}=\{(X_0,X_1,\dots,X_n)\in B_n\}.\]
+    Fixing $n\geq 1$, and using similar reasoning as previously, we have
+    \begin{align*}
+        \{T=n\}&=\{T\leq n\}\setminus\{T\leq n-1\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in B_n\}\setminus\{(X_0,X_1,\dots,X_n)\in B_{n-1}\times S\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in B_n\setminus (B_{n-1}\times S)\}
+    \end{align*}
+    and trivially, when $n=0$
+    \begin{align*}
+        \{T=0\}&=\{T\leq 0\}=\{(X_0)\in B_0\}
+    \end{align*}
+    so that now $\{T=n\}$ only involves information about $X_0,X_1,\dots,X_n$ for arbitrary $n\geq 0$. This in conjunction with the nonnegativity (and possible infinitude) of $T$ allow us to conclude it is a stopping time.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Let $T$ and $V$ be two stopping times. Show that $W=\min\{T,V\}$ is a stopping time.\\[10pt]
+    {\bf Solution} Similar to 2a, we begin by claiming that
+    \[\{W=n\}=\{\min\{T,V\}=n\}=\left(\{T=n\}\cap\{V\geq n\}\right)\cup\left(\{T\geq n\}\cap\{V=n\}\right).\]
+    which is proved very similarly, so we will be a bit more terse. Recalling that these events are all subsets of sample space $\Omega$, if $\omega\in \{U=n\}$ for some $n\geq 0$, then at least one of $\omega\in\{T=n\}$ or $\omega\in\{V=n\}$ are true, and both $\omega\in\{T\geq n\}$ and $\omega\in\{V\geq n\}$ hold.
+    But this simply says that at least one of $\omega\in\{T=n\}\cap\{V\geq n\}$ or $\omega\in\{T\geq n\}\cap\{V=n\}$, so $\omega\in(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})$, so we have found
+    \[\{W=n\}\subseteq (\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\}).\]
+    Conversely, suppose that $\omega\in(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})$. Then either $\omega\in\{T=n\}$ and $\omega\in\{V\geq n\}$, in which case $W=\min\{T,V\}=n$ so $\omega\in\{W=n\}$, or $\{V=n\}$ and $\{T\geq n\}$, in which case $W=\min\{T,V\}=n$, so $\omega\in\{W=n\}$. Thus we have
+    \[(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})\subseteq\{W=n\}\]
+    and thus $(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})=\{W=n\}$, as desired.\\[10pt]
+    Now, fix $n\geq 0$. Since $T,V$ are stopping times, by 2b, $\exists B_j,C_j\subset S^{j+1}$ so that
+    \[\{T\leq j\}=\{(X_0,X_1,\dots,X_j)\in B_j\}\quad\text{and}\quad\{V\leq j\}=\{(X_0,X_1,\dots,X_j)\in C_j\}\]
+    for $j=0,1,\dots,n$. Further, define $B_j^\prime=B_j\times S^{n-j}$ and $C_j^\prime=C_j\times S^{n-j}$ for $j=0,1,2,\dots,n-1$, with $B_n=B_n^\prime$ and $C_n=C_n^\prime$ for notational convenience. Then, observe that for $Z\in\{T,V\}$ with $\zeta_j=B_j, \zeta_j^\prime=B_j^\prime$ ($\zeta_j=C_j,\zeta_j^\prime=C_j^\prime$, respectively) when $Z=T$ ($Z=V$, respectively)
+    we find
+    \begin{align*}
+        \{Z\geq n\}&=\Omega\setminus\{Z\leq n-1\}\\
+        &=\Omega\setminus\{(X_0,X_1,\dots,X_{n-1})\in \zeta_{n-1}\}\\
+        &=\Omega\setminus\{(X_0,X_1,\dots,X_n)\in\zeta_{n-1}^\prime\}\\
+        &=\{(X_0,X_1,\dots,X_n)\in(\zeta_{n-1}^\prime)^c\}.
+    \end{align*}
+    We also need to define $B_n^\ast,C_n^\ast\subseteq S^{n+1}$ satisfying
+    \[\{T=n\}=\{(X_0,X_1,\dots,X_n)\in B_n^\ast\}\quad\text{and}\quad\{V=n\}=\{(X_0,X_1,\dots,X_n)\in C_n^\ast\}\]
+    which exist because $T,V$ are stopping times. Finally, we get that
+    \begin{align*}
+        \{W=n\}&=\{\min\{T,V\}=n\}\\
+        &=(\{T=n\}\cap\{V\geq n\})\cup(\{T\geq n\}\cap\{V=n\})=\{W=n\}\\
+        &=(\{(X_0,X_1,\dots,X_n)\in B_n^\ast\}\cap\{(X_0,X_1,\dots,X_n)\in(C_{n-1}^\prime)^c\})\\
+        &\quad\cup(\{(X_0,X_1,\dots,X_n)\in (B_{n-1}^\prime)^c\}\cap\{(X_0,X_1,\dots,X_n)\in C_n^\ast\})\\
+        &=\{(X_0,X_1,\dots,X_n)\in(B_n^\ast\cap(C_{n-1}^\prime)^c)\cup((B_{n-1}^\prime)^c\cap C_n^\ast)\}
+    \end{align*}
+    where $(B_n^\ast\cap(C_{n-1}^\prime)^c)\cup((B_{n-1}^\prime)^c\cap C_n^\ast)\subset S^{n+1}$. Additionally, since $T$ and $V$ take values in $\{0,1,\dots\}\cup\{\infty\}$, $W=\min\{T,V\}$ does too. With both of these properties, $W$ satisfies the definition of a stopping time.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 3} Let $\{X_n,n\geq 0\}$ be a Markov chain with the state space $S$, initial distribution $\lambda$ and transition matrix $P$. Let $k\geq 1$ be a fixed integer
+    and define $Y_n=X_{kn}$ for $n\geq 0$.\\[10pt]
+    {\bf a)} Show $\{Y_n,n\geq 0\}$ is a Markov chain with initial distribution $\lambda$ and transition matrix $P^k$.\\[10pt]
+    {\bf Solution} For all $n\geq 0$, $Y_n=X_{nk}\in S$, so denoting the state space of $\{Y_n\}_{n\geq 0}$ $S_Y$, we get $S_Y\subseteq S$, but set $S_Y=S$.
+    Now take $i_0,i_1,\dots,i_{n-2},i,j\in S_Y$ and observe that
+    \begin{align*}
+        P(Y_n=j|Y_{n-1}=i,\dots,Y_1=i_1,Y_0=i_0)&=P(X_{kn}=j|X_{k(n-1)}=i,\dots,X_{k}=i_1,X_0=i_0)\\
+        &=P(X_{kn}=j|X_{k(n-1)}=i)\\
+        &=P(Y_n=j|Y_{n-1}=i)
+    \end{align*}
+    so, indeed, $\{Y_n\}_{n\geq 0}$ is Markovian and we need only find its initial distribution and transition matrix, which we shall indicate with $\gamma$ and $\mbb{P}$ respectively.
+    Let $i,j\in S_Y$. Then
+    \begin{align*}
+        \mbb{P}_{ij}=P(Y_1=j|Y_0=i)=P(X_k=j|X_0=i)=(P^k)_{ij}
+    \end{align*}
+    the $i,j$th element of the $k$-step transition probability matrix associated to $\{X_n\}_{n\geq 0}$, so $\mbb{P}=P^k$. Similarly, letting $i\in S_Y$ we have
+    \[\gamma_i=P(Y_0=i)=P(X_0=i)=\lambda_i\]
+    which holds for any $i\in S_Y$, so $\gamma=\lambda$. Thus we have found that $\{Y_n\}_{n\geq 0}\sim\text{Markov}(\lambda,P^k)$.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Show that if $\pi$ is an invariant distribution for $\{X_n\}_{n\geq 0}$, then $\pi$ is also an invariant distribution for $\{Y_n\}_{n\geq 0}$.\\[10pt]
+    {\bf Solution} Let $\pi$ be invariant for $\{X_n\}_{n\geq 0}$. Then
+    \[\pi=\pi P.\]
+    With this property, we find
+    \[\pi P^k=(\pi P)P^{k-1}=\pi P^{k-1}=\dots=\pi P=\pi\]
+    so $\pi$ is an invariant distribution for $\{Y_n\}_{n\geq 0}$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 4} A particle moves among six vertices in the graph below. For each vertex, its neighbors are those vertices connected to it by an edge. At each step, the particle
+    is equally likely to move to one of its neighbors, independently of its past motion. For each $n\geq 0$, denote by $X_n$ the vertex occupied by the particle after $n\geq 0$ steps and $Y_n=X_{2n}$.
+    \begin{center}
+        \makebox[\textwidth]{\includegraphics[width=60mm]{855-A3-Q4-fig.png}}
+    \end{center}
+    {\bf Figure 1} State transition diagram for problem 4.\\[10pt]
+    {\bf a)} Find all invariant distributions for $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} First define the bijection $I:\{A,B,C,D,E,F\}\rightarrow S$ with $I(A)=1$, $I(B)=2$, $I(C)=3$, $I(D)=4$, $I(E)=5$ and $I(F)=6$ so that we can take $S=\{1,2,3,4,5,6\}$ to be our state space. From figure 1, we can clearly see that for any pair $i,j\in S$ we have $i\longleftrightarrow j$. Formally,
+    we can fix $i,j\in S$, let $m=|i-j| \mod 6$, and show this by arguing
+    \begin{align*}
+    P_i(X_m=j)&=\sum_{i_1,i_2,\dots,i_{m-1}\in S}P_i(X_m=j, X_{m-1}=i_{m-1},\dots,X_1=i_1)\\
+    &\geq P_i(X_1=i+1,X_2=i+2,\dots, X_{m-1}=j-1, X_m=j)\\
+    &=\left(\frac{1}{2}\right)^m\\
+    &>0
+    \end{align*}
+    so $i\longrightarrow j$, and an identical argument establishes $j\longrightarrow i$ by simply swapping $i$ and $j$ in the above.
+    Since every state communicates with one another, there is one communicating class in this process and the system is irreducible.\\[10pt]
+    This, along with the fact that $S$ is finite, allows us to conclude that there exists a unique invariant distribution and we can find it by solving
+    the system of equations
+    \[\pi=\pi P\quad\text{subject to the constraint}\quad \sum_{i\in S}\pi_i=1\]
+    where we define $\pi=\{\pi(i)=\pi_i:i\in S\}$ and view this as a $1\times 6$ row vector. Further, the transition probability matrix $P$ for the system is given by
+    \[P=\begin{pmatrix}
+       0 & 1/2 & 0 & 0 & 0 & 1/2\\
+       1/2 & 0 & 1/2 & 0 & 0 & 0\\
+       0 & 1/2 & 0 & 1/2 & 0 & 0\\
+       0 & 0 & 1/2 & 0 & 1/2 & 0\\
+       0 & 0 & 0 & 1/2 & 0 & 1/2\\
+       1/2 & 0 & 0 & 0 & 1/2 & 0 
+    \end{pmatrix}\]
+    So the system we aim to solve is given by
+    \begin{align*}
+        \pi_1 &= \frac{1}{2}\pi_2 + \frac{1}{2}\pi_6,\quad
+        \pi_2 = \frac{1}{2}\pi_1 + \frac{1}{2}\pi_3,\quad
+        \pi_3 = \frac{1}{2}\pi_2 + \frac{1}{2}\pi_4,\\
+        \pi_4 &= \frac{1}{2}\pi_3 + \frac{1}{2}\pi_5,\quad
+        \pi_5 = \frac{1}{2}\pi_4 + \frac{1}{2}\pi_6,\quad
+        \pi_6 = \frac{1}{2}\pi_1 + \frac{1}{2}\pi_5\\
+        \text{and}\qquad 1&=\pi_1+\pi_2+\pi_3+\pi_4+\pi_5+\pi_6.
+    \end{align*}
+    One of these equations (excluding the last) is redundant, so we will exclude $\pi_6=(1/2)\pi_1+(1/2)\pi_5$ and solve
+    \begin{align*}
+        \begin{pmatrix}
+            -1 & 1/2 & 0 & 0 & 0 & 1/2\\
+            1/2 & -1 & 1/2 & 0 & 0 & 0\\
+            0 & 1/2 & -1 & 1/2 & 0 & 0\\
+            0 & 0 & 1/2 & -1 & 1/2 & 0\\
+            0 & 0 & 0 & 1/2 & -1 & 1/2\\
+            1 & 1 & 1 & 1 & 1 & 1 
+        \end{pmatrix}\begin{pmatrix}
+            \pi_1\\
+            \pi_2\\
+            \pi_3\\
+            \pi_4\\
+            \pi_5\\
+            \pi_6
+        \end{pmatrix}=\begin{pmatrix}
+            0\\
+            0\\
+            0\\
+            0\\
+            0\\
+            1
+        \end{pmatrix}
+    \end{align*}
+    numerically (see Appendix A.2 for the code used to do this). The result is
+    \[\pi_i=\frac{1}{6}\quad\text{for}\quad i\in S\]
+    which is the unique invariant distribution for $\{X_n\}_{n\geq 0}$.\\[10pt]
+    {\bf b)} Find the communicating classes of $\{Y_n\}_{n\geq 0}$.\\[10pt]
+    {\bf Solution} From 3a, we know that the transition probability matrix of $\{Y_n\}_{n\geq 0}$ is $P^2$, which is given by
+    \begin{align*}
+        P^2=\begin{pmatrix}
+            1/2 & 0 & 1/4 & 0 & 1/4 & 0\\
+            0 & 1/2 & 0 & 1/4 & 0 & 1/4\\
+            1/4 & 0 & 1/2 & 0 & 1/4 & 0\\
+            0 & 1/4 & 0 & 1/2 & 0 & 1/4\\
+            1/4 & 0 & 1/4 & 0 & 1/2 & 0\\
+            0 & 1/4 & 0 & 1/4 & 0 & 1/2
+        \end{pmatrix}
+    \end{align*}  
+    where we can see that
+    \[P_1(X_1=3)=1/4,\quad P_3(X_1=5)=1/4,\quad P_5(X_1=1)=1/4\]
+    so $1\longleftrightarrow 3$, $3\longleftrightarrow 5$, $5\longleftrightarrow 1$ and thus $C_1=\{1,3,5\}\subset S$ is a communicating class. Further, this class is closed since
+    $P_i(X_1=j)=0$ for $i\in C_1$, $j\in\{2, 4, 6\}=S\setminus C_1$. Similarly, we have
+    \[P_2(X_1=4)=1/4,\quad P_4(X_1=6)=1/4,\quad P_6(X_1=2)=1/4\]
+    so $2\longleftrightarrow 4$, $4\longleftrightarrow 6$, $6\longleftrightarrow 2$ and thus $C_2=\{2,4,6\}\subset S$ is a communicating class as well. This class is also closed, since
+    $P_i(X_1=j)=0$ for $i\in C_2$, $j\in C_1=S\setminus C_2$. Thus, we have partitioned the state space $S$ into two communicating classes $C_1$ and $C_2$, and there can be no others.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Find all invariant distributions of $\{Y_n\}_{n\geq 0}$.\\[10pt]
+    {\bf Solution} We seek an invariant distribution in precisely the same way as in 4a. The main difference here is that the transition matrix for the process $\{Y_n,n\geq 0\}$ is not irreducible, so we are
+    not able to invoke the Perron-Frobenius theorem to affirm the existence/uniqueness of an invariant distribution at the outset.\\[10pt]
+    Let $\pi=\{\pi(i)=\pi_i: i\in S\}$ be a row vector. We wish to determine the value of $\pi_i$ for $i\in S$ so that it satisfies
+    \[\pi=\pi P^2\quad\text{subject to the constraint}\quad \sum_{i\in S}\pi_i=1.\]
+    The system we aim to solve is thus given by
+    \begin{align*}
+        \pi_1&=\frac{1}{2}\pi_1+\frac{1}{4}\pi_3+\frac{1}{4}\pi_5\quad
+        \pi_2=\frac{1}{2}\pi_2+\frac{1}{4}\pi_4+\frac{1}{4}\pi_6\quad
+        \pi_3=\frac{1}{4}\pi_1+\frac{1}{2}\pi_3+\frac{1}{4}\pi_5\\
+        \pi_4&=\frac{1}{4}\pi_2+\frac{1}{2}\pi_4+\frac{1}{4}\pi_6\quad
+        \pi_5=\frac{1}{4}\pi_1+\frac{1}{4}\pi_3+\frac{1}{2}\pi_5\quad
+        \pi_6=\frac{1}{4}\pi_2+\frac{1}{4}\pi_4+\frac{1}{2}\pi_6\\
+        \text{and}\qquad 1&=\pi_1+\pi_2+\pi_3+\pi_4+\pi_5+\pi_6.
+    \end{align*}
+    One of these equations (excluding the last) is redundant, so we will exclude $\pi_6=(1/4)\pi_2+(1/4)\pi_4+(1/2)\pi_6$ and solve
+    \begin{align*}
+        \begin{pmatrix}
+            -1/2 & 0 & 1/4 & 0 & 1/4 & 0\\
+            0 & -1/2 & 0 & 1/4 & 0 & 1/4\\
+            1/4 & 0 & -1/2 & 0 & 1/4 & 0\\
+            0 & 1/4 & 0 & -1/2 & 0 & 1/4\\
+            1/4 & 0 & 1/4 & 0 & -1/2 & 0\\
+            1 & 1 & 1 & 1 & 1 & 1
+        \end{pmatrix}\begin{pmatrix}
+            \pi_1\\
+            \pi_2\\
+            \pi_3\\
+            \pi_4\\
+            \pi_5\\
+            \pi_6
+        \end{pmatrix}=\begin{pmatrix}
+            0\\
+            0\\
+            0\\
+            0\\
+            0\\
+            1
+        \end{pmatrix}
+    \end{align*}
+    numerically (see Appendix A.3 for the code used to do this). From the reduced row echelon form of the system, we find an infinite family of solutions to the system given by
+    \[\Theta=\{\pi=(1/3-t,t,1/3-t,t,1/3-t,t):t\in[0,1/3]\}.\]
+    In fact, the invariant distribution found for $\{X_n\}_{n\geq 0}$ in 4a is a member of this family -- an expected consequence given our result in 3b.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 5} Let $S=\{0,1,\dots\}$ be the set of non-negative integers. Let $\{X_n\}_{n\geq 0}$ be a Markov chain with state space $S$ and transition probabilities given by
+    \[p_{i,i+1}=p_i,\quad\text{and}\quad p_{i,0}=1-p_i\quad\text{for $i\in S$}\]
+    where $\{p_i:i\geq 0\}$ is a sequence of real numbers in $[0,1]$.\\[10pt]
+    {\bf a)} Provide one choice of $\{p_i:i\geq 0\}$ so that the Markov chain is irreducible and transient.\\[10pt]
+    {\bf Solution} Let $j\in S$. Then 
+    \begin{align*}
+        P_0(X_j=j)&=\sum_{i_1,i_2,\dots,i_{j-1}\in S}P_0(X_j=j,X_{j-1}=i_{j-1},\dots,X_2=i_2,X_1=i_1)\\
+        &\geq P_0(X_j=j,X_{j-1}=j-1,\dots,X_2=2,X_1=1)\\
+        &=p_0p_1\cdots p_{j-1}
+    \end{align*}
+    so, provided $p_i>0$ for $i< j$, $P_0(X_j=j)>0$, so $0\longrightarrow j$. By constraining $i>0$ $\forall i\in S$, we thus have $0\longrightarrow j$ $\forall j\in S$. Taking another $j\in S$, we have
+    \[P_j(X_1=0)=1-p_j\]
+    so that, if $p_j <1$, we can guarantee that $j\longrightarrow 0$ for any $j\in S$. We thus have a sufficient condition for the irreducibility of the Markov chain: if $\forall i\in S$ we have $p_i\in(0,1)$, then $\forall j\in S$, $0\longrightarrow j$ and $j\longrightarrow 0$, so $0\longleftrightarrow j$.
+    But then for any other state $k\in S$, we also have $0\longleftrightarrow k$, so by the transitivity of communication, we have $k\longleftrightarrow j$. In other words, $\forall k,j\in S$
+    \[p_i\in(0,1)\;\;\;\forall i\in S\quad\Rightarrow\quad k\longleftrightarrow j.\]
+    Furthermore, provided our choice of $\{p_i:i\geq 0\}$ satisfies this condition, we need only show that a particular state is transient to conclude that the entire chain is.\\[10pt]
+    We proceed by finding a sequence $\{p_i:i\geq 0\}$ so that $0\in S$ is transient. Recall the first return time to state zero is defined $T_0^{(1)}=\inf\{n>0:X_n=0\}$ (we will just write $T_0$ for notational convenience) and observe that
+    \begin{align*}
+        P_0(T_0<\infty)&=1-P_0(T_0=\infty)=1-\lim_{r\rightarrow\infty}P(T_0>r)
+    \end{align*}
+    so that $0\in S$ is transient if $\lim_{r\rightarrow\infty}P_0(T_0>r)>0$. However, the structure of the transition probabilities allow us to write an expression for $P_0(T_0>r)$:
+    \[P_0(T_0>r)=p_0p_1\cdots p_{r-1}=\prod_{j=0}^{r-1}p_j\]
+    so that we search for $\{p_i:i\geq 0\}$ such that
+    \[\lim_{r\rightarrow\infty}\prod_{j=0}^{r-1}p_j=\prod_{j=0}^{\infty}p_j>0.\]
+    To accomplish this, we define a sequence $\{\alpha_r\}_{r\geq 0}$ and set the terms so that it converges to a positive limit on the interval $(0,1)$. Then we solve for the sequence $\{p_i:i\geq 0\}$ producing the equality
+    \[\prod_{j=0}^rp_j=\alpha_j.\]
+    To this end, for $r\geq 0$ set
+    \[\alpha_r=(1/3)+(1/3)^{r+1}\]
+    which immediately induces $p_0=1/3+(1/3)^1=2/3$. Then for $r\geq 1$ we find
+    \[\alpha_r=\prod_{j=0}^rp_j=p_r\prod_{j=0}^{r-1}p_j=p_r\alpha_{r-1}\quad\Rightarrow\quad p_r=\frac{\alpha_r}{\alpha_{r-1}}=\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^{r}}.\]
+    additionally,
+    \[0<1/3+(1/3)^1=p_0<1\quad\text{and}\quad 0<\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^r}<1\;\;\text{for $r\geq 1$}\]
+    so under this choice of $\{\alpha_r\}_{r\geq 0}$ the resulting $\{p_i\}_{i\geq 0}$ satisfies $p_i\in(0,1)$ $\forall i\in S$ and the resulting chain is irreducible. Further, we get
+    \begin{align*}
+        P_0(T_0=\infty)&=\lim_{r\rightarrow\infty}P_0(T_0>r)\\
+        &=\lim_{r\rightarrow\infty}\prod_{j=0}^rp_j\\
+        &=\lim_{r\rightarrow\infty}\left(\frac{1/3+(1/3)^1}{1}\frac{1/3+(1/3)^2}{1/3+(1/3)^1}\frac{1/3+(1/3)^3}{1/3+(1/3)^2}\cdots\frac{1/3+(1/3)^r}{1/3+(1/3)^{r-1}}\frac{1/3+(1/3)^{r+1}}{1/3+(1/3)^r}\right)\\
+        &=\lim_{r\rightarrow\infty}1/3+(1/3)^{r+1}\\
+        &=1/3
+    \end{align*}
+    so that we have the original probability of interest
+    \begin{align*}
+        P_0(T_0<\infty)&=1-P_0(T_0=\infty)
+        =1-1/3
+        =2/3
+        <1
+    \end{align*}
+    which says that the choice of $\{p_i\}_{i\geq 0}$ here renders $0\in S$ transient. But this choice also makes the chain irreducible, and since transience is a class property, we have that $\forall j\in S$, $j$ is transient with this choice.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Provide one choice of $\{p_i:i\geq 0\}$ so that the Markov chain is irreducible and null recurrent.\\[10pt]
+    We have already established a sufficient condition for the irreducibility of the Markov chain -- and thus require $p_i\in(0,1)$ for $i\in S$. Provided the process is irreducible, we need only show that a particular state is null recurrent, since
+    null recurrence is a class property. Thus, we endeavor to identify $\{p_i\}_{i\geq 0}$ so that
+    \[\mbb{E}_0\left[T_0\right]=\infty\]
+    where $T_0$, as before, is the first return time to state $0\in S$. Since $T_0$ takes values in $\{1,2,3,\dots\}$, we can rewrite this expectation
+    \[\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty P(T_0>n)=\sum_{n=0}^\infty\prod_{j=0}^{n-1}p_j.\]
+    As before, for $n\geq 0$ we set
+    \[\prod_{j=0}^np_j=\alpha_n\quad\text{and}\quad\alpha_{n}=\frac{1}{n+2}\quad\text{so that}\quad\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty\frac{1}{n+1}=\infty\]
+    as desired. We need only use this to solve for $\{p_i\}_{i\geq 0}$. Just as in 5a, for $n\geq 1$ we have $p_n=\alpha_n/\alpha_{n-1}$, so
+    \[p_0=\alpha_0=\frac{1}{2}\in(0,1)\quad\text{and for $n\geq 1$,}\quad p_n=\frac{\alpha_n}{\alpha_{n-1}}=\frac{n+1}{n+2}\in(0,1)\]
+    so this choice once again renders the process irreducible. But as shown above, we also get $\mbb{E}_0\left[T_0\right]=\infty$, so the state $0\in S$ is null recurrent. But null recurrence is a class property, and since the process is irreducible we can conlude that $\forall k\in S$, $k$ is also null recurrent.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Provide one choice of $\{p_i\}_{i\geq 0}$ so that the Markov chain is irreducible and positive recurrent. Further, for your choice, find the invariant distribution.\\[10pt]
+    {\bf Solution} Once more we require $p_i\in(0,1)$ for all $i\in S$ as a sufficient condition for irreducibility. Then, granted this, we need only show $0\in S$ is positive recurrent to conclude that all states are, since positive recurrence is a class property.\\[10pt]
+    We again have the formula 
+    \[\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty P(T_0>n)=\sum_{n=0}^\infty\prod_{j=0}^{n-1}p_j.\]
+    Then, for $n\geq 0$, we set
+    \[\prod_{j=0}^np_j=\alpha_n\quad\text{and}\quad\alpha_{n}=\frac{1}{3^{n+1}}\quad\text{so that}\quad\mbb{E}_0\left[T_0\right]=\sum_{n=0}^\infty\frac{1}{3^n}=\frac{1}{1-1/3}=\frac{3}{2}<\infty\]
+    as desired. Solving for $p_i$ by the same method as above,
+    \[p_0=\alpha_0=\frac{1}{3}\in(0,1)\quad\text{and for $n\geq 1$,}\quad p_n=\frac{\alpha_n}{\alpha_{n-1}}=\frac{3^n}{3^{n+1}}=\frac{1}{3}\in(0,1)\]
+    so that the Markov chain is indeed irreducible and the state $0\in S$ is positive recurrent, so all states are.\\[10pt]
+    From this, we know that an invariant distribution for this process exists. Let $\pi=\{\pi_i:i\in S\}$ denote this distribution. We find its elements with the formula:
+    \[\pi_0=\frac{1}{\mbb{E}_0[T_0]}\quad\text{and, for $i\geq 1$}\quad\pi_i=\frac{\gamma^0_i}{\mbb{E}_0[T_0]}\]
+    where 
+    \[\gamma^0_i=\mbb{E}_0\left[\sum_{n=0}^{T_0-1}\mathbbm{1}_{X_n=i}\right]\]
+    where for any event $A$, $\mathbbm{1}_A$ is the indicator function over $A$. However, due to the nature of this process,  we have
+    \[\sum_{n=0}^{T_0-1}\mathbbm{1}_{X_n=i}=\begin{cases}
+        1\quad\text{if $T_0>i$}\\
+        0\quad\text{{\it o.w.}}
+    \end{cases}=\mathbbm{1}_{T_0>i}\]
+    so that we simplify the expression for $\gamma^0_i$ to be
+    \[\gamma^0_i=\mbb{E}_0[\mathbbm{1}_{T_0>i}]=P_0(T_0>i)=\prod_{j=0}^{i-1}p_j=\frac{1}{3^i}.\]
+    And, of course, $\gamma_0^0=1$. But from this we obtain the invariant distribution; for $i\in S$
+    \[\pi_i=\frac{3}{2}\frac{1}{3^i}=\frac{1}{2\cdot 3^{i-1}}\]
+    defines the invariant distribution on the Markov chain when $p_i=1/3$ for all $i\in S$. As shown above, this choice of $\{p_i\}_{i\geq 0}$ also renders the process irreducible and positive recurrent.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 6} Let $\{X_n\}_{n\geq 0}$ be a Markov chain on state space $S=\{0,1,2,\dots\}$. Show that if $\{X_n\}_{n\geq 0}$ is irreducible and recurrent, then
+    \[P\left(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty} X_n=\infty\right)=1.\]
+    {\bf Proof} Let $\{X_n\}_{n\geq 0}$ be an irreducible, recurrent markov chain on the nonnegative integers. We will make use of the following lemma:
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma} Let $\{Y_n\}_{n\geq 0}$ be a Markov chain that is irreducible and recurrent on some state space $\mc{S}$. Independent of the initial distribution, we have for $j\in\mc{S}$
+            \[P(Y_n=j\;\text{for infinitely many $n$})=1.\]  
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    Let $\Omega$ be the sample space for the process $\{X_n\}_{n\geq 0}$. By the lemma, taking $\omega\in\Omega$ and choosing arbitrary $j\in S$ we get
+    \[P(X_n(\omega)=j\;\text{for infinitely many $n$})=1\]
+    so that for any realization of the Markov chain, $j$ occurs infinitely many times {\it w.p.} 1.
+    Let us now fix some $\omega\in\Omega$ giving rise to realization $\{X_n(\omega)\}_{n\geq 0}$. Next, choose $M\in\mbb{R}$, $M\geq 0$. Then $\lceil M\rceil\in S$, so $\lceil M\rceil$ occurs in $\{X_n(\omega)\}_{n\geq 0}$ infinitely many times {\it w.p.} 1.
+    That is, for any $N\geq 0$, {\it w.p.} 1 we have $\lceil M\rceil\in\{X_n(\omega)\}_{n\geq N}$ (for otherwise $\lceil M\rceil$ could only occur at most $N$ times), so
+    \[\sup_{n\geq N}X_n(\omega)\geq\lceil M\rceil\geq M.\]
+    But this was for arbitrary choice of $N\geq 0$, so we get
+    \[\limsup_{n\rightarrow\infty}X_n(\omega)\geq M\]
+    {\it w.p.} 1. Additionally, $M$ was arbitrary, so the limit supremum is almost surely unbounded and thus
+    \[P(\limsup_{n\rightarrow\infty}X_n=\infty)=1.\tag{4}\]
+    Additonally, we have $0\in S$, so $0$ occurs in $\{X_n(\omega)\}_{n\geq 0}$ infinitely many times {\it w.p.} 1. But for any $i\in S$, $0\leq i$, so taking $N\geq 0$, $\{X_n(\omega)\}_{n\geq N}$ is bounded below by $0$. It is easy to see that this is a greatest lower bound,
+    since $0\in\{X_n(\omega)\}_{n\geq N}$ (for otherwise $0$ could occur at most only $N$ times) so for any $\varepsilon>0$, $\varepsilon$ is not a lower bound of $\{X_n(\omega)\}_{n\geq N}$. In other words, for any $N\geq 0$ we have
+    \[\inf\{X_n(\omega)\}_{n\geq N}=0\]
+    {\it w.p.} 1. But of course this was for arbitrary choice of $N\geq 0$, so
+    \[P(\liminf_{n\rightarrow\infty}X_n=0)=1.\tag{5}\]
+    To finish the proof, we make use of the following lemma:
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} Let $A,B$ be two events with $P(A)=1$ and $P(B)=1$. Then $P(A\cap B)=1$.\\[10pt]
+            {\bf Proof.} The result follows directly from, DeMorgan's law, finite subadditivity and elementary properties of probability measures.
+            \begin{align*}
+                P(A\cap B)&=1-P(A^c\cup B^c)\tag{DeMorgan's law}\\
+                &\geq1-P(A^c)-P(B^c)\tag{finite subadditivity}\\
+                &=1-(1-1)-(1-1)\\
+                &=1
+            \end{align*}
+            so $1\leq P(A\cap B)\leq 1\Rightarrow P(A\cap B)=1$.\hfill{$\qed$}
+        \end{minipage}\vspace{10pt}
+    \end{center}
+    so that by (4) and (5) and the lemma we determine that the joint probability of interest is
+    \[P(\liminf_{n\rightarrow\infty}X_n=0,\;\limsup_{n\rightarrow\infty}X_n=\infty)=1\tag*{$\qed$}\]
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Code used for problem 1b}
+    \begin{verbatim}
+        # Compute gamma-discounted cost function for given system and parameters
+        S = c(1, 2, 3) # state space
+        U = c(1, 2) # action space
+        gamma = 0.8 # discounting parameter
+
+        # Action-dependent state probability transition matrices
+        P_1 = matrix(c(1/2, 1/4, 1/4, 1/4, 1/2, 1/4, 1/4, 1/4, 1/2), nrow=3)
+        P_2 = matrix(rep(1/3, 9), nrow=3)
+
+        # Function for computing P_mu elementwise using formula in (a)
+        P_ij = function(P_1, P_2, u, i, j){
+            if (u == 1){
+                e = P_1[i, j]
+            }
+            else {
+                e = P_2[i, j]
+            }
+            return(e)
+        }
+
+        # Policy for selecting actions under the given policy
+        policy = function(s) {
+            if (s == 1){
+                e = 1
+            }
+            else if (s == 2) {
+                e = 2
+            }
+            else {
+                e = 1
+            }
+            return(e)
+        }
+
+        # Initialize solution constructs
+        P_mu = matrix(rep(0, length(S)**2), nrow=3)
+        C = rep(0, length(S))
+
+        # Find P_mu
+        for (i in S){
+            for (j in S){
+                u = policy(i)
+                P_mu[i, j] = P_ij(P_1, P_2, u, i, j)
+            }
+        }
+
+        # Find C
+        for (i in seq_along(S)){
+            C[i] = S[i] * policy(S[i])
+        }
+
+        # Compute (I - gamma*P_mu)^-1
+        I = diag(length(S))
+        ic_trans = (I - (gamma * P_mu))
+        inv_ic_trans = solve(sol_transform)
+
+        # Solve for the gamma-discounted cost function
+        J_mu = inv_ic_trans %*% C
+
+        # Report solution and constructs
+        ic_trans
+        P_mu
+        C
+        J_mu
+    \end{verbatim}
+    {\bf A.2 Code used for problem 4a}
+    \begin{verbatim}
+        # Finding invariant distributions of symmetric walk on the hexagon
+        library(pracma) # used to find system RREF in 4c
+
+        # Generate one step transition matrix P
+        ind_f = c(2, 3, 4, 5, 6, 1)
+        ind_b = c(6, 1, 2, 3, 4, 5)
+        P_vec = c()
+        for (i in 1:6) {
+            x = rep(0, 6)
+            x[c(ind_b[i], ind_f[i])] <- 1/2
+            P_vec = append(P_vec, x)
+        }
+        P = matrix(P_vec, nrow=6, ncol=6)
+
+        # Write out the system to solve by hand
+        pi_system = matrix(c(
+            -1, 1/2, 0, 0, 0, 1/2,
+            1/2, -1, 1/2, 0, 0, 0,
+            0, 1/2, -1, 1/2, 0, 0,
+            0, 0, 1/2, -1, 1/2, 0,
+            0, 0, 0, 1/2, -1, 1/2,
+            1, 1, 1, 1, 1, 1
+        ), nrow=6, ncol=6)
+        pi_system = t(pi_system)
+
+        # Write out the RHS of the system
+        constants = matrix(c(0, 0, 0, 0, 0, 1), nrow=6)
+
+        # Solve the system and print the solution
+        sol = solve(pi_system, constants)
+        sol
+    \end{verbatim}
+    {\bf A.3 Code used for problem 4c}
+    \begin{verbatim}
+        # Get two step transition matrix from P in 4a
+        P_y = P %*% P
+        y_pi_system = P_y # initialize the system of equations
+        y_pi_system[y_pi_system == 0.5] <- -0.5 # change 0.5 entries to -0.5
+        y_pi_system[6, seq(6)] <- 1 # replace bottom equation distribution constraint
+
+        # Create the augmented matrix
+        aug_y = cbind(y_pi_system, constants)
+
+        # Obtain reduced row echelon form and read off solution
+        rref(aug_y)
+
+        # Test the invariance property using over many elements of the solution family 
+        generate_y_invariant = function(t){
+            return(c(1/3 - t, t, 1/3 - t, t, 1/3 - t, t))
+        }
+        fail = FALSE
+        for (t in seq(0, 0.45, length.out=1000)){
+            pi_inv = generate_y_invariant(t) 
+            res = sum(abs(pi_inv - (pi_inv %*% P_y)))
+            if (res != 0){
+                fail = TRUE
+            }
+        }
+        fail
+    \end{verbatim}
+\end{document}

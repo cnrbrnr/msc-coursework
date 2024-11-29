@@ -1,0 +1,124 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 2} \hfill {\bf Connor Braun} \hfill {\bf 2024-02-08}
+    \end{center}
+    \noindent{\bf Problem 5}\\[5pt]
+    Show that the following form a basis for the space of cubic splines with one interior knot at $\xi$:
+    \begin{align*}
+        h_1(x)=1,\quad h_2(x)=x,\quad h_3(x)=x^2,\quad h_4(x)=x^3,\quad h_5(x)=(x-\xi)^3_+.
+    \end{align*}
+    {\bf Proof}\hspace{5pt} First, let $(\gamma_i)_{i=1}^5$ with $\gamma_i\in\mbb{R}$ for $i=1,\dots,5$ specify a linear combination of our basis functions such that
+    \begin{align*}
+        g(x)=\gamma_1+\gamma_2x+\gamma_3x^2+\gamma^4x^3+\gamma^5(x-\xi)_+^3=\begin{cases}
+            \gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3,\quad&\text{if $x<\xi$}\\
+            \gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3+\gamma_5(x-\xi)^3,\quad&\text{if $\xi\leq x$}
+        \end{cases}
+    \end{align*}
+    with $g$ clearly a piecewise-defined cubic polynomial on either side of $\xi$. We can also show this is indeed a spline by verifying the necessary continuity conditions
+    \begin{align*}
+        g(\xi^-)&=\lim_{x\rightarrow\xi^-}(\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3)=\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3=\lim_{x\rightarrow\xi^+}(\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3+\gamma_5(x-\xi)^3_+)=g(\xi^+)\\
+        g^{\prime}(\xi^-)&=\lim_{x\rightarrow\xi^-}(\gamma_2+2\gamma_3x+3\gamma_4x^2)=\gamma_2+2\gamma_3x+3\gamma_4x^2=\lim_{x\rightarrow\xi^+}(\gamma_2+2\gamma_3x+3\gamma_4x^2+3\gamma_5(x-\xi)^2)=g^\prime(\xi^+)\\
+        g^{\prime\prime}(\xi^-)&=\lim_{x\rightarrow\xi^-}(2\gamma_3+6\gamma_4x)=2\gamma_3+6\gamma_4x=\lim_{x\rightarrow\xi^+}(2\gamma_3+6\gamma_4x+6\gamma_5(x-\xi))=g(\xi^+)
+    \end{align*} 
+    so any real linear combination of the basis functions produces a cubic spline with a single knot at $\xi$. Conversely, consider a cubic spline defined by
+    \begin{align*}
+        f(x)=\begin{cases}
+            \alpha_0+\alpha_1x+\alpha_2x^2+\alpha_3x^3,\quad&\text{if $x<\xi$}\\
+            \beta_0+\beta_1x+\beta_2x^2+\beta_3x^3,\quad&\text{if $x\geq \xi$}
+        \end{cases}\quad\text{satisfying}\quad\begin{cases}
+            \alpha_0+\alpha_1\xi+\alpha_2\xi^2\alpha_3\xi^3=\beta_3\xi^3+\beta_2\xi^2+\beta_1\xi+\beta_0\quad&\text{(1)}\\
+            \alpha_1+2\alpha_2\xi+3\alpha_3\xi^2=3\beta_3\xi^2+2\beta_2\xi+\beta_1\quad&\text{(2)}\\
+            2\alpha_2+6\alpha_3\xi=6\beta_3\xi+2\beta_2\quad&\text{(3)}
+        \end{cases}
+    \end{align*}
+    now we set $g(x)=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x-\xi)^3_+$, and solve for the coefficients $\gamma_i$, $i=0,1,\dots,4$ so that $g\equiv f$. First, observe that when $x<\xi$ we have
+    $g(x)=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3$, so we require that $\gamma_i=\alpha_i$ for $i=0,1,2,3$. When instead we have $x\geq \xi$, then
+    \begin{align*}
+        g(x)&=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x-\xi)^3\\
+        &=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x^3-3\xi x^2+3\xi^2x-\xi^3)\\
+        &=(\gamma_3+\gamma_4)x^3+(\gamma_2-3\gamma_4\xi)x^2+(\gamma_1+3\gamma_4\xi^2)x+(\gamma_0-\gamma_4\xi^3)\\
+        &=(\alpha_3+\gamma_4)x^3+(\alpha_2-3\gamma_4\xi)x^2+(\alpha_1+3\gamma_4\xi^2)x+(\alpha_0-\gamma_4\xi^3).
+    \end{align*}
+    This produces the overspecified system of equations
+    \begin{align*}
+        \begin{cases}
+            \beta_3=\alpha_3+\gamma_4\\
+            \beta_2=\alpha_2-3\gamma_4\xi\\
+            \beta_1=\alpha_1+3\gamma_4\xi^2\\
+            \beta_0=\alpha_0-\gamma_4\xi^3
+        \end{cases}
+    \end{align*}
+    the solution to which is obtained by setting $\gamma_4=\beta_3-\alpha_3$. To see that this is in fact the solution, observe that it satisfies the first equation trivially, and for the second we have
+    \begin{align*}
+        \beta_2=\alpha_2-3\gamma_4\xi^2\quad\Rightarrow\quad 3\gamma_4\xi=\alpha_2-\beta_2=3\beta_3\xi-3\alpha_3\xi=3(\beta_3-\alpha_3)\xi.\tag{4}
+    \end{align*}
+    Where we used constraint (3) for the second last equality in (4). Similarly, the third equation implies that $3\gamma_3\xi^2=\beta_1-\alpha_1$, and so
+    \begin{align*}
+        3\gamma_4\xi^2=\beta_1-\alpha_1&=2\alpha_2\xi+3\alpha_3\xi^2-3\beta_3\xi^2-2\beta_2\xi\tag{by (2)}\\
+        &=2(\alpha_2-\beta_2)\xi+3(\alpha_3-\beta_3)\xi^2\\
+        &=6(\beta_3-\alpha_3)\xi^2-3(\beta_3-\alpha_3)\xi^2\tag{by (4)}\\
+        &=3(\beta_3-\alpha_3)\xi^2.\tag{5}
+    \end{align*}
+    Lastly, from the fourth equation we get that $\gamma_4\xi^3=\alpha_0-\beta_0$, and so
+    \begin{align*}
+        \gamma_4\xi^3=\alpha_0-\beta_0&=\beta_3\xi^3+\beta_2\xi^2+\beta_1\xi-\alpha_3\xi^3-\alpha_2\xi^2-\alpha_1\xi\\
+        &=(\beta_3-\alpha_3)\xi^3+(\beta_2-\alpha_2)\xi^2+(\beta_1-\alpha_1)\xi\\
+        &=(\beta_3-\alpha_3)\xi^3-3(\beta_3-\alpha_3)\xi^3+3(\beta_3-\alpha_3)\xi^3\tag{by (4) and (5)}\\
+        &=(\beta_3-\alpha_3)\xi^3.\tag{6}
+    \end{align*}
+    Examining (4), (5), and (6) we see that $\gamma_4=\beta_3-\alpha_3$ satisfies all members of the system of equations. Thus, setting
+    \begin{align*}
+        g(x)=\alpha_0+\alpha_1x+\alpha_2x^2\alpha_3x^3+(\beta_3-\alpha_3)(x-\xi)^3_+\quad\Rightarrow\quad g\equiv f.
+    \end{align*}
+    The coefficients $\beta_i$, $i=0,1,2$ do not appear in our truncated-power basis representation of $f$ since $f$ is overspecified. That is, we only need five parameters to
+    specify a cubic spline with a single interior knot in the first place.\hfill{$\qed$}\\[5pt]
+\end{document}

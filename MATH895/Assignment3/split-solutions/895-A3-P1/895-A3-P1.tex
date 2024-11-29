@@ -1,0 +1,96 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Aspects of the solutions presented are the result of collaboration with colleagues. Of particular help were Osman Bicer (problem 1, bounding the probability of rolling 7 below to obtain a contradiction), Yichen Zhou (problem 7, for helping with the form of sequence of densities), Anthony Pasion (problems 5, for pointing out that $p$ is an integer in the computation of the moments of $Y_a^p$; problem 10, for
+            much discussion on possible solution strategies) and Qixia Liu (problem 10, for suggesting the use of one-sided derivatives in the computation of $\varphi_{S_n}$). I would also like to acknowledge Professor Cellarosi for his help during office hours and in particular the method of handling the $o\bp{\frac{\pi}{nx}}$ term in problem 8; the same used in the proof of the local limit theorem presented in lecture.
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    {\bf Problem 1}\\[5pt]
+    Prove that you cannot load two dice in such a way that the probabilities of all sums from 2 to 12 are the same.\\[5pt]
+    {\bf Proof}\hspace{5pt} Define $D=\{1,2,3,4,5,6\}$ with random variables $X_1,X_2$ so that
+    $P(X_1=k)=p_k$ and $P(X_2=k)=q_k$ for $k\in D$. To be pedantic, we can specify $X_i:(D,2^D,P)\rightarrow (\mbb{R},\mc{B}(\mbb{R}))$ with $X_i(k)=k$ for all $k\in D$, $i=1,2$.\\[5pt]
+    Now, define $S=\{m+n:m,n\in D\}$ and assume for the purpose of deriving a contradiction that for $k\in D$, $\exists p_k,q_k$, with $\sum_{k\in D}p_k=\sum_{k\in D}q_k=1$ so that $\mathcal{L}(X_1+X_2)(\{\ell\})=\tfrac{1}{|S|}=\tfrac{1}{11}$ $\forall \ell\in S$.
+    But from our construction, the laws of the die are given by
+    \begin{align*}
+        \mc{L}(X_1)=\sum_{k\in D}p_k\delta_k,\quad\text{and}\quad\mc{L}(X_2)=\sum_{k\in D}q_k\delta_k
+    \end{align*}
+    so that, for $\{\ell\}\in S$, we may compute the probability of the sum by convolving the laws
+    \begin{align*}
+        \frac{1}{11}=\mc{L}(X_1+X_2)(\{\ell\})&=\int_\mbb{R}\mc{L}(X_1)(\{\ell\}-x)d\mc{L}(X_2)(x)\\
+        &=\int_\mbb{R}\bp{\sum_{k\in D}p_k\delta_k(\{\ell\}-x)}d\bp{\sum_{t\in D}q_t\delta_t(x)}\\
+        &=\sum_{k\in D}\sum_{t\in D}\int_\mbb{R}p_kq_t\delta_k(\{\ell\}-x)d\delta_t(x)\\
+        &=\sum_{t\in D}p_{\ell-t}q_t
+    \end{align*}
+    where the final equality holds by the so-called sifting property of the Dirac delta function [3]. We adopt the convention that $p_n=0$ whenever $n\notin D$. This gives us
+    \[\frac{1}{11}=\mc{L}(X_1+X_2)(\{2\})=p_1q_1\quad\Rightarrow\quad p_1=\frac{1}{11q_1}\quad\text{and}\quad\frac{1}{11}=\mc{L}(X_1+X_2)(\{12\})=p_6q_6\quad\Rightarrow\quad p_6=\frac{1}{11q_6}\]
+    where we with which we can produce an interesting lower bound on $P(X_1+X_2=7)$:
+    \begin{align*}
+        \frac{1}{11}=\mc{L}(X_1+X_2)(\{7\})=\sum_{k\in D}p_{7-k}q_k
+        &\geq p_6q_1+p_1q_6\\
+        &=\frac{1}{11}\bp{\frac{q_1}{q_6}+\frac{q_6}{q_1}}\\
+        &=\frac{1}{11}\bp{\frac{q_1^2+q_6^2}{q_6q_1}}\\
+        &\geq \frac{2}{11}
+    \end{align*}
+    which the last equality holding since $0\leq (q_1-q_6)^2=q_1^2-2q_1q_6+q_6^2$, so $2q_1q_6\leq q_1^2+q_6^2$. Thus, we have a contradiction and conclude that there is no such choice of $p_i,q_i$ for $i\in D$ so that the probabilities of all sums from 2 to 12 are the same.\\[5pt]
+    Importantly, no valid loading of the die could allow $q_i=0$ or $p_i=0$ for $i=1,6$, since then
+    the probabilities of rolling a sum of 2 or 12 would be zero, forcing the probabilities of sums 3 to 11 to be zero as well, so all dice faces would occur with probability zero on at least one of them -- another contradiction.\hfill{$\qed$}\\[5pt]
+\end{document}

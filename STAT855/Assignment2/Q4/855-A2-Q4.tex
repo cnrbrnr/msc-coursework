@@ -1,0 +1,95 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 4} Let $X_n$, $n\geq 0$ be a markov chain on $S=\{0,1,2,\dots\}$ with transition probabilities given by
+    \[p_{0,1}=1,\quad p_{i,i+1}+p_{i,i-1}=1,\quad p_{i,i+1}=\left(\frac{i+1}{i}\right)^2p_{i,i-1},\quad\text{for $i\geq 1$}.\]
+    Then
+    \[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=\frac{6}{\pi^2}.\]
+    {\bf Proof} First, rewrite the probability of interest
+    \[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=1-P(X_n=0\;\text{for some\;}n\geq 0|X_0=1).\]
+    Next, write $\mc{A}=\{\omega\in\Omega:X_n(\omega)=0\;\text{for some\;}n\geq 0\}$ and let $H^0:\Omega\rightarrow \mbb{Z}_{\geq 0}$ with $H^0(\omega)=\inf\{n\geq 0:X_n(\omega)=0\}$,
+    called the hitting time associated to $\{0\}\subset S$ and realization $\omega\in\Omega$. Letting $\mc{B}=\{\omega\in\Omega:H^0(\omega)<\infty\}$, we find that $\mc{A}=\mc{B}$. To see this, suppose $\omega\in\mc{A}$.
+    Then $\{n\geq 0: X_n(\omega)=0\}\neq\emptyset$, and in particular it is bounded below by $0$, so $H^0(\omega)$ exists and is finite. But this is precisely $\mc{B}$, so $\omega\in\mc{B}$.
+    Conversely, suppose that $\omega\in\mc{B}$. Then $H^0(\omega)<\infty$, so $\exists n\geq0$ with $X_n(\omega)=0$, and thus $\omega\in\mc{A}$. Armed with this equivalence, the probability of interest becomes
+    \[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=1-P(H^0<\infty|X_0=1)=1-h_1^0\tag{3}\]
+    where $h_1^0$ is the probability of hitting $\{0\}$ starting at $X_0=1$, but we will simply write $h_1=h^0_1$, and for $j\in S$, $P(H^0<\infty|X_0=j)=:h_j$. We know that these hitting probabilities are the minimal solution to
+    the system of linear equations
+    \begin{align*}
+        x_0&=1\\
+        x_i&=\sum_{j\in S}p_{ij}x_j\quad\text{for $i\in S\setminus\{0\}$}
+    \end{align*}
+    where the equation for $i\geq 1$ simplifies considerably for this problem:
+    \[x_i=p_{i,i+1}x_{i+1}+p_{i,i-1}x_{i-1}\]
+    since $p_{i,k}=0$ for $|k-i|>1$. To conserve space, we write $p_{i,i+1}=p_i$ and $p_{i,i-1}=q_i$. Then $p_i+q_i=1$ and we can write
+    \begin{align*}
+        &(p_i+q_i)x_i=p_ix_{i+1}+q_ix_{i-1}\\
+        \Rightarrow\quad&p_i(x_i-x_{i+1})=q_i(x_{i-1}-x_i)
+    \end{align*}
+    which can be reexpressed as a recurrence relation under the substitute $u_i=x_i-x_{i+1}$ (valid for $i\geq 1$) so that
+    \begin{align*}
+        &p_iu_i=q_iu_{i-1}\\
+        \Rightarrow\quad&u_i=\frac{q_i}{p_i}u_{i-1}
+    \end{align*}
+    proceeding by recursion, we obtain the equation
+    \begin{align*}
+        u_i&=\left(\frac{q_i}{p_i}\right)\left(\frac{q_{i-1}}{p_{i-1}}\right)\cdots\left(\frac{q_1}{p_1}\right)u_0\\
+        &=\prod_{j=1}^i\left(\frac{q_j}{p_j}\right)(x_0-x_1)\\
+        &=\prod_{j=1}^i\left(\frac{q_j}{p_j}\right)(1-x_1)
+    \end{align*}
+    which gives us a new recurrence relation
+    \[x_{i+1}=x_i-\prod_{j=1}^i\left(\frac{q_j}{p_i}\right)(1-x_1).\]
+    From this formula it is easy to see that every element of the sequence can be expressed in terms of $x_1$, namely
+    \[x_{i+1}=x_1-(1-x_1)\sum_{j=1}^i\prod_{k=1}^j\left(\frac{q_k}{p_k}\right).\tag{4}\]
+    Next we shall obtain a more ruly expression for the summation in the second term.
+    \begin{align*}
+        \sum_{j=1}^i\prod_{k=1}^j\left(\frac{q_k}{p_k}\right)&=\sum_{j=1}^i\prod_{k=1}^j\left(\frac{p_{k,k-1}}{\left(\frac{k+1}{k}\right)^2p_{k,k-1}}\right)\\
+        &=\sum_{j=1}^i\prod_{k=1}^j\left(\frac{k}{k+1}\right)^2\\
+        &=\sum_{j=1}^i\left(\frac{j!}{(j+1)!}\right)^2\\
+        &=\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)-1\tag{simplify factorials and reindex}
+    \end{align*}
+    subsituting this back into (4) we find
+    \begin{align*}
+        x_{i+1}&=x_1-(1-x_1)\left(\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)-1\right)\\
+        &=x_1-(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)+1-x_1\\
+        &=1-(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)\tag{5}
+    \end{align*}
+    which is much simpler to analyze. In particular, the minimal solution is required to satisfy $h_i\in[0,1]$ $\forall i\geq 0$
+    so we can first constrain $(1-x_1)\geq 0$. Further, the sequence of partial sums $S_N:=\sum_{k=1}^N(1/k^2)$ is increasing, so the second term in (5) is decreasing
+    and we apply the additional constraint
+    \[\lim_{i\rightarrow\infty}\left|(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)\right|\leq 1\]
+    to ensure that $x_i\in[0,1]$ $\forall i\geq 0$. Taking the fact that $\lim_{i\rightarrow\infty}\sum_{k=1}^{i+1}(1/k^2)=\pi^2/6$, this constraint implies
+    \begin{align*}
+        &(1-x_1)\frac{\pi^2}{6}\leq 1\\
+        \Rightarrow\quad&x_1\geq 1-\frac{6}{\pi^2}.
+    \end{align*}
+    Finally, the hitting probabilities are the minimal solution to the original system of equations, so we take
+    \[h_1=1-\frac{6}{\pi^2}.\]
+    Returning to (3), the probability of interest is found to be
+    \begin{align*}
+        P(X_n\geq 1\;\forall n\geq 0|X_0=1)&=1-h_1\\
+        &=1-1+\frac{6}{\pi^2}\\
+        &=\frac{6}{\pi^2}
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[10pt]
+\end{document}

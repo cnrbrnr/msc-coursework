@@ -1,0 +1,98 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 5}\\[5pt]
+    Suppose that $X$, $Y$ and $Z$ are three random variables defined on the same probability space, such that $r(X,Y)=0.7$ and $r(Y,Z)=0.8$. Find the smallest and largest possible
+    values of $r(X,Z)$.\\[5pt]
+    {\bf Solution}\hspace{5pt}
+    For indexing purposes, set $X_1=X$, $X_2=Y$ and $X_3=Z$. Next, let $\bs{X}=(X_1,X_2,X_3)^T$ be an $\mbb{R}^3$-valued random variable. We define $\E(\bs{X})=(\E(X_1),\E(X_2),\E(X_3))^T\in\mbb{R}^3$, and
+    the {\it covariance matrix} $\Cov(\bs{X},\bs{X})=\E((X-\E(X))(X-\E(X))^T)$, with $i,j$-th entry $(\Cov(\bs{X},\bs{X}))_{i,j}=\Cov(X_i,X_j)$ such that $\Cov(\bs{X},\bs{X})$ is symmetric with $j$-th diagonal entry $\Var(X_j)$, $1\leq i,j\leq 3$.
+    We will make use of the following two theorems to obtain the solution:
+    \begin{theorem}
+        Let $\Sigma$ be the covariance matrix corresponding to a random vector $\bs{Z}=(Z_1,\dots,Z_n)^T$, with $0<\Var(Z_i)<\infty$, $i=1,\dots,n$. Define $D=\diag(\Sigma)^{1/2}$, a nonsingular diagonal matrix with $i$-th diagonal entry $\Var(Z_i)^{1/2}$, $i=1,\dots,n$. Then $\Sigma$ and $D^{-1}\Sigma D^{-1}$ are positive semidefinite,
+        and the latter is called the correlation matrix of $\bs{Z}$.
+    \end{theorem}
+    \noindent{\bf Proof} See Appendix A.1.
+    \begin{theorem}[Generalized Sylvester's Criterion]
+        Let $A$ be a real, $n\times n$ symmetric matrix. Then $A$ is positive semi-definite if and only if all of its principle minors are nonnegative.
+    \end{theorem}
+    \noindent Instead of a proof, we refer the reader to [3] for an explanation of Theorem 3. For our application, letting $\Sigma=\Cov(\bs{X},\bs{X})$ and $D=\diag(\Sigma)^{-1/2}$, we have
+    \begin{align*}
+        D\Sigma D&=\begin{pmatrix}
+            \frac{1}{\sqrt{\Var(X_1)}} & 0 & 0\\
+            0 & \frac{1}{\sqrt{\Var(X_2)}} & 0\\
+            0 & 0 & \frac{1}{\sqrt{\Var(X_3)}}
+        \end{pmatrix}
+        \begin{pmatrix}
+            \Var(X_1) & \Cov(X_1,X_2) & \Cov(X_1,X_3)\\
+            \Cov(X_1,X_2) & \Var(X_2) & \Cov(X_2,X_3)\\
+            \Cov(X_1,X_3) & \Cov(X_2,X_3) & \Var(X_3)
+        \end{pmatrix}
+        \begin{pmatrix}
+            \frac{1}{\sqrt{\Var(X_1)}} & 0 & 0\\
+            0 & \frac{1}{\sqrt{\Var(X_2)}} & 0\\
+            0 & 0 & \frac{1}{\sqrt{\Var(X_3)}}
+        \end{pmatrix}\\
+        &=\begin{pmatrix}
+            1 & 0.7 & \rho \\
+            0.7 & 1 & 0.8 \\
+            \rho & 0.8 & 1
+        \end{pmatrix}\tag{12}
+    \end{align*}
+    with $\rho=r(X,Z)$, the correlation of interest. Since $D\Sigma D$ is a correlation matrix, it is positive semidefinite (Theorem 2), which equivalent to each of it's principle minors being nonnegative (Theorem 3).\\[5pt] All principle minors of (12) which are not a function of $\rho$ are clearly positive, so
+    we now need only for $\rho$ to satisfy
+    \[0\leq 1-\rho^2\quad \text{and}\quad 0\leq -\rho^2+2(0.7)(0.8)\rho+(1-(0.7)^2-(0.8)^2).\]
+    The second condition is a concave quadratic in $\rho$, so the condition holds when $\rho$ falls between the roots of the polynomial. By the quadratic formula, we find
+    \[0\leq -\rho^2+2(0.7)(0.8)\rho+(1-(0.7)^2-(0.8)^2)\quad\Leftrightarrow\quad\frac{28-3\sqrt{51}}{50}\leq\rho\leq\frac{28+3\sqrt{51}}{50}.\]
+    However, we have $\frac{28-3\sqrt{51}}{50}\approx 0.1315$ and $\frac{28+3\sqrt{51}}{50}\approx 0.9885$, so the first constraint, which requires $|\rho|\leq 1$ is satisfied. Thus,
+    $\rho=r(X,Z)$ can be at least $\frac{28-3\sqrt{51}}{50}\approx 0.1315$ and at most $\frac{28+3\sqrt{51}}{50}\approx 0.9885$.\hfill{$\qed$}\\[5pt]
+\end{document}

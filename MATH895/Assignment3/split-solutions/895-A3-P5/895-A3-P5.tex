@@ -1,0 +1,115 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \noindent{\bf Problem 5}\\[5pt]
+    Let $X$ be a standard normal random variable, i.e. the density of $X$ is $\tfrac{1}{\sqrt{2\pi}}e^{-x^2/2}$, $x\in\mbb{R}$. Let $Y=e^X$. We say that $Y$ is a {\it log-normal} random variable.
+    Prove that the density of $Y$ is $f(x)=\tfrac{1}{x\sqrt{2\pi}}e^{-(\log(x))^2/2}\1{(0,\infty)}(x)$. Let now $a\in\mbb{R}$ with $|a|\leq1$. Define $f_a(x)=(1+a\sin(2\pi\log(x)))f(x)$. Show that $f_a$ is the density of a random variable $Y_a$
+    with $\E{(Y_a^p)}<\infty$ for all $p\geq0$, and that none of the moments depend on $a$.\\[5pt]
+    {\bf Proof} We can identify the density of $Y$ by finding the Radon-Niokdym derivative of its law. Let $(\Omega,\mc{F},P)$ be the probability space on which all random variables are defined. Observe that $Y=e^X$ means that $Y$ is $(0,\infty)$-valued,
+    so we may take $A\in\mc{B}(\mbb{R})$ satisfying $A\cap(0,\infty)=A$ in the computations that follow:
+    \begin{align*}
+        \mc{L}(Y)(A)=P(Y^{-1}(A))=P(\{\omega\in\Omega:e^{X(\omega)}\in A\})P(\{\omega\in\Omega:X(\omega)\in\log(A)\})&=\mc{L}(X)(\log(A))\\
+        &=\int_{\log(A)}\frac{1}{\sqrt{2\pi}}e^{-x^2/2}dx\\
+        &=\int_A\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}
+    \end{align*}
+    where the last equality holds by making a change of variables $x=\log(t)$. But this holds for every $A\in\mc{B}((0,\infty))$, so we find the density of $Y$ to be
+    \begin{align*}
+        f(x)=\frac{1}{x\sqrt{2\pi}}e^{-(\log(x))^2/2}\1{(0,\infty)}(x)
+    \end{align*}
+    as desired. Taking $|a|\leq1$, we may show that $f_a$ corresponds to the density of a random variable by establishing that it defines a valid distribution function. We define
+    \[F_a(x)=\int_{-\infty}^xf_a(t)dt=\int_{0}^x(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt.\] 
+    First, observe that $F_a(x)=0$ $\forall x\leq 0$, so $\lim_{x\rightarrow-\infty}F_a(x)=0$. Next, we have $\forall x\in\mbb{R}$,
+    \begin{align*}
+        a\sin(2\pi\log(x))\geq -a\quad\Rightarrow\quad 1+a\sin(2\pi\log(x))\geq 1-a\geq 0
+    \end{align*}
+    and further $f(x)\geq 0$ so that $f_a\geq 0$ on $\mbb{R}$, and thus $F_a$ is monotonically increasing on $\mbb{R}$. Next we have
+    \begin{align*}
+        \lim_{x\rightarrow\infty}F_a(x)=\int_{-\infty}^\infty f_a(t)dt&=\int_0^\infty(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=\int_{-\infty}^\infty f(t)dt+a\int_{0}^\infty \sin(2\pi\log(t))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=1+a\int_{-\infty}^\infty\sin(2\pi u)\frac{1}{\sqrt{2\pi}}e^{-u^2/2}du\tag{setting $u=\log(t)$}\\
+        &=1
+    \end{align*}
+    with the last equality holding since we are integrating the product of an odd and even function over $\mbb{R}$. Lastly, we must establish the right-continuity of $F_a$. For this, take $x\in\mbb{R}$ and a sequence $\{x_n\}_{n\geq 1}$ with $x_n\searrow x$ as $n\rightarrow\infty$. We may impose $x\geq0$ and $\{x_n\}_{n\geq 1}\subset(0,\infty)$,
+    since otherwise we will have trivial limiting behavior in the sense that $\exists N\in\mbb{N}$ so that $n\geq N$ implies $F_a(x_n)=0$. Then we find
+    \begin{align*}
+        \lim_{n\rightarrow\infty}F_a(x_n)=\lim_{n\rightarrow\infty}\int_0^{x_n}f_a(t)dt&=\lim_{n\rightarrow\infty}\int_0^{x_n}(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\\
+        &=\lim_{n\rightarrow\infty}\int_{\mbb{R}}(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\1{(0,x_n]}dt\\
+        &=\int_0^x(1+a\sin(2\pi\log(t)))\frac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt\tag{dominated convergence}\\
+        &=F_a(x)
+    \end{align*} 
+    where the dominated convergence theorem is applicable since $(1+a(\sin(2\pi\log(t))))\tfrac{1}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\1{(0,x_n)}(t)$ is non-negative and dominated by $f_a$, which itself is $L^1$ integrable. Furthermore, since $(0,x_n]\supset (0,x_{n+1}]$ for $n\geq 1$, $\lim_{n\rightarrow\infty}(0,x_n]=(0,x]$ and so $\lim_{n\rightarrow\infty}\1{(0,x_n]}=\1{(0,x]}$, yielding the above result.
+    \\[5pt]
+    We have established that $F_a(x)$ is monotonically increasing on $\mbb{R}$, approaching zero as $x\rightarrow-\infty$ and one as $x\rightarrow\infty$, and is right-continuous, so it is
+    a distribution function and corresponds to the law of a random variable, which we shall designate $Y_a$.\\[5pt]
+    Take $p\in\mbb{N}\cup\{0\}$, and let us compute the $p$-th moment of $Y_a$.
+    \begin{align*}
+        \E{(Y_a^p)}=\int_\mbb{R}t^p(1+a\sin(2\pi\log(t)))f(t)dt&=\int_\mbb{R}t^pf(t)dt+a\int_\mbb{R}t^pf(t)\sin(2\pi\log(t))dt\\
+        &=\int_0^\infty\frac{t^p}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}dt+a\int_0^\infty\frac{t^p}{t\sqrt{2\pi}}e^{-(\log(t))^2/2}\sin(2\pi\log(t))dt\\
+        &=\int_{-\infty}^\infty \frac{e^{pu}}{\sqrt{2\pi}}e^{-u^2/2}du+a\int_{-\infty}^\infty\frac{e^{pu}}{\sqrt{2\pi}}e^{-u^2/2}\sin(2\pi u)du\tag{setting $u=\log(t)$}
+    \end{align*}
+    completing the square, we get $u^2-2pu=(u-p)^2-p^2$, such that the above becomes
+    \begin{align*}
+        \E{(Y_a^p)}&=\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-(u^2-2pu)/2}du+a\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-(u^2-2pu)/2}\sin(2\pi u)du\\
+        &=e^{p^2/2}\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-(u-p)^2/2}du+ae^{p^2/2}\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-(u-p)^2/2}\sin(2\pi u)du\\
+        &=e^{p^2/2}\int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}}e^{-y^2/2}dy+ae^{p^2/2}\int_{-\infty}^\infty\frac{1}{\sqrt{2\pi}}e^{-y^2/2}\sin(2\pi p+2\pi y)dy.
+    \end{align*}
+    The integral in the first term is just the standard gaussian density over the real line and thus equals one. In the second integral, $\sin(2\pi p+2\pi y)=\sin(2\pi y)$ since $p$ is a fixed integer, so this is actually just the integral of the product of an even function (the Gaussian kernel) with an odd function ($\sin(2\pi y)$) and is thus zero. With this, we arrive at
+    \[\E{(Y_a^p)}=e^{p^2/2}<\infty\]
+    which does not depend on the selection of $a$. This holds for any non-negative integer $p$ and real $a$ with $|a|\leq 1$, so we have constructed an uncountable family of random variables with mutually distinct laws but all moments equal.\hfill{$\qed$}\\[5pt]
+\end{document}

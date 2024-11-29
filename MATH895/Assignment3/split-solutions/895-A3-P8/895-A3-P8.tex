@@ -1,0 +1,96 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \noindent{\bf Problem 8}\\[5pt]
+    A real-valued random variable is said to be {\it Cauchy} if its density is $f(x)=\frac{1}{\pi}\frac{1}{1+x^2}$, $x\in\mbb{R}$. Let $X_1,X_2,\dots$ be a sequence of $\iid$ Cauchy random variables, and
+    let $M_n=\max\{X_1,X_2\dots, X_n\}$. Prove that $\frac{\pi M_n}{n}$ converges in law as $n\rightarrow\infty$ to a random variable whose distribution function is $H(x)=e^{-1/x}\1{(0,\infty)}(x)$, $x\in\mbb{R}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Our goal is to apply the Helly-Bray theorem to establish weak convergence via convergence in distribution. Let us first obtain the distribution function of $\frac{\pi M_n}{n}$, calling it $F_n$.
+    \begin{align*}
+        F_n(x)=P\bp{\frac{\pi M_n}{n}\leq x}=P\bp{M_n\leq \frac{nx}{\pi}}=P\bp{X_1\leq \frac{nx}{\pi},X_2\leq\frac{nx}{\pi},\dots,X_n\leq\frac{nx}{\pi}}=\bp{P\bp{X_1\leq\frac{nx}{\pi}}}^n
+    \end{align*}
+    with the last equality holding under the assumption that $X_1,\dots,X_n$ are $\iid$ Computing the probability on the right hand side:
+    \begin{align*}
+        P\bp{X_1\leq\frac{nx}{\pi}}=\frac{1}{\pi}\int_{-\infty}^{\frac{nx}{\pi}}\frac{1}{1+x^2}dx=\frac{1}{\pi}\bp{\arctan(x)}\bigg|_{-\infty}^{\frac{nx}{\pi}}=\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}
+    \end{align*}
+    so the distribution function $F_n$ may be expressed
+    \begin{align*}
+        F_n(x)&=\bp{\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}}^n\tag{5}\\
+        &=\bp{\frac{1}{\pi}\bp{\frac{\pi}{2}-\arctan\bp{\frac{\pi}{nx}}}+\frac{1}{2}}^n\tag{6}\\
+        &=\bp{1-\frac{1}{\pi}\arctan\bp{\frac{\pi}{nx}}}^n.
+    \end{align*}
+    Where in (6) we assumed $x>0$ and used the fact that for $y\in\mbb{R}$, $\arctan(y)+\arctan(1/y)=\frac{\pi}{2}$ [1, p 79]. Turning our attention to (5) and supposing $x\leq 0$, we have $-\tfrac{\pi}{2}\leq\arctan(nx/\pi)\leq 0$, so $\tfrac{1}{2}\leq\tfrac{1}{\pi}\arctan(nx/\pi)\leq 0$ and so
+    \[0\leq \bp{\frac{1}{\pi}\arctan\bp{\frac{nx}{\pi}}+\frac{1}{2}}^n=F_n(x)\leq\bp{\frac{1}{2}}^n\rightarrow 0=H(x)\quad\text{as\;$n\rightarrow\infty$}\]
+    so we find that $F_n(x)\rightarrow0$ for all $x\leq 0$ as $n\rightarrow\infty$. In the computations to follow we take $x>0$. For this, let us first obtain the exact first order Taylor expansion of $\arctan$, say at some $y\in\mbb{R}$:
+    \begin{align*}
+        \arctan(y)=\arctan(0)+\frac{d}{dx}\arctan(y)\big|_{y=0}(y-0)+o(y)=y+o(y)
+    \end{align*}
+    where $o(y)$ is such that $o(y)/y\rightarrow 0$ as $y\rightarrow 0$. Substituting this into (6) we obtain
+    \begin{align*}
+        F_n(x)=\bp{1-\frac{1}{\pi}\bp{\frac{\pi}{nx}+o\bp{\frac{\pi}{nx}}}}^n=\bp{1-\frac{1}{nx}+o\bp{\frac{\pi}{nx}}}^n.\tag{7}
+    \end{align*}
+    Now, since $|(1-(1/nx))|\leq 1$ $\forall n\in\mbb{N}$ and $|(1-(1/nx)+o(\pi/nx))|\leq 1$ provided $n$ is sufficiently large, we may take the following bound (using a lemma from the local limit theorem)
+    \begin{align*}
+        \left|\bp{1-\frac{1}{nx}+o\bp{\frac{\pi}{nx}}}^n-\bp{1-\frac{1}{nx}}^n\right|\leq\sum_{i=1}^no\bp{\frac{\pi}{nx}}=\frac{nx}{\pi}o\bp{\frac{\pi}{nx}}\frac{\pi}{x}\rightarrow 0\quad\text{as $n\rightarrow \infty$.}
+    \end{align*}
+    so, as $n$ grows large, (7) can be approximated arbitrarily well by $(1-\tfrac{1}{xn})^n$. Thus,
+    \[\lim_{n\rightarrow\infty}F_n(x)=\lim_{n\rightarrow\infty}\bp{1-\frac{1}{nx}}^n=e^{-1/x}\]
+    and we already established that $F_n(x)\rightarrow 0$ when $x\leq 0$, so we have the result
+    \[\lim_{n\rightarrow\infty}F_n(x)=e^{-1/x}\1{(0,\infty)}(x)=H(x)\]
+    for all $x\in\mbb{R}$, so by the Helly-Bray theorem, $\tfrac{\pi M_n}{n}$ converges in law to a random variable with distribution function is $H(x)$.\hfill{$\qed$}\\[5pt]
+\end{document}

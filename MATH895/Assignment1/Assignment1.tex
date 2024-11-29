@@ -1,0 +1,598 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Some solutions presented here were, at least in part, the product of collaboration with my fellow students and
+            Professor Cellarosi himself. To be more precise, problems 1, 3, 5, and 7 incorporate ideas presented to me during discussion with Osman Bicer (1b)
+            Anthony Pasion (problem 7) and Timothy Liu (problems 3 and 5). Professor Cellarosi contributed significantly to solutions for problems 2, 3 and 5.
+            Problems 7-10 were completed with occasional reference to [1].
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    \noindent{\bf Problem 1}\\[5pt]
+    {\bf a)} Let $(\Omega, \mc{F},P)$ be a probability space, and let $A_1,\dots, A_n\in\mc{F}$ be $n\geq 1$ events.
+    Prove the so-called {\it inclusion-exclusion formula}
+    \[P\left(\bigcup_{i=1}^nA_i\right)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{1}\]
+    {\bf Proof}\hspace{5pt} We proceed by induction. First, consider the basis where we fix $n=1$. Then, trivially,
+    \[P\left(\bigcup_{i=1}^n A_i\right)=P(A_1)=\sum_{k=1}^1(-1)^{k+1}P(A_1)=\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k}).\]
+    Now supposing that (1) holds for any subcollection of $\mc{F}$ of size $n\geq 1$, we aim to show that for $A_1,\dots,A_{n+1}\in\mc{F}$
+    \[P\left(\bigcup_{i=1}^{n+1}A_i\right)=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k}).\tag{2}\]
+    For notational compactness, take $A=\cup_{i=1}^nA_i$ and $B=A_{n+1}$, each an element of $\mc{F}$. Then, we can rewrite the probability of interest
+    \begin{align*}
+        P\left(\cup_{i=1}^{n+1}A_i\right)=P(A\cup B)=P(A)+P(B\setminus(A\cap B))&=P(A)+P(B\setminus (A\cap B))+P(A\cap B)-P(A\cap B)\\
+        &=P(A)+P((B\setminus(A\cap B))\cup (A\cap B))-P(A\cap B)\\
+        &=P(A)+P(B)-P(A\cap B)
+    \end{align*}
+    yielding an expression amenable to the inductive hypothesis:
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=P\bp{\bigcup_{i=1}^nA_i}+P(A_{n+1})-P\bp{\bigcup_{i=1}^n(A_i\cap A_{n+1})}\\
+        &=P(A_{n+1})+\sum_{k=1}^n(-1)^{k+1}\sum_{1\leq i_1<\dots <i_k\leq n}P(A_{i_1}\cap\cdots A_{i_k})
+        \quad+\sum_{k=1}^n(-1)^{k+2}\sum_{1\leq i_1<\dots<i_k\leq n}P(A_{i_1}\cap\dots A_{i_k}\cap A_{n+1})\tag{3}
+    \end{align*}
+    since both $\cup_{i=1}^nA_i$ and $\cup_{i=1}^n(A_i\cap A_{n+1})$ are $n$-unions over elements of $\mc{F}$. Massaging this expression, we find that
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=\sum_{k=1}^{n+1}P(A_k)+\sum_{k=2}^n(-1)^{k+1}\sum_{1\leq i_1<\dots<i_k\leq n}P(A_{i_1}\cap\cdots\cap A_{i_k})+\sum_{k=2}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots<i_{k-1}\leq n}P(A_{i_1}\cap\cdots\cap A_{i_{k-1}}\cap A_{n+1})
+    \end{align*}
+    where the second term contains all intersections of $2$ or more elements of $\{A_i\}_{i=1}^n$ (i.e., those not including $A_{n+1}$) and the third term contains all intersections of two or more elements of $\{A_i\}_{i=1}^{n+1}$, at least once of which is $A_{n+1}$.
+    Combining these, we get the appropriate sum of probabilities over all intersections of two or more elements of $\{A_i\}_{i=1}^{n+1}$:
+    \begin{align*}
+        P\bp{\bigcup_{i=1}^{n+1}A_i}&=\sum_{k=1}^{n+1}P(A_{k})+\sum_{k=2}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots<i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k})\\
+        &=\sum_{k=1}^{n+1}(-1)^{k+1}\sum_{1\leq i_1<\dots i_k\leq n+1}P(A_{i_1}\cap\cdots\cap A_{i_k}).
+    \end{align*} 
+    whereby the basis, inductive step, and principle of induction we have that (1) holds for any $n\geq 1$.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Let $n\geq 3$ be given, and consider $A_1,\dots,A_n$ in some probability space $(\Omega,\mc{F},P)$. We say that an event {\it occurs} if it has nonzero probability.
+    Assume that
+    \begin{itemize}
+        \item at least one of the events occurs,
+        \item no more than three events occur,
+        \item the probability of at least two events occuring is $\frac{1}{2}$,
+        \item $P(A_i)=p$, $P(A_i\cap A_j)=q$ and $P(A_i\cap A_j\cap A_k)=r$ for $1\leq i<j<k\leq n$.
+    \end{itemize}
+    Show that both $p\geq \frac{3}{2n}$ and $q\leq \frac{4}{n}$.\\[5pt]
+    {\bf Proof}\hspace{5pt}\\[5pt]
+    Since at least one of the events occur, we have (restricting the probability space to the union of the $\{A_i\}_{i=1}^n$)
+    \[P\bp{\bigcup_{i=1}^nA_i}=1\]
+    where from the inclusion-exclusion principle, we obtain
+    \begin{align*}
+        1=\sum_{i=1}^nP(A_i)-\sum_{1\leq i<j\leq n}P(A_i\cap A_j)+\sum_{1\leq i<j<k\leq n}P(A_i\cap A_j\cap A_k)=np-\nck{n}{2}q+\nck{n}{3}r.
+    \end{align*}
+    Now, letting $\mathcal{I}=\{(i,j): 1\leq i<j\leq n\}$, the probability that at least two events occur is $\frac{1}{2}$ so we can again apply the inclusion-exclusion principle to obtain
+    \begin{align*}
+        \frac{1}{2}&=P\bp{\bigcup_{1\leq i<j\leq n}(A_i\cap A_j)}\\
+        &=\sum_{1\leq i<j\leq n}P(A_i\cap A_j)-\sum_{\substack{(i,j),(k,\ell)\in\mathcal{I} \\ (i,j)\neq (k,\ell)}}P(A_i\cap A_j\cap A_k\cap A_\ell)+\sum_{\substack{(i,j),(k,\ell),(s,t)\in\mathcal{I} \\ (i,j)\neq(k,\ell)\neq(s,t)}}P(A_i\cap A_j\cap A_k\cap A_\ell\cap A_s\cap A_t).
+    \end{align*}
+    Some care is needed to justify this latest expression, in particular the fact that we can truncate the expansion after the third sum. For this, simply observe that $\nck{2}{2}=1<\nck{3}{2}=3$, so any set of $\geq 4$ combinations of two (out of three) events cannot be pairwise distinct. Equivalently,
+    taking $\geq 4$ pairwise distinct elements of $\mathcal{I}$ must specify at least four distinct events such that the probability of their intersection is zero.\\[5pt]
+    Through a similar line of reasoning, observe that for any $(i,j),(k,\ell)\in\mathcal{I}$ with $(i,j)\neq(k,\ell)$, at least three of $A_i, A_j,A_k,A_\ell$ are pairwise distinct. Of course, we can restrict our attention to the case when exactly three are pairwise distinct,
+    since the probability that greater than three events occur is zero. Now, fixing three sets $A_{i_1},A_{i_2},A_{i_3}\in\{A_i\}_{i=1}^n$, there are $\nck{3}{2}$ distinct elements of $\mathcal{I}$ specifying a pair of them. Then, there are $\nck{\nck{3}{2}}{2}=\nck{3}{2}=3$ ways of selecting two of these three elements, each
+    of which specify the same intersection $A_{i_1}\cap A_{i_2}\cap A_{i_3}$.\\[5pt]
+    Finally, for any $(i,j),(k,\ell),(s,t)\in\mathcal{I}$ with $(i,j)\neq(k,\ell)\neq (s,t)$, at least three of $A_i,A_j,A_k,A_\ell,A_s,A_t$ are pairwise distinct and, again,
+    we restrict our consideration for the case when exactly three are pairwise distinct. With the same arbitrary $A_{i_1},A_{i_2},A_{i_3}$ as before, there is now $\nck{\nck{3}{2}}{3}=\nck{3}{3}=1$ way of selecting three of the three available pairwise distinct elements of $\mathcal{I}$ specifying a pair of them.
+    Importantly, there were $\nck{n}{3}$ ways we could have fixed $A_{i_1},A_{i_2}$ and $A_{i_3}$.\\[5pt]
+    With this cumbersome counting aside, the above plainly reduces to
+    \begin{align*}
+        \frac{1}{2}=\nck{n}{2}q-3\nck{n}{3}r+\nck{n}{3}r=\nck{n}{2}q-2\nck{n}{3}r\leq \nck{n}{2}q-\nck{n}{3}r
+    \end{align*}
+    which we can use to obtain the desired inequalities. Specifically, we will need the facts
+    \[\frac{1}{2}\leq \nck{n}{2}q-\nck{n}{3}r\quad\text{and}\quad\nck{n}{3}r=\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\]
+    the latter of which is easily derived from the above result. Using the first, we can get
+    \begin{align*}
+        1=np-\nck{n}{2}q+\nck{n}{3}r\quad\Rightarrow\quad 1+\frac{1}{2}\leq np\quad\Rightarrow\quad p\geq \frac{3}{2n}
+    \end{align*}
+    as desired. We also know that $p\leq 1$, so that
+    \begin{align*}
+        1=np-\nck{n}{2}q+\nck{n}{3}r&\leq n-\nck{n}{2}q+\nck{n}{3}r+\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\\
+        &=n-\frac{1}{2}\nck{n}{2}q-\frac{1}{4}.
+    \end{align*}
+    Isolating for $q$ gives us
+    \begin{align*}
+        1\leq n-\frac{1}{2}\nck{n}{2}q-\frac{1}{4}\quad\Rightarrow\quad \nck{n}{2}q\leq 2n-\frac{5}{2}\quad\Rightarrow\quad &q\leq \frac{(4n-5)(n-2)!2!}{2n!}\\
+        \Rightarrow\quad &q\leq \frac{4n-5}{n^2-n}=\frac{4n}{n^2}\frac{(1-\frac{5}{4n})}{(1-\frac{1}{n})}\leq \frac{4}{n}
+    \end{align*}
+    with the final inequality holding since $(1-\frac{5}{4n})\leq (1-\frac{1}{n})$. Thus we have shown that both $p\geq \frac{3}{2n}$ and $q\leq \frac{4}{n}$, as desired.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 2}\\[5pt]
+    Suppose we wish to estimate an integral $\mc{I}=\int_0^1f(x)dx$, where $0\leq f(x)\leq 1$ $\forall x\in[0,1]$. \\[5pt]
+    For this, let $([0,1],\mc{F},\lambda)$ be a probability space, with $\lambda$ the Lebesgue measure, and $X,Y:([0,1],\mc{F},\lambda)\rightarrow([0,1],\mc{F})$ be independent
+    (uniform) random variables. Then $(X,Y)$ is taken to be a random variable on the product probability space $\Omega=[0,1]\times[0,1]$ with uniform measure taken to be
+    the 2-dimensional Lebesgue measure.\\[5pt]
+    Now consider the following three candidate {\it estimators} of $\mc{I}$:
+    \begin{itemize}
+        \item $U=\1{Y\leq f(X)}$
+        \item $V=f(X)$
+        \item $W=\frac{1}{2}(f(X)+f(1-X))$.
+    \end{itemize}
+    Prove first that $\E(U)=\E(V)=\E(W)=\mc{I}$, and then $\Var(W)\leq\Var(V)\leq \Var(U)$. In other words, $W$ is the most 'efficient' estimator of $\mc{I}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} The expectations of our three estimators can be found directly. Starting with $U$, define $Z:=(X,Y)$, $g:[0,1]\times[0,1]\rightarrow\{0,1\}$ with $g(x,y)=\1{y\leq f(x)}$, and let $P$ be the 2-dimensional Lebesgue measure on $\Omega$. Then
+    \begin{align*}
+        \E(U)=\int_\Omega\1{Y(\omega)\leq f(X(\omega))}P(d\omega)=\int_\Omega (g\circ Z)(\omega)P(d\omega)&=\int_{[0,1]\times[0,1]}g(x,y)(P\circ Z^{-1})(dx, dy)\\
+        &=\int_{[0,1]\times[0,1]}\1{y\leq f(x)}\mc{L}((X,Y))(dx, dy)\\
+        &=\int_{[0,1]\times[0,1]}\1{y\leq f(x)}\mc{L}(Y)(dy)\mc{L}(X)(dx)\tag{independence of $X$ and $Y$}\\
+        &=\int_{[0,1]}\int_{[0,1]}\1{y\leq f(x)}\lambda(dy)\lambda(dx)\tag{Fubini-Tonelli theorem}\\
+        &=\int_0^1\int_0^{f(x)}\lambda(dy)\lambda(dx)\tag{4}\\
+        &=\int_{0}^1\lambda([0,f(x)])\lambda(dx)\\
+        &=\int_0^1f(x)\lambda(dx)
+    \end{align*}
+    which is precisely $\mc{I}$. Note that $\mc{L}(X)=\lambda$ since $X^{-1}(A)=A$ for any $A\in\mc{F}$, and likewise for $Y$. Additionally, (4) holds because $\forall x\in[0,1]$, $0\leq f(x)\leq 1$, so $[0,f(x)]\in\mc{F}$. These finer points aside, we continue to the
+    (relatively) simpler calculations for $\E(V)$ and $\E(W)$.
+    \begin{align*}
+        \E(V)=\int_{[0,1]}f(X(\omega))\lambda(d\omega)=\int_{[0,1]}(f\circ X)(\omega)\lambda(d\omega)=\int_0^1f(x)(\lambda\circ X^{-1})(dx)=\int_0^1f(x)\lambda(dx)=\mc{I}\tag{5}
+    \end{align*}
+    and lastly
+    \begin{align*}
+        \E(W)=\frac{1}{2}\bp{\int_{[0,1]}f(X(\omega))\lambda(d\omega)+\int_{[0,1]}f(1-X(\omega))\lambda(d\omega)}\tag{6}
+    \end{align*}
+    where the first term in parentheses is exactly (5), so we need only show that $\int_{[0,1]}f(1-X(\omega))\lambda(d\omega)=\mc{I}$ too. For this, first define a new random variable $Q=1-X$. Then
+    \begin{align*}
+        \int_{[0,1]}f(1-X(\omega))\lambda(d\omega)=\int_{[0,1]}(f\circ Q)(\omega)\lambda(d\omega)=\int_{[0,1]}f(x)(\lambda\circ Q^{-1})(dx)\tag{7}
+    \end{align*}
+    but if $A\in\mc{F}$, then $Q^{-1}(A)=\{\omega\in[0,1]:Q(\omega)=1-X(\omega)\in A\}=\{\omega\in[0,1]:X(\omega)\in 1-A\}$, and $1-A:=\{1-a:a\in A\}$. It turns out that both
+    $1-A\in\mc{F}$ and $\lambda(1-A)=\lambda(A)$ (see Appendix A.1) giving us $\lambda(Q^{-1}(A))=\lambda(X^{-1}(1-A))=\lambda(1-A)=\lambda(A)$. With this invariance, (7) becomes
+    \begin{align*}
+        \int_{[0,1]}f(x)(\lambda\circ Q^{-1})(dx)=\int_0^1f(x)\lambda(dx)
+    \end{align*}
+    so that (combining the above with (6)) $\E(W)=\mc{I}$ as well.\\[5pt]
+    Having established that each estimator is unbiased, we now rank their variances. For this, we need only rank their second moments since $\E(W)=\E(V)=\E(U)$ and $\Var(\mc{X})=\E(\mc{X}^2)-\E(\mc{X})^2$ for $\mc{X}$ an arbitrary random variable.
+    We will need the fact that for $a,b\in\mbb{R}$, $2ab\leq a^2+b^2$, which is easily deduced from the observation that $0\leq (a-b)^2=a^2-2ab+b^2$.
+    \begin{align*}
+        \E(W^2)=\frac{1}{4}\int_{[0,1]}(f(X(\omega))+f(1-X(\omega)))^2\lambda(d\omega)&=\frac{1}{4}\int_{[0,1]}f^2(X(\omega))+2f(X(\omega))f(1-X(\omega))+f^2(1-X(\omega))\lambda(d\omega)\\
+        &\leq \frac{1}{4}\int_{[0,1]}2f^2(X(\omega))+2f^2(1-X(\omega))\lambda(d\omega)\\
+        &=\frac{1}{2}\int_{0}^1f^2(X(\omega))\lambda(d\omega)+\frac{1}{2}\int_{[0,1]}f^2(x)(\lambda\circ Q^{-1})(dx)\\
+        &=\int_0^1f^2(x)\lambda(dx)\tag{8}
+    \end{align*}
+    with (8) following by precisely the same logic as was applied to (7). But (8) is exactly $\E(V^2)$, so $\E(W^2)\leq\E(V^2)$. Finally, we work backwards from $\E(U^2)$.
+    \begin{align*}
+        \E(U^2)=\int_\Omega(\1{Y(\omega)\leq f(X(\omega))})^2dP(d\omega)=\int_\Omega\1{Y(\omega)\leq f(X(\omega))}dP(d\omega)=\E(U)&=\int_0^1f(x)\lambda(dx)\\
+        &\geq\int_0^1f^2(x)\lambda(dx)\tag{since $0\leq f(x)\leq 1$ $\forall x\in[0,1]$}
+    \end{align*}
+    which is, again, exactly $\E(V^2)$. Thus, we have established the ranking $E(W^2)\leq\E(V^2)\leq\E(U^2)$, where since these estimators are unbiased (and in particular have equal expected values) we get
+    \[\E(W^2)\leq\E(V^2)\leq\E(U^2)\quad\Leftrightarrow\quad \E(W^2)-\E(W)^2\leq \E(V^2)-\E(V)^2\leq\E(U^2)-\E(U)^2\quad\Leftrightarrow\quad\Var(W)\leq\Var(V)\leq\Var(U)\]
+    as desired.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 3}\\[5pt]
+    For $n,r\geq 1$, find the number of solutions $(x_1,\dots,x_r)$ to the equation
+    \[x_1+x_2+\dots +x_r=n\]
+    where $x_i\geq 0$, $i=1,2,\dots, r$ are integers. Let $\Omega_{n,r}$ be the set of solutions. Consider the $\sigma$-algebra $2^{\Omega_{n,r}}$ and the uniform probability measure $P_{n,r}$ thereupon.\\[5pt]
+    {\bf a)} For every nonnegative integer $k$, find $P_{n,r}(x_1=k)$.\\[5pt]
+    {\bf Solution}\hspace{5pt} For a set $A\in 2^{\Omega_{n,r}}$, the uniform probability measure is simply
+    \[P_{n,r}(A)=\frac{|A|}{|\Omega_{n,r}|}\]
+    so we first set about finding $|\Omega_{n,r}|$, setting $N_{n,r}:=|\Omega_{n,r}|$. We claim that $N_{n,r}={n+r-1\choose r-1}$, and show this by induction, fixing some $n\geq 1$ throughout the duration.\\[5pt]
+    Proceeding with the basis, set $r=1$. In this case, the only solution is $x_1=n$, and in fact $1=\nck{n}{0}=\nck{n+1-1}{1-1}=\nck{n+r-1}{r-1}$. Now, suppose that for some $r\geq 1$ we have $N_{n,r}=\nck{n+r-1}{r-1}$. We want to show that $N_{n,r+1}=\nck{n+1+r-1}{r}$.\\[5pt]
+    Observe that, were we to fix $x_1=0$, there would remain $r$ free coordinates $x_2,\dots,x_{r+1}$, all of which must add up to $n=n-x_1$, and there are $N_{n-x_1,r}$ solutions to this problem. Similarly, fixing $x_1=1$, the remaining $r$ coordinates must sum to $n-1=n-x_1$, and there are now $N_{n-x_1,r}$ solutions.
+    We could repeat this for all $n+1$ possible values of $x_1$ to find all possible solutions of $\sum_{i=1}^{n+1}x_i=n$, such that
+    \begin{align*}
+        N_{n,r+1}=\sum_{j=0}^n N_{n-j,r}&=\sum_{j=0}^n \nck{n-j+r-1}{r-1}\tag{by inductive hypothesis}\\
+        &=\sum_{j=0}^n\nck{j+r-1}{r-1}=\nck{n+r}{r}\tag{9}
+    \end{align*}
+    where the last step follows Chu's Theorem [2] (see Appendix A.1 for a proof). By the principle of induction,
+    we have that for $n\geq 1$, $r\geq 1$, $N_{n,r}=\nck{n+r-1}{r-1}$.\\[5pt]
+    For the probability of interest, fix some $1\leq k\leq n$ and take $r=1$. Then $|\Omega_{n,1}|=1$, and so
+    \[P_{n,1}(x_1=k)=\delta_{n,k}=\begin{cases}
+        1,\quad\text{if $k=n$}\\
+        0,\quad\text{otherwise.}
+    \end{cases}\]
+    Now take $r\geq 2$ and consider $\Omega_{n,k,r}=\{x\in\Omega_{n,r}:x=(x_1,\dots,x_r),\;x_1=k\}$. As argued previously, for $(x_1,\dots,x_r)\in\Omega_{n,k,r}$ to be a solution, we require $\sum_{j=2}^rx_j=n-k$. The set of all such tuples $(x_2,\dots,x_r)$ is
+    quite obviously isomorphic to $\Omega_{n-k,r-1}$, so we have a total of $|\Omega_{n,k,r}|=N_{n-k,r-1}$ solutions. Thus
+    \[P_{n,r}(x_1=k)=\frac{|\Omega_{n,k,r}|}{|\Omega_{n,r|}}=\frac{|\Omega_{n-k,r-1}|}{|\Omega_{n,r}|}=\frac{N_{n-k,r-1}}{N_{n,r}}=\frac{\nck{n-k+r-2}{r-2}}{\nck{n+r-1}{r-1}}=\frac{(n-k+r-2)!n!(r-1)}{(n-k)!(n+r-1)!}.\tag{10}\]
+    Having obtained an expression for $P_{n,r}(x_1=k)$ for all $n,r\geq 1$ and $k\geq 0$, we are finished.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Find the limit of $P_{n,r}(x_1=k)$ as $r,n\rightarrow\infty$ with $\frac{n}{r}\rightarrow\rho>0$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Fix $n,r\geq 1$ and $0\leq k\leq n$. Let us first expand the probability in (10) to find that
+    \begin{align*}
+        P_{n,r}(x_1=k)&=(r-1)\frac{{n(n-1)\cdots(n-k+1)}}{(n+r-1)(n+r-2)\cdots(n+r-k-1)}\\
+        &=r(1-\frac{1}{r})\frac{n^k(1-\frac{1}{n})\cdots(1-\frac{k+1}{n})}{(n+r)^{k+1}(1-\frac{1}{n+r})\cdots(1-\frac{k-1}{n+r})}.
+    \end{align*}
+    Next, since $\frac{n}{r}\rightarrow\rho>0$ as $n,r\rightarrow\infty$ by supposition, we can consider $n=n(r)$ with $\lim_{n\rightarrow\infty}n=\lim_{r\rightarrow\infty}r\rho$. Thus,
+    \begin{align*}
+        \lim_{n,r\rightarrow\infty}P_{n,r}(x_1=k)&=\lim_{n,r\rightarrow\infty}r(1-\frac{1}{r})\frac{n^k(1-\frac{1}{n})\cdots(1-\frac{k+1}{n})}{(n+r)^{k+1}(1-\frac{1}{n+r})\cdots(1-\frac{k-1}{n+r})}\\
+        &=\lim_{r\rightarrow\infty}r(1-\frac{1}{r})\frac{(r\rho)^k(1-\frac{1}{r\rho})\cdots(1-\frac{k+1}{r\rho})}{(r\rho+r)^{k+1}(1-\frac{1}{r\rho+r})\cdots(1-\frac{k-1}{r\rho+r})}\\
+        &=\lim_{r\rightarrow\infty}(1-\frac{1}{r})\frac{r^{k+1}\rho^k(1-\frac{1}{r\rho})\cdots(1-\frac{k+1}{r\rho})}{r^{k+1}(\rho+1)^{k+1}(1-\frac{1}{r\rho+r})\cdots(1-\frac{k-1}{r\rho+r})}\\
+        &=\frac{\rho^k}{(\rho+1)^{k+1}}
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 4}\\[5pt]
+    Recall that if $X$ and $Y$ are two real-valued random variables on the same probability space, we defined the {\it correlation coefficient of $X$ and $Y$} as $r(X,Y):=\frac{\Cov(X,Y)}{\sqrt{\Var(X)\Var{Y}}}$, provided $0<\Var(X),\Var(Y)<\infty$.
+    Prove the following theorem.
+    \begin{theorem}
+        Let $X$, $Y$ be two real-valued random variables defined on a probability space $(\Omega,\mc{F},P)$. Suppose that $X$ and $Y$ have finite, nonzero variances. Then
+        \begin{enumerate}
+            \item $|r(X,Y)|\leq 1$
+            \item If $|r(X,Y)|=1$ then $\exists a,b\in\mbb{R}:\;Y(\omega)=aX(\omega)+b$ for $P$-almost every $\omega\in\Omega$.
+        \end{enumerate}
+    \end{theorem}
+    \noindent{\bf Proof}\hspace{5pt}Let $t\in\mbb{R}$ and consider
+    \begin{align*}
+        0\leq\E((t(Y=\E(Y))+(X-\E(X)))^2)&=\E(t^2(Y-\E(Y))^2+2t(Y-\E(Y))(X-\E(X))+(X-\E(X))^2)\\
+        &=t^2\Var(Y)+2t\Cov(X,Y)+\Var(X)\tag{11}
+    \end{align*}
+    a nonnegative quadratic polynomial in $t$, which therefore has a nonpositive discriminant. That is,
+    \begin{align*}
+        4(\Cov(X,Y))^2-4\Var(Y)\Var(X)\leq 0\quad\Leftrightarrow\quad(\Cov(X,Y))^2\leq\Var(X)\Var(Y)\quad&\Leftrightarrow\quad|\Cov(X,Y)|\leq\sqrt{\Var(X)\Var(Y)}\\
+        &\Leftrightarrow\quad|r(X,Y)|\leq 1
+    \end{align*}
+    establishing part 1 of Theorem 1. For part 2, suppose $|r(X,Y)|=1$, so that $4(\Cov(X,Y))^2-4\Var(X)\Var(Y)=0$ and (11) has a single root of multiplicity two. Let $\hat{t}$ be this root. Then
+    \begin{align*}
+        \hat{t}=\frac{-2\Cov(X,Y)}{2\Var(Y)}=-\frac{\Cov(X,Y)}{\Var(Y)}.
+    \end{align*}
+    Evaluating the quadratic at this root, we find
+    \begin{align*}
+        0=\hat{t}^2\Var(Y)+2\hat{t}\Cov(X,Y)+\Var(X)=\E((\hat{t}(Y-\E(Y))+(X-\E(X)))^2)
+    \end{align*}
+    which can only hold if $\hat{t}(Y(\omega)-\E(Y(\omega)))+(X(\omega)-\E(X(\omega)))=0$ for $P$-almost every $\omega\in\Omega$. Then, isolating for $Y$
+    \[Y=-\frac{1}{\hat{t}}X+\frac{1}{\hat{t}}\E(X)+\E(Y)=\frac{\Var(Y)}{\Cov(X,Y)}X+\bp{\E(Y)-\frac{\Var(Y)}{\Cov(X,Y)}\E(X)}\]
+    where taking $a=\Var(Y)/\Cov(X,Y),\;b=\E(Y)-(\Var(Y)/\Cov(X,Y))\E(X)\in\mbb{R}$ we arrive at part 2 of Theorem 1.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 5}\\[5pt]
+    Suppose that $X$, $Y$ and $Z$ are three random variables defined on the same probability space, such that $r(X,Y)=0.7$ and $r(Y,Z)=0.8$. Find the smallest and largest possible
+    values of $r(X,Z)$.\\[5pt]
+    {\bf Solution}\hspace{5pt}
+    For indexing purposes, set $X_1=X$, $X_2=Y$ and $X_3=Z$. Next, let $\bs{X}=(X_1,X_2,X_3)^T$ be an $\mbb{R}^3$-valued random variable. We define $\E(\bs{X})=(\E(X_1),\E(X_2),\E(X_3))^T\in\mbb{R}^3$, and
+    the {\it covariance matrix} $\Cov(\bs{X},\bs{X})=\E((X-\E(X))(X-\E(X))^T)$, with $i,j$-th entry $(\Cov(\bs{X},\bs{X}))_{i,j}=\Cov(X_i,X_j)$ such that $\Cov(\bs{X},\bs{X})$ is symmetric with $j$-th diagonal entry $\Var(X_j)$, $1\leq i,j\leq 3$.
+    We will make use of the following two theorems to obtain the solution:
+    \begin{theorem}
+        Let $\Sigma$ be the covariance matrix corresponding to a random vector $\bs{Z}=(Z_1,\dots,Z_n)^T$, with $0<\Var(Z_i)<\infty$, $i=1,\dots,n$. Define $D=\diag(\Sigma)^{1/2}$, a nonsingular diagonal matrix with $i$-th diagonal entry $\Var(Z_i)^{1/2}$, $i=1,\dots,n$. Then $\Sigma$ and $D^{-1}\Sigma D^{-1}$ are positive semidefinite,
+        and the latter is called the correlation matrix of $\bs{Z}$.
+    \end{theorem}
+    \noindent{\bf Proof} See Appendix A.1.
+    \begin{theorem}[Generalized Sylvester's Criterion]
+        Let $A$ be a real, $n\times n$ symmetric matrix. Then $A$ is positive semi-definite if and only if all of its principle minors are nonnegative.
+    \end{theorem}
+    \noindent Instead of a proof, we refer the reader to [3] for an explanation of Theorem 3. For our application, letting $\Sigma=\Cov(\bs{X},\bs{X})$ and $D=\diag(\Sigma)^{-1/2}$, we have
+    \begin{align*}
+        D\Sigma D&=\begin{pmatrix}
+            \frac{1}{\sqrt{\Var(X_1)}} & 0 & 0\\
+            0 & \frac{1}{\sqrt{\Var(X_2)}} & 0\\
+            0 & 0 & \frac{1}{\sqrt{\Var(X_3)}}
+        \end{pmatrix}
+        \begin{pmatrix}
+            \Var(X_1) & \Cov(X_1,X_2) & \Cov(X_1,X_3)\\
+            \Cov(X_1,X_2) & \Var(X_2) & \Cov(X_2,X_3)\\
+            \Cov(X_1,X_3) & \Cov(X_2,X_3) & \Var(X_3)
+        \end{pmatrix}
+        \begin{pmatrix}
+            \frac{1}{\sqrt{\Var(X_1)}} & 0 & 0\\
+            0 & \frac{1}{\sqrt{\Var(X_2)}} & 0\\
+            0 & 0 & \frac{1}{\sqrt{\Var(X_3)}}
+        \end{pmatrix}\\
+        &=\begin{pmatrix}
+            1 & 0.7 & \rho \\
+            0.7 & 1 & 0.8 \\
+            \rho & 0.8 & 1
+        \end{pmatrix}\tag{12}
+    \end{align*}
+    with $\rho=r(X,Z)$, the correlation of interest. Since $D\Sigma D$ is a correlation matrix, it is positive semidefinite (Theorem 2), which equivalent to each of it's principle minors being nonnegative (Theorem 3).\\[5pt] All principle minors of (12) which are not a function of $\rho$ are clearly positive, so
+    we now need only for $\rho$ to satisfy
+    \[0\leq 1-\rho^2\quad \text{and}\quad 0\leq -\rho^2+2(0.7)(0.8)\rho+(1-(0.7)^2-(0.8)^2).\]
+    The second condition is a concave quadratic in $\rho$, so the condition holds when $\rho$ falls between the roots of the polynomial. By the quadratic formula, we find
+    \[0\leq -\rho^2+2(0.7)(0.8)\rho+(1-(0.7)^2-(0.8)^2)\quad\Leftrightarrow\quad\frac{28-3\sqrt{51}}{50}\leq\rho\leq\frac{28+3\sqrt{51}}{50}.\]
+    However, we have $\frac{28-3\sqrt{51}}{50}\approx 0.1315$ and $\frac{28+3\sqrt{51}}{50}\approx 0.9885$, so the first constraint, which requires $|\rho|\leq 1$ is satisfied. Thus,
+    $\rho=r(X,Z)$ can be at least $\frac{28-3\sqrt{51}}{50}\approx 0.1315$ and at most $\frac{28+3\sqrt{51}}{50}\approx 0.9885$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 6}\\[5pt]
+    The goal of this problem is to show that, in general, convergence in probability does not imply convergence almost surely. Let $(\Omega, \mathcal{F}, P)$ be the probability space where $\Omega=[0,1]$,
+    $\mathcal{F}$ is the borel $\sigma$-field and $P$ is the Lebesgue measure. Define the events $A_n\in\mathcal{F}$ for $n\geq  1$ as follows:
+    \begin{align*}
+        A_1&=[0,1],\\
+        A_2&=[0,\tfrac{1}{2}],\;A_3=[\tfrac{1}{2},1],\\
+        A_4&=[0,\tfrac{1}{3}],\;A_5=[\tfrac{1}{3},\tfrac{2}{3}],\;A_6=[\tfrac{2}{3},1],\\
+        A_7&=[0,\tfrac{1}{4}],\;A_8=[\tfrac{1}{4},\tfrac{2}{4}],\;A_9=[\tfrac{2}{4},\tfrac{3}{4}],\;A_{10}=[\tfrac{3}{4},1],\\
+        A_{11}&=[0,\tfrac{1}{5}],\;A_{12}=[\tfrac{1}{5},\tfrac{2}{5}],\dots
+    \end{align*}
+    Let $(X_n)_{n\geq 1}$ be random variables with $X_n=\1{A_n}$ for $n\geq 1$.\\[5pt]
+    {\bf a)} Show that $X_n\overset{P}{\longrightarrow} 0$ as $n\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix $\varepsilon>0$, but $\varepsilon<1$ (for otherwise the proof is trivial). Then observe that
+    \[\{\omega\in\Omega:|X_n(\omega)|>\varepsilon\}=\{\omega\in\Omega:\1{A_n}(\omega)>\varepsilon\}=A_n\]
+    so that we seek an expression for $P(A_n)$ in terms of $n$ which we can pass to the limit. For this, define the n-th {\it triangular number} $T(n):=\frac{n(n+1)}{2}=\sum_{k=1}^nk$ and observe that for $T(n)=\sum_{k=1}^nk< m\leq \sum_{k=1}^{n+1}k=T(n+1)$, we have
+    \[P(A_m)=\frac{i+1}{n+1}-\frac{i}{n+1}=\frac{1}{n+1}\]
+    for some $i=0,\dots,n$. We proceed by establishing a relationship between such an index $m$ and the largest triangular number less than it. This will allow us to measure any of the $A_i$ given only its index $i=1,2,\dots$ by the above observation.\\[5pt]
+    Consider the equation
+    \[\frac{x(x+1)}{2}-c=0\quad\Leftrightarrow\quad \frac{1}{2}x^2+\frac{1}{2}x-c=0\tag{13}\]
+    with $c\in\mbb{R}_+$. The discriminant of this quadratic is positive so that (13) admits exactly two solutions in $\mbb{R}$. Only one of these is nonnegative, so denoting it with $x^\ast$ we have $\frac{x^\ast(x^\ast+1)}{2}=c$. Thus, if $x^\ast\in\mbb{N}$ then $c=T(x^\ast)\in\mbb{N}$, so $c$ is the $x^\ast$-th triangular number.
+    Further, $T(\floor{x^\ast})\leq c$, and for any $n\in\mbb{N}$ with $n\leq\floor{x^\ast}$, $T(n)\leq T(\floor{x^\ast})$, since $T$ is increasing. That is, $T(\floor{x^\ast})$ is the largest triangular number $\leq c$. By the quadratic formula,
+    \begin{align*}
+        \floor{x^\ast}&=\floor{-\frac{1}{2}+\sqrt{\tfrac{1}{4}+2c}}=\floor{\frac{2\sqrt{\tfrac{1}{4}+2c}-1}{2}}=\floor{\frac{\sqrt{1+8c}-1}{2}}=:R(c)
+    \end{align*}
+    such that $T(R(c))$ is the largest triangular number $\leq c$ for any $c\in\mbb{R}_+$. Now that we are equipped with a means of relating indices of the $A_i$ to their Lebesgue measure, we can compute
+    \begin{align*}
+        \lim_{n\rightarrow\infty}P(A_n)=\lim_{n\rightarrow\infty}\frac{1}{R(n)+1}=\lim_{n\rightarrow\infty}\frac{1}{\floor{\frac{\sqrt{1+8n}-1}{2}}+1}&\leq\lim_{n\rightarrow\infty}\frac{2}{\sqrt{1+8n}-1}\tag{$\floor{x}>x-1\;\forall x\in\mbb{R}$}\\
+        &=0.
+    \end{align*}
+    Thus, we have that $\lim_{n\rightarrow\infty}P(|X_n-0|>\varepsilon)=0$ for arbitrary $\varepsilon>0$ and so $X_n\overset{P}{\longrightarrow} 0$ as $n\rightarrow\infty$.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Show that $(X_n)_{n\geq 1}$ does not converge to $0$ almost surely as $n\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix some $\varepsilon>0$, but with $\varepsilon<1$ (since otherwise the proof is trivial) and observe that 
+    \begin{align*}
+        \{\lim_{n\rightarrow\infty}Xn=0\}&=\{\omega\in\Omega:\forall\delta>0,\exists N\in\mbb{N}:n\geq N\Rightarrow |X_n(\omega)-0|<\delta\}\\
+        &\subset\{\omega\in\Omega:\exists N\in\mbb{N}:n\geq N\Rightarrow\1{A_n}<\varepsilon\}\\
+        &=\bigcup_{N\in\mbb{N}}\bigcap_{n\geq N}\{\omega\in\Omega:\1{A_n}<\varepsilon\}\\
+        &=\bigcup_{n\in\mbb{N}}\bigcap_{n\geq N}([0,1]\setminus A_n)\tag{$\1{A_n}(\omega)<1\Leftrightarrow \omega\in[0,1]\setminus A_n$}.
+    \end{align*}
+    Now, we proceed by restricting the inner intersection to a finite set of indices which 'sweep a row of the triangle'. Specifically, fix some $N\in\mbb{N}$ and consider $T(N)=\sum_{k=1}^Nk>N$. From the form of the sequence $\{A_i\}_{i\geq 1}$, we see that
+    for $\sum_{k=1}^Nk<m\leq\sum_{k=1}^{N+1}k$, $\exists\, 0\leq i\leq N$ so that $A_m=[\tfrac{i}{N+1},\tfrac{i+1}{N+1}]$, and the union of all such $A_m$ is $[0,1]$. Continuing from the above, we obtain
+    \begin{align*}
+        \bigcup_{n\in\mbb{N}}\bigcap_{n\geq N}([0,1]\setminus A_n)&\subset\bigcup_{n\in\mbb{N}}\bigcap_{k=T(N)+1}^{T(N+1)}([0,1]\setminus A_k)\tag{$N<T(N)+1\leq T(N+1)$}\\
+        &=\bigcup_{n\in\mbb{N}}\bp{[0,1]\setminus\bp{\bigcup_{k=T(N)+1}^{T(N+1)}A_k}}\tag{DeMorgan's Law}\\
+        &=\bigcup_{n\in\mbb{N}}\bp{[0,1]\setminus\bp{[0,\tfrac{1}{N+1}]\cup[\tfrac{1}{N+1},\tfrac{2}{N+1}]\cup\cdots\cup[\tfrac{N}{N+1},1]}}\\
+        &=\bigcup_{n\in\mbb{N}}\emptyset\\
+        &=\emptyset.
+    \end{align*}
+    Which completes the proof, since this gives us
+    \begin{align*}
+        P(\{\omega\in\Omega:\lim_{n\rightarrow\infty}X_n(\omega)=0\})\leq P(\emptyset)=0
+    \end{align*}
+    so $(X_n)_{n\geq 1}$ does not converge to $0$ almost surely as $n\rightarrow\infty$\hfill{$\qed$}\\[5pt]
+    {\bf c)} Show that there exists a subsequence $(n_\ell)_{\ell\geq 1}$ such that $X_{n_\ell}\overset{a.s.}{\longrightarrow}0$ as $\ell\rightarrow\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Define $(n_\ell)_{\ell\geq 1}$ with $n_\ell=T(\ell)$ for $\ell\geq 1$. Then, $\forall\ell\geq 1$, $A_{n_\ell}=A_{T(\ell)}=[\tfrac{\ell-1}{\ell},1]$. Then observe that
+    \begin{align*}
+        \{\omega\in\Omega:\forall\varepsilon>0,\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\varepsilon\}=\bigcap_{m=1}^\infty\{\omega\in\Omega:\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\tfrac{1}{m}\}\tag{14}
+    \end{align*}
+    which holds since, fixing an integer $m\geq 1$, if $\omega$ is an element of the left hand side, then $\exists N\in\mbb{N}$ so that $\ell\geq N$ implies that $|X_{n_\ell}(\omega)|<\tfrac{1}{m}$. Since this holds for arbitrary $m\geq 1$, $\omega$ is an element of the right hands side. For the reverse inclusion, fix $\varepsilon>0$
+    and observe that, by the Archimedean property of $\mbb{R}$, $\exists M\in\mbb{N}$ so that $0<\frac{1}{M}<\varepsilon$. But $\exists N\in\mbb{N}$ so that $\ell\geq N$ implies $|X_{n_\ell}(\omega)|<\tfrac{1}{M}<\varepsilon$, so $\omega$ is an element of the left hand side.\\[5pt]
+    Having shown (14), we press on to find
+    \begin{align*}
+        \bigcap_{m=1}^\infty\{\omega\in\Omega:\exists N\in\mbb{N}:\ell\geq N\Rightarrow|X_{n_\ell}(\omega)|<\tfrac{1}{m}\}&=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}\{\omega\in\Omega:\1{A_{k_\ell}}<\tfrac{1}{m}\}\\
+        &=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}([0,1]\setminus A_{n_\ell}).\tag{15}
+    \end{align*}
+    However, $[0,1]\setminus A_{n_i}\subset[0,1]\setminus A_{n_{i+1}}$ for any $i\geq 1$ such that for $N\in\mbb{N}$, $\cap_{\ell\geq N}([0,1]\setminus A_{n_\ell})=[0,1]\setminus A_{n_N}=[0,\tfrac{N-1}{N}]\nearrow[0,1]$ as $N\rightarrow\infty$.
+    But then (15) simplifies to 
+    \begin{align*}
+        \bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}\bigcap_{\ell\geq N}([0,1]\setminus A_{n_\ell})&=\bigcap_{m=1}^\infty\bigcup_{N\in\mbb{N}}[0,\tfrac{N-1}{N}]=\bigcap_{m=1}^\infty[0,1]=[0,1].
+    \end{align*}
+    so ultimately we have found for our choice of $(n_\ell)_{\ell\geq 1}$
+    \[P(\lim_{\ell\rightarrow\infty}X_{n_\ell}=0)=P([0,1])=1-0=1\]
+    so that the subsequence $X_{n_\ell}\overset{a.s.}{\longrightarrow}0$ as $\ell\rightarrow\infty$.\hfill{$\qed$}\\[5pt]
+    \begin{center}
+        {\bf Prelude to Problems 7 through 10}
+    \end{center}
+    In 1928, A.N. Kolmogorov published the following theorem providing necessary and sufficient conditions for the Weak Law of Large Numbers.
+    \begin{theorem}[Kolmogorov, 1928]
+        Let $(X_k)_{k\geq 1}$ be a sequence of mutually independent, zero mean, real-valued random variables. Let $X_{k,n}=X_k\1{|X_k|<n}$. Then
+        \[\frac{1}{n}\sum_{k=1}^nX_k\overunderset{P}{n\rightarrow\infty}{\longrightarrow} 0\]
+        if and only if the following three conditions are all satisfied:
+        \begin{enumerate}
+            \item $\sum_{k=1}^nP(|X_k|\geq n)\rightarrow 0\quad\text{as}\quad n\rightarrow\infty$
+            \item $\frac{1}{n}\sum_{k=1}^n\E(X_{k,n})\rightarrow 0\quad\text{as}\quad n\rightarrow\infty$
+            \item $\frac{1}{n^2}\sum_{k=1}^n\Var(X_{k,n})\rightarrow 0\quad\text{as}\quad n\rightarrow\infty$.
+        \end{enumerate}
+    \end{theorem}
+    \noindent In the same paper, Kolmogorov included, without a proof, a sharpened version of the above theorem where condition $3$ is replaced by
+    \begin{enumerate}
+        \setcounter{enumi}{3}
+        \item $\frac{1}{n^2}\sum_{k=1}^n\E(X_{n,k}^2)\rightarrow 0\quad\text{as}\quad n\rightarrow\infty$.
+    \end{enumerate}
+    The improved 'theorem' was 'proved' by B.V. Gnedenko and A.N. Kolmogorov in 1949. However, the result is false tnd their proof contained a smitake. The goal of the following four problems is to show, assuming Kolmogorov's corrent theorem, that conditions 1,2,4 
+    are not necessary for the Weak Law of Large Numbers to hold.\\[5pt]
+    As a specific counterexample, consider $(X_k)_{k\geq 1}$ mutually independent random variables such that
+    \begin{align*}
+        &P(X_1=0)=1\\
+        &P\bp{X_k=(-1)^kk^{5/2}}=\frac{1}{k^2},\quad P\bp{X_k=(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}}=1-\frac{1}{k^2}\quad\text{for}\quad k\geq 2.\tag{16}
+    \end{align*} 
+    {\bf Problem 7}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ as defined in (16) satisfies condition 1 of Kolmogorov's theorem.\\[5pt]
+    {\bf Proof}\hspace{5pt} First, observe that if $k<n^{2/5}$ then $k^{5/2}<n$ and so
+    \[0<\left|(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}\right|=\frac{k^{5/2}}{k^2-1}<k^{5/2}=\left|(-1)^kk^{5/2}\right|<n.\tag{17}\]
+    That is, $|X_k|>n$ with probability $0$ if $k\leq n^{2/5}$ since both of the values it can take are less than $n$ (and, of course, $X_1$ is always less than $n$). If instead $n^{2/5}\leq k\leq n$, then $n\leq k^{5/2}=|(-1)^kk^{5/2}|$, but still we have
+    \begin{align*}
+        \left|(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}\right|=\frac{k^{1/2}}{1-k^{-2}}=\frac{k^{5/2}}{k^2-1}< k^{1/2}<k\leq n\tag{18}
+    \end{align*}
+    so that $|X_k|\geq n$ only when $X_k=(-1)^kk^{5/2}$, which occurs with probability $\tfrac{1}{k^2}$. Thus, we have
+    \begin{align*}
+        \sum_{k=1}^nP(|X_k|\geq n)=\sum_{k=\ceil{n^{2/5}}}^n\frac{1}{k^2}<\sum_{k=\ceil{n^{2/5}}}^\infty\frac{1}{k^2}=\sum_{k=1}^\infty\frac{1}{k^2}-\sum_{k=1}^{\ceil{n^{2/5}}-1}\frac{1}{k^2}\overset{n\rightarrow\infty}{\longrightarrow}\sum_{k=1}^\infty\frac{1}{k^2}-\sum_{k=1}^\infty\frac{1}{k^2}=0
+    \end{align*}
+    admissable, since $\sum_{k=1}^\infty\tfrac{1}{k^2}<\infty$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 8}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ defined in $(16)$ satisfies condition $2$ of Kolmogorov's theorem.\\[5pt]
+    {\bf Proof}\hspace{5pt}From ($17$), we have that whenever $k\leq n^{2/5}$, $|X_k|<n$ w.p. $1$ so that $X_{n,k}=X_k$ w.p. $1$, in which case
+    \begin{align*}
+        \E(X_{k,n})=\E(X_k)=\frac{1}{k^2}(-1)^kk^{5/2}+(1-k^{-2})(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}=(-1)^k(k^{1/2}-k^{1/2})=0
+    \end{align*}
+    with $\E(X_{1,n})=0$ as well. Similarly, by ($18$), when $n^{2/5}\leq k\leq n$ we have
+    \begin{align*}
+        \E(X_{k,n})=0\frac{1}{k^2}+(1-k^{-2})(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}=(-1)^{k+1}k^{1/2}
+    \end{align*}
+    so that the sum of interest can be computed as follows:
+    \begin{align*}
+        \frac{1}{n}\sum_{k=1}^n\E(X_{k,n})=\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}^n(-1)^kk^{1/2}.
+    \end{align*}
+    Now, if this sum consists of an even number of terms, then using the fact that $\sqrt{s}-\sqrt{s-1}<\tfrac{1}{2\sqrt{s-1}}$ for $s>1$ we can write
+    \begin{align*}
+        \left|\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}^n(-1)^kk^{1/2}\right|=\frac{1}{n}\left|-\sqrt{\ceil{n^{2/5}}}+\sqrt{\ceil{n^{2/5}}+1}-\dots+\sqrt{n}\right|&<\frac{1}{2n}\bp{\frac{1}{\sqrt{\ceil{n^{2/5}}}}+\frac{1}{\sqrt{\ceil{n^{2/5}}+2}}+\dots+\frac{1}{\sqrt{n-1}}}\\
+        &<\frac{1}{2n}\sum_{k=1}^{n}\frac{1}{\sqrt{k}}\\
+        &<\frac{2\sqrt{n}}{2n}\tag{19}\\
+        &=\frac{1}{\sqrt{n}}
+    \end{align*}
+    which, of course, goes to zero as $n\rightarrow\infty$. In ($19$), we used the fact that $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$ (see Appendix A.1 for a proof). Alternatively, if the number of terms in the sum was odd then
+    \begin{align*}
+        \left|\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}(-1)^kk^{1/2}\right|=\frac{1}{n}\left|\sqrt{\ceil{n^{2/5}}}-\sqrt{\ceil{n^{2/5}}+1}+\dots,+\sqrt{n}\right|&<\frac{1}{2n}\bp{\frac{1}{\sqrt{\ceil{n^{2/5}}+1}}+\dots+\frac{1}{\sqrt{n-1}}}+\frac{1}{n}\sqrt{\ceil{n^{2/5}}}\\
+        &<\frac{1}{2n}\sum_{k=1}^n\frac{1}{\sqrt{k}}+\frac{1}{n}(n^{2/5}+1)^{1/2}\tag{$\ceil{x}<x+1\;\forall x\in\mbb{R}$}\\
+        &<\frac{1}{\sqrt{n}}+\frac{1}{n^{4/5}}\bp{1+\frac{1}{n^{2/5}}}^{1/2}
+    \end{align*}
+    which, again, uses the fact that $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$. But this latest expression also goes to zero as $n\rightarrow\infty$. In either case, we have that $\frac{1}{n}\sum_{k=1}^n\E(X_{k,n})\rightarrow 0$ as $n\rightarrow\infty$, and we are done.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 9}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ defined in (16) satisfies condition $3$ of Kolmogorov's theorem. Conclude that it obeys the Weak Law of Large Numbers.\\[5pt]
+    {\bf Proof}\hspace{5pt} As was found previously, when $2\leq k<n^{2/5}$ we have $\E(X_{k,n})=\E(X_k)=0$, so
+    \begin{align*}
+        \Var(X_{k,n})=\E(X_{k,n}^2)=\bp{(-1)^kk^{5/2}}^2\frac{1}{k^2}+\bp{(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}}^2(1-k^{-2})=k^3+\frac{k}{1-k^{-2}}<k^3+\frac{4}{3}k\leq 2k^3
+    \end{align*}
+    with $\Var(X_{1,n})=0$ trivially. If instead $n^{2/5}\leq k\leq n$, we previously showed that $\E(X_{k,n})=(-1)^{k+1}k^{1/2}$. With this, we compute
+    \begin{align*}
+        \Var(X_{k,n})=\E((X_{k,n}-(-1)^{k+1}k^{1/2})^2)&=\E(X_{k,n}^2-2(-1)^{k+1}k^{1/2}X_{k,n}+k)\\
+        &=\E(X_{k,n}^2)+2(-1)^{k+2}k^{1/2}\E(X_{k,n})+k\\
+        &=\bp{\frac{(-1)^{k+1}k^{1/2}}{1-k^{-2}}}^2(1-k^{-2})+2(-1)^{k+2}k^{1/2}(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}(1-k^{-2})+k\\
+        &=\frac{k}{1-k^{-2}}-2k+k\\
+        &=\frac{k}{1-k^{-2}}-k\\
+        &=\frac{1}{k(1-k^{-2})}\\
+        &\leq\frac{4}{3k}
+    \end{align*}
+    where we have used the hints provided in the last couple steps of both variance computations. We can proceed to bound the sum of interest from above.
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=1}^n\Var(X_{k,n})&\leq\frac{1}{n^2}\bp{\sum_{k=1}^{\ceil{n^{2/5}}-1}2k^3+\sum_{k=\ceil{n^{2/5}}}^n\frac{4}{3k}}\\
+        &=\frac{2}{n^2}\sum_{k=1}^{\ceil{n^{2/5}}-1}k^3+\frac{4}{3n^2}\sum_{k=\ceil{n^{2/5}}}^n\frac{1}{k}\\
+        &\leq \frac{2}{n^2}\bp{\frac{\bp{\ceil{n^{2/5}}-1}\bp{\ceil{n^{2/5}}}}{2}}^2+\frac{4}{3n^2}\sum_{k=1}^n\frac{1}{k}.
+    \end{align*}
+    At this point we need some elementary inequalities in order to complete the proof. First, let $x\geq1$. Then
+    \begin{align*}
+        (x-1)^2x^2=(x^2-2x+1)x^2=x^4-2x^3+x^2=x^4-x^2(2x-1)\leq x^4.\tag{20}
+    \end{align*}
+    Additionally, we have that $\tfrac{1}{k}\geq\tfrac{1}{x}\geq\tfrac{1}{k+1}$ for $x\in[k,k+1]$, so
+    \begin{align*}
+        \frac{1}{k}\geq\int_{k}^{k+1}\frac{dx}{x}\geq\frac{1}{k+1}\quad\Rightarrow\quad\frac{1}{k+1}\leq\log(k+1)-\log(k)\leq\frac{1}{k}\quad\Rightarrow\quad\sum_{k=2}^n\frac{1}{k}=\sum_{k=1}^{n-1}\frac{1}{k+1}\leq\log(n)\quad\Rightarrow\quad \sum_{k=1}^n\frac{1}{k}\leq\log(n)+1.\tag{21}
+    \end{align*}
+    With these we can pick up where we left off to find
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=1}^n\Var(X_{k,n})&\leq \frac{1}{2n^2}\ceil{n^{2/5}}^4+\frac{4}{3n^2}(\log(n)+1)\tag{by (20) and (21)}\\
+        &\leq \frac{1}{2n^2}(n^{2/5}+1)^4+\frac{4}{3n^2}\log(n)+\frac{4}{3n^2}\\
+        &\leq \frac{n^{8/5}}{2n^2}\bp{1+\frac{1}{n^{2/5}}}^4+\frac{4n}{3n^2}+\frac{4}{3n^2}\tag{$\log(n)\leq n$}\\
+        &=\frac{1}{2n^{2/5}}\bp{1+\frac{1}{n^{2/5}}}^4+\frac{4}{3n}+\frac{4}{3n^2}
+    \end{align*}
+    where now it is plain to see that each term goes to zero as $n\rightarrow\infty$, yielding the desired result.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 10}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ defined in (16) does not satisfy condition 4 of Kolmogorov's theorem.\\[5pt]
+    {\bf Proof}\hspace{5pt} As was shown previously for the case when $2\leq k<n^{2/5}$, we have
+    \[\E(X_{k,n}^2)=k^3+\frac{k}{1-k^{-2}}\]
+    and if instead we have $n^{2/5}\leq k\leq n$, then
+    \begin{align*}
+        \E(X_{k,n}^2)=0\cdot k^3+\frac{k}{1-k^{-2}}
+    \end{align*}
+    with, of course, $\E(X_{1,n}^2)=0$. Then, the sum of interest can be rewritten as follows:
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=1}^n\E(X_{n,k}^2)&=\frac{1}{n^2}\sum_{k=1}^{\ceil{n^{2/5}}-1}\E(X_{k,n}^2)+\frac{1}{n^2}\sum_{k=\ceil{n^{2/5}}}\E(X_{k,n}^2)\\
+        &=\frac{1}{n^2}\sum_{k=2}^{\ceil{n^{2/5}}-1}k^3+\frac{k}{1-k^{-2}}+\frac{1}{n^2}\sum_{k=\ceil{n^{2/5}}}^n\frac{k}{1-k^{-2}}\\
+    \end{align*}
+    where now, since $k^3>0$, $1-k^{-2}<1$ $\forall k\geq 2$, we can obtain a lower bound on the sum:
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=2}^{\ceil{n^{2/5}}-1}k^3+\frac{k}{1-k^{-2}}+\frac{1}{n^2}\sum_{k=\ceil{n^{2/5}}}^n\frac{k}{1-k^{-2}}
+        &>\frac{1}{n^2}\bp{\sum_{k=1}^{\ceil{n^{2/5}}-1}k+\sum_{k=\ceil{n^{2/5}}}^nk}\\
+        &=\frac{1}{n^2}\sum_{k=2}^nk\\
+        &=\frac{1}{n^2}\bp{T(n)-1}\\
+        &=\frac{n(n+1)}{2n^2}-\frac{1}{n^2}\\
+        &=\frac{1}{2}+\frac{1}{2n}-\frac{1}{n^2}
+    \end{align*}
+    which yields the result
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\frac{1}{n^2}\sum_{k=1}^n\E(X_{k,n}^2)>\lim_{n\rightarrow\infty}\bp{\frac{1}{2}+\frac{1}{2n}-\frac{1}{n^2}}=\frac{1}{2}>0.
+    \end{align*}
+    Overall we have found that the sequence of random variables $(X_n)_{n\geq 1}$ satisfies the Weak Law of Large Numbers, but does not satisfy condition 4 of Kolmogorov's theorem, verifying its unnecessity.\hfill{$\qed$}
+    \\[5pt]
+    \hrule
+    \begin{center}
+        {\bf\large Appendix}
+    \end{center}
+    {\bf A.1\hspace{5pt} Proofs of supplementary theorems}
+    
+    \begin{lemma}[Problem 2]
+        Let $([0,1],\mc{F},\lambda)$ be a probability space with $\lambda$ the Lebesgue measure. For a measurable set $A\in\mc{F}$, define $1-A:=\{1-a:a\in A\}$. Then $1-A\in\mc{F}$ and $\lambda(1-A)=\lambda(A)$.
+    \end{lemma}
+    \noindent{\bf Proof}\hspace{5pt} Consider the space $[0,1]\subset\mbb{R}$ equipped with the semiring $\mc{S}\subset 2^{[0,1]}$ given by the set of all intervals (open, half-open, closed). Let $\mu$ be the Lebesgue premeasure on the algebra generated by $([0,1],S)$.
+    Then $\lambda$ is in fact the {\it Lebesgue outer measure} defined by
+    \[\lambda(E)=\inf\left\{\sum_{i=1}^\infty\mu(B_i):\{B_i\}_{i=1}^\infty\subset \mc{S},\quad E\subset\bigcup_{i=1}^\infty U_i\right\}\] 
+    where the infimum is taken over the set of all at-most countable covers of $E$ in $\mc{S}$. Now, take some $A\in \mc{F}$. We first aim to show that $1-A$ is measurable. For this, define a function $f:([0,1],\mc{F})\rightarrow([0,1],\mc{F})$ by $f(x)=1-x$ for all $x\in[0,1]$. Clearly, $f$ is continuous, so
+    for any open set $U\subset[0,1]$, $f^{-1}(U)\subset[0,1]$ is open too, allowing us to conclude that $f$ is measurable (since it is measurable on the generating class of the Borel $\sigma$-algebra). But then $f^{-1}(A)=\{x\in[0,1]:1-x\in A\}=\{x\in[0,1]:x\in1-A\}=1-A$, so $1-A\in\mc{F}$.\\[5pt]
+    Next, let $\{A_i\}_{i=1}^\infty\subset\mc{S}$ be an arbitrary open cover of $A$. If $x\in1-A$, then $1-x\in A$, so $1-x\in A_k$, and further $x\in 1-A_k$ for some $k\in\mbb{N}$. Thus, $\{1-A_i\}_{i=1}^\infty$ is a cover of $1-A$. Taking $A_i=(a_i,b_i)$ for some $a_i\leq b_i\in[0,1]$, $i\in\mbb{N}$ (the openness of these is without loss of generality, since $\mu(A_i)$ does not depend on the type of interval $A_i$ is)
+    we have
+    \[\sum_{i=1}^\infty \mu(A_i)=\sum_{i=1}^\infty(b_i-a_i)=\sum_{i=1}^\infty (b_i-1+1-a_i)=\sum_{i=1}^\infty\mu((1-b_i,1-a_i))=\sum_{i=1}^\infty\mu(1-A_i)\]
+    so that $\lambda(1-A)\leq\lambda(A)$. For the reverse, let $\{B_i\}_{i=1}^\infty\subset\mc{S}$ be a cover of $1-A$. If $x\in A$ now, then $1-x\in1-A$, so $1-x\in B_k$ and further $x\in1-B_k$ for some $k\in\mbb{N}$. Thus $\{1-B_i\}_{i=1}^\infty\subset\mc{S}$ is a cover of $A$, and by precisely the same calculation as above we get $\lambda(A)\leq\lambda(1-A)$. Thus, $\lambda(A)=\lambda(1-A).$\hfill{$\qed$}\\[5pt]
+    \begin{theorem}[Chu's Theorem; Problem 3]
+        Let $n\geq r\geq 0$ be integers. Then
+        \[\sum_{j=0}^{n-r}\nck{r+j}{r}=\nck{n+1}{r+1}.\]    
+    \end{theorem}
+    \noindent{\bf Proof}\hspace{5pt} Fix some integer $r\geq 0$. Proceeding by induction on $n$, let $n=r$. Then
+    \[\sum_{j=0}^{n-r}\nck{r+j}{r}=\nck{r}{r}=\nck{r+1}{r+1}.\]
+    Now, suppose that the identity holds for some $n\geq r$. Then
+    \[\sum_{j=0}^{n+1-r}\nck{r+j}{r}=\nck{n+1-r+r}{r}+\sum_{j=0}^{n-r}\nck{r+j}{r}=\nck{n+1}{r}+\nck{n+1}{r+1}=\nck{n+2}{r+1}\]
+    where the last equality holds by Pascal's identity. By the principle of mathematical induction, the desired identity holds for all $n\geq r$, $r\geq0$ an arbitrary nonnegative integer.\hfill{$\qed$}\\[5pt]
+    {\bf Theorem 2} (Problem 5){\bf .} Covariance and correlation matrices are positive semidefinite.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $\bs{X}=(X_1,\dots,X_n)^T$ be a $\mbb{R}^n$-valued random variable on a probability space $(\Omega,\mc{F},P)$ where $0<\Var(X_i)<\infty$ for $i=1,\dots,n$. We first show that $\Sigma=\Cov(\bs{X},\bs{X})$ is positive semidefinite. For this, let $x\in\mbb{R}^n$, $x\neq 0$. Then
+    \begin{align*}
+        x^T\Sigma x&=\begin{pmatrix}
+            x_1 & \cdots & x_n
+        \end{pmatrix}
+        \begin{pmatrix}
+            x_1\Var(X_1)+\sum_{i\neq 1}\Cov(X_1,X_i)\\
+            \vdots\\
+            x_n\Var(X_n)+\sum_{i\neq n}\Cov(X_n,X_i)
+        \end{pmatrix}\\
+        &=\sum_{i=1}^nx_i^2\Var(X_i)+2\sum_{1\leq j<k\leq n}x_jx_k\Cov(X_j,X_k)\\
+        &=\Var\bp{\sum_{i=1}^nx_iX_i}\\
+        &\geq 0
+    \end{align*}
+    so, indeed, $\Sigma$ is positive semidefinite. Now define $D=\diag(\Sigma)^{1/2}$, the diagonal matrix with entries the square roots of the diagonal elements of $\Sigma$. Clearly $D$ is nonsingular since its diagonal entries are nonzero (i.e., the variances of the $X_i$).
+    Thus, taking $x\in\mbb{R}^n$ with $x\neq 0$, we get $0\neq D^{-1}x\in\mbb{R}^n$ and $x^TD^{-1}\Sigma D^{-1}x=(D^{-1}x)^T\Sigma D^{-1}x\geq 0$. Of course, $D^{-1}\Sigma D^{-1}$ is also symmetric, since $(D^{-1}\Sigma D^{-1})^T=(D^{-1})^T\Sigma^T (D^{-1})^T=D^{-1}\Sigma D^{-1}$, so 
+    the correlation matrix $D^{-1}\Sigma D^{-1}$ is positive semidefinite as well.\hfill{$\qed$}\\[5pt]
+    \begin{theorem}[Problem 8]
+        If $n\in\mbb{N}$, then $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$.
+    \end{theorem}
+    \noindent{\bf Proof}\hspace{5pt} Suppose $n=1$. Then $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}=1<2=2\sqrt{n}$. Now, suppose that $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$ holds for some $n\geq 1$. Then we have
+    \[\sum_{k=1}^{n+1}\frac{1}{\sqrt{k}}<2\sqrt{n}+\frac{1}{\sqrt{n+1}}\]
+    and
+    \[2\sqrt{n+1}-2\sqrt{n}=\frac{2}{\sqrt{n+1}+\sqrt{n}}>\frac{2}{2\sqrt{n+1}}=\frac{1}{\sqrt{n+1}}\quad\Rightarrow\quad 2\sqrt{n}+\frac{1}{\sqrt{n+1}}<2\sqrt{n+1}\]
+    as desired.\hfill{$\qed$}\\[5pt]
+    \begin{theorem}[Triangular Numbers, Sums of Cubes; Problem 6, 9]
+        Let $n\in\mbb{N}$. Then we have $\sum_{k=1}^nk=\tfrac{n(n+1)}{2}$ and $\sum_{k=1}^nk^3=\bp{\tfrac{(n)(n+1)}{2}}^2$. 
+    \end{theorem}
+    \noindent{\bf Proof} By induction. Let $n=1$. Then both
+    \begin{align*}    
+        \sum_{k=1}^nk=1=\frac{n(n+1)}{2}\quad\text{and}\quad\sum_{k=1}^nk^3=1=\bp{\frac{n(n+1)}{2}}^2.
+    \end{align*}
+    Now, suppose that both hold for some $n\geq 1$. Then
+    \begin{align*}
+        \sum_{k=1}^{n+1}k=n+1+\frac{n(n+1)}{2}=\frac{2(n+1)+n(n+1)}{2}=\frac{(n+1)(n+2)}{2}.
+    \end{align*}
+    Additionally, we have
+    \begin{align*}
+        \sum_{k=1}^{n+1}k^3=(n+1)^3+\bp{\frac{n(n+1)}{2}}^2=\frac{n^4+6n^3+13n^2+12n+4}{4}=\bp{\frac{n^2+3n+2}{2}}^2=\bp{\frac{(n+1)(n+2)}{2}}^2
+    \end{align*}
+    where we have ommitted the tedious, but elementary, intermediate steps. Thus, by the principle of mathematical induction, both equalities hold for and $n\in\mbb{N}$.\hfill{$\qed$}\\[5pt]
+    \hrule
+    \begin{center}
+        {\bf\large References}
+    \end{center}
+    1. L. Breiman, {\it A counterexample to a theorem of Kolmogorov}, Ann. Math. Stat. {\bf 28} (1957), no. 3, 811-814.\\[5pt]
+    2. Russel Merris, {\it Combinatorics}, Wiley-Interscience, Hoboken, New Jersey, 2003. \\[5pt]
+    3. J. Prussing, {\it The principle minor test for semidefinite matrices}, J. Guid. Control. Dyn. {\bf 9} (1986), no. 1, 121-122.
+\end{document}

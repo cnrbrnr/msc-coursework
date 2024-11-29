@@ -1,0 +1,329 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 2} \hfill {\bf Connor Braun} \hfill {\bf 2024-02-08}
+    \end{center}
+    \noindent{\bf Problem 2}\\[5pt]
+    Show that for a $p\times p$ matrix $A$ not depending on $x\in\mbb{R}^p$,
+    \begin{align*}
+        \frac{\partial x^TAx}{\partial x} =(A+A^T)x.
+    \end{align*}
+    {\bf Proof}\hspace{5pt}We may proceed directly. First, let us re-express the quadratic form to make computing the gradient
+    easier. For $1\leq i,j\leq p$, let us denote the $i,j$-th element of $A$ with $A_{i,j}$. Then, in excrutiating detail:
+    \begin{align*}
+        x^TAx=\begin{pmatrix}
+            x_1\cdots x_p
+        \end{pmatrix}\begin{pmatrix}
+            A_{1,1} & A_{1,2} & \cdots & A_{1, p}\\
+            A_{2,1} & A_{2,2} & \cdots & A_{2, p}\\
+            \vdots & \vdots & \ddots & \vdots\\
+            A_{p,1} & A_{p,2} & \cdots & A_{p,p}
+        \end{pmatrix}\begin{pmatrix}
+            x_1\\
+            \vdots\\
+            x_p
+        \end{pmatrix} &= \begin{pmatrix}
+            x_1,\dots x_p
+        \end{pmatrix}\begin{pmatrix}
+            A_{1,1}x_1+A_{1,2}x_2+\dots +A_{1,p}x_p\\
+            A_{2,1}x_1+A_{2,2}x_2+\dots+A_{2,p}x_p\\
+            \vdots\\
+            A_{p,1}x_1+A_{p,2}x_2+\dots+A_{p,p}x_p
+        \end{pmatrix}\\
+        &=\sum_{1\leq i,j\leq p}x_jA_{j,i}x_i\\
+        &=\sum_{i=1}^px_i^2A_{i,i}+\sum_{j=2}^p\sum_{i<j}x_jA_{j,i}x_i+\sum_{i=2}^p\sum_{j<i}x_jA_{j,i}x_i.
+    \end{align*}
+    From here, let us find the $k$th element of the gradient with $1\leq k\leq p$.
+    \begin{align*}
+        \frac{\partial x^TAx}{\partial x_k}&=\frac{\partial}{\partial x_k}\bp{\sum_{i=1}^px_i^2A_{i,i}}+\frac{\partial}{\partial x_k}\bp{\sum_{j=2}^p\sum_{i<j}x_jA_{j,i}x_i}+\frac{\partial}{\partial x_k}\bp{\sum_{i=2}^p\sum_{j<i}x_jA_{j,i}x_i}\\
+        &=2x_kA_{k,k}+\sum_{i<k}A_{k,i}x_i+\sum_{k<j}x_jA_{j,k}+\sum_{j<k}x_jA_{j,k}+\sum_{k<i}A_{k,i}x_i\\
+        &=\bp{A_{k,k}x_k+\sum_{i<k}A_{k,i}x_i+\sum_{k<i}A_{k,i}x_i}+\bp{A_{k,k}x_k+\sum_{k<j}x_jA_{j,k}+\sum_{j<k}x_jA_{j,k}}\\
+        &=\sum_{i=1}^pA_{k,i}x_i+\sum_{j=1}^px_jA_{j,k}.
+    \end{align*}
+    Thus, the full gradient vector is given by
+    \begin{align*}
+       \frac{\partial x^TAx}{\partial x}&=\begin{pmatrix}
+            \sum_{i=1}^pA_{1,i}x_i+\sum_{j=1}^px_jA_{j,1}\\
+            \sum_{i=1}^pA_{2,i}x_i+\sum_{j=1}^px_jA_{j,2}\\
+            \vdots \\
+            \sum_{i=1}^pA_{p,i}x_i+\sum_{j=1}^px_jA_{j,p}
+       \end{pmatrix} = Ax+A^Tx=(A+A^T)x
+    \end{align*}
+    as we intended to show.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 3}\\[5pt]
+    Let $W$ be a $p\times p$ symmetric matrix. Solve
+    \begin{align*}
+        \min_{\beta\in\mbb{R}^p}\left\{\sum_{i=1}^n(y_i-x_i^T\beta)^2+\beta^TW\beta\right\}.
+    \end{align*}
+    {\bf Solution}\hspace{5pt} Let $G(\beta):=\sum_{i=1}^n(y_i-x_i^T\beta)^2+\beta^TW\beta$ be the objective function. To minimize it, we identify it's (in this case unique) critical point, and use the Hessian to characterize the nature of this extrema. We can rewrite this function as 
+    \begin{align*}
+        G(\beta)&=(y-X\beta)^T(y-X\beta)+\beta^T W\beta=y^Ty-2y^TX\beta+\beta^TX^TX\beta+\beta^TW\beta
+    \end{align*}
+    with $X$ the design matrix and $y=(y_1,\dots y_n)^T$. Then, the gradient is simply
+    \begin{align*}
+        \frac{\partial G(\beta)}{\partial \beta}&=-2X^Ty+(X^TX+(X^TX)^T)\beta+(W+W^T)\beta\tag{by the previous problem}\\
+        &=-2X^Ty+2X^TX\beta+2W\beta\tag{since $W^T=W$}
+    \end{align*}
+    so that if $\hat{\beta}\in\mbb{R}^p$ is a critical point of $G$, then
+    \begin{align*}
+        0=\frac{\partial G(\beta)}{\partial\beta}\bigg|_{\hat{\beta}}&=-2X^Ty+2X^TX\hat{\beta}+2W\hat{\beta}\quad\Rightarrow\quad X^TX\hat{\beta}+W\hat{\beta}=X^Ty\quad\Rightarrow\quad(X^TX+W)\hat{\beta}=X^Ty\quad\Rightarrow\quad\hat{\beta}=(X^TX+W)^{-1}X^Ty
+    \end{align*}
+    provided $X^TX+W$ is nonsingular. Now, computing the Hessian matrix
+    \begin{align*}
+        \frac{\partial^2G(\beta)}{\partial\beta\partial\beta^T}&=2(X^TX+W)
+    \end{align*}
+    we have that for $u\in\mbb{R}^p$, $u\neq 0$
+    \[2u^T(X^TX+W)u=2(u^TX^TXu+u^TWu)=2((Xu)^TXu+u^TWu)=2(\|Xu\|^2+u^TWu)\geq u^TWu\]
+    which is non-negative for arbitrary such $u$ if and only if $W$ is positive semi-definite. Thus, $G$ is convex and $\hat{\beta}$ is the unique global minimum if and only if $W$ is positive semi-definite.
+    Taking this for granted, we further can state that $(X^TX+W)$ is nonsingular if either $X^TX$ or $W$ is strictly positive definite (such that the eigenvalues of $X^TX+W$ are all positive, and in particular nonzero).\hfill{$\qed$}\\[5pt]
+    {\bf Problem 4}\\[5pt]
+    Show that for the problem 
+    \[\min_{\beta\in\mbb{R}^3}\sum_{i=1}^n\bp{y_i-\sum_{m=1}^3\beta_mh_m(x_i)}^2,\]
+    where $h_1(X)=\1{X<\xi_1}$, $h_2(X)=\1{\xi_1\leq X<\xi_2}$ and $h_3(X)=\1{\xi_2\leq X}$, the minimizer is
+    \[\hat{f}(X)=\sum_{m=1}^3\bar{Y}_mh_m(X)\]
+    where $\hat{Y}_m$ is the average of all the response $y_i$'s in the $m$-th interval.\\[5pt]
+    {\bf Solution}\hspace{5pt} This problem can be solved by taking the standard least squares approach. Specifically, we shall optimize an arbitrary element of $\beta$, call it
+    $\beta_i$ with $i\in\{1,2,3\}$.
+    \begin{align*}
+        \frac{\partial}{\partial\beta_i}\sum_{j=1}^n\bp{y_j-\sum_{m=1}^3\beta_mh_m(x_j)}^2&=\sum_{j=1}^n2\bp{y_j-\sum_{m=1}^3\beta_mh_m(x_j)}h_{i}(x_j)\\
+    \end{align*} 
+    where if $\hat{\beta}$ is a critical point, then
+    \begin{align*}
+        \sum_{j=1}^ny_jh_i(x_j)=\sum_{j=1}^n\hat{\beta}_1h_1(x_j)h_i(x_j)+\hat{\beta}_2h_2(x_j)h_i(x_j)+\hat{\beta}_3h_3(x_j)h_i(x_j)=\sum_{j=1}^n\hat{\beta}_ih_i(x_j)
+    \end{align*}
+    with the final equality holding since $h_i(X)h_j(X)=0$ $\forall X$ if $i\neq j$ (because the regions between the knots are disjoint) and $h_i(X)^2=h_i(X)$ for $i=1,2,3$. Now, let $J_i:=\{1\leq j\leq n: h_i(x_j)=1\}$, with $|J_i|:=n_i$. With this, we can see that
+    \begin{align*}
+        \sum_{j=1}^n\hat{\beta}_ih_i(x_j)&=\sum_{j=1}^ny_jh_i(x_j)\quad\Leftrightarrow\quad \sum_{j\in J_i}\hat{\beta}_i=\sum_{j\in J_i}y_j\quad\Leftrightarrow\quad \hat{\beta}_i=\frac{1}{n_i}\sum_{j\in J_i}y_j=\bar{Y}_i
+    \end{align*}
+    which is precisely the average of all response $y_j$'s on the $i$th interval. But this holds for arbitrary $i=1,2,3$, so we have that $\hat{\beta}_m=\bar{Y}_m$ for $m=1,2,3$, and further
+    \begin{align*}
+        \hat{f}(X)=\sum_{m=1}^3\bar{Y}_mh_m(X)
+    \end{align*} 
+    and we are finished.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 5}\\[5pt]
+    Show that the following form a basis for the space of cubic splines with one interior knot at $\xi$:
+    \begin{align*}
+        h_1(x)=1,\quad h_2(x)=x,\quad h_3(x)=x^2,\quad h_4(x)=x^3,\quad h_5(x)=(x-\xi)^3_+.
+    \end{align*}
+    {\bf Proof}\hspace{5pt} First, let $(\gamma_i)_{i=1}^5$ with $\gamma_i\in\mbb{R}$ for $i=1,\dots,5$ specify a linear combination of our basis functions such that
+    \begin{align*}
+        g(x)=\gamma_1+\gamma_2x+\gamma_3x^2+\gamma^4x^3+\gamma^5(x-\xi)_+^3=\begin{cases}
+            \gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3,\quad&\text{if $x<\xi$}\\
+            \gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3+\gamma_5(x-\xi)^3,\quad&\text{if $\xi\leq x$}
+        \end{cases}
+    \end{align*}
+    with $g$ clearly a piecewise-defined cubic polynomial on either side of $\xi$. We can also show this is indeed a spline by verifying the necessary continuity conditions
+    \begin{align*}
+        g(\xi^-)&=\lim_{x\rightarrow\xi^-}(\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3)=\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3=\lim_{x\rightarrow\xi^+}(\gamma_1+\gamma_2x+\gamma_3x^2+\gamma_4x^3+\gamma_5(x-\xi)^3_+)=g(\xi^+)\\
+        g^{\prime}(\xi^-)&=\lim_{x\rightarrow\xi^-}(\gamma_2+2\gamma_3x+3\gamma_4x^2)=\gamma_2+2\gamma_3x+3\gamma_4x^2=\lim_{x\rightarrow\xi^+}(\gamma_2+2\gamma_3x+3\gamma_4x^2+3\gamma_5(x-\xi)^2)=g^\prime(\xi^+)\\
+        g^{\prime\prime}(\xi^-)&=\lim_{x\rightarrow\xi^-}(2\gamma_3+6\gamma_4x)=2\gamma_3+6\gamma_4x=\lim_{x\rightarrow\xi^+}(2\gamma_3+6\gamma_4x+6\gamma_5(x-\xi))=g(\xi^+)
+    \end{align*} 
+    so any real linear combination of the basis functions produces a cubic spline with a single knot at $\xi$. Conversely, consider a cubic spline defined by
+    \begin{align*}
+        f(x)=\begin{cases}
+            \alpha_0+\alpha_1x+\alpha_2x^2+\alpha_3x^3,\quad&\text{if $x<\xi$}\\
+            \beta_0+\beta_1x+\beta_2x^2+\beta_3x^3,\quad&\text{if $x\geq \xi$}
+        \end{cases}\quad\text{satisfying}\quad\begin{cases}
+            \alpha_0+\alpha_1\xi+\alpha_2\xi^2\alpha_3\xi^3=\beta_3\xi^3+\beta_2\xi^2+\beta_1\xi+\beta_0\quad&\text{(1)}\\
+            \alpha_1+2\alpha_2\xi+3\alpha_3\xi^2=3\beta_3\xi^2+2\beta_2\xi+\beta_1\quad&\text{(2)}\\
+            2\alpha_2+6\alpha_3\xi=6\beta_3\xi+2\beta_2\quad&\text{(3)}
+        \end{cases}
+    \end{align*}
+    now we set $g(x)=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x-\xi)^3_+$, and solve for the coefficients $\gamma_i$, $i=0,1,\dots,4$ so that $g\equiv f$. First, observe that when $x<\xi$ we have
+    $g(x)=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3$, so we require that $\gamma_i=\alpha_i$ for $i=0,1,2,3$. When instead we have $x\geq \xi$, then
+    \begin{align*}
+        g(x)&=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x-\xi)^3\\
+        &=\gamma_0+\gamma_1x+\gamma_2x^2+\gamma_3x^3+\gamma_4(x^3-3\xi x^2+3\xi^2x-\xi^3)\\
+        &=(\gamma_3+\gamma_4)x^3+(\gamma_2-3\gamma_4\xi)x^2+(\gamma_1+3\gamma_4\xi^2)x+(\gamma_0-\gamma_4\xi^3)\\
+        &=(\alpha_3+\gamma_4)x^3+(\alpha_2-3\gamma_4\xi)x^2+(\alpha_1+3\gamma_4\xi^2)x+(\alpha_0-\gamma_4\xi^3).
+    \end{align*}
+    This produces the overspecified system of equations
+    \begin{align*}
+        \begin{cases}
+            \beta_3=\alpha_3+\gamma_4\\
+            \beta_2=\alpha_2-3\gamma_4\xi\\
+            \beta_1=\alpha_1+3\gamma_4\xi^2\\
+            \beta_0=\alpha_0-\gamma_4\xi^3
+        \end{cases}
+    \end{align*}
+    the solution to which is obtained by setting $\gamma_4=\beta_3-\alpha_3$. To see that this is in fact the solution, observe that it satisfies the first equation trivially, and for the second we have
+    \begin{align*}
+        \beta_2=\alpha_2-3\gamma_4\xi^2\quad\Rightarrow\quad 3\gamma_4\xi=\alpha_2-\beta_2=3\beta_3\xi-3\alpha_3\xi=3(\beta_3-\alpha_3)\xi.\tag{4}
+    \end{align*}
+    Where we used constraint (3) for the second last equality in (4). Similarly, the third equation implies that $3\gamma_3\xi^2=\beta_1-\alpha_1$, and so
+    \begin{align*}
+        3\gamma_4\xi^2=\beta_1-\alpha_1&=2\alpha_2\xi+3\alpha_3\xi^2-3\beta_3\xi^2-2\beta_2\xi\tag{by (2)}\\
+        &=2(\alpha_2-\beta_2)\xi+3(\alpha_3-\beta_3)\xi^2\\
+        &=6(\beta_3-\alpha_3)\xi^2-3(\beta_3-\alpha_3)\xi^2\tag{by (4)}\\
+        &=3(\beta_3-\alpha_3)\xi^2.\tag{5}
+    \end{align*}
+    Lastly, from the fourth equation we get that $\gamma_4\xi^3=\alpha_0-\beta_0$, and so
+    \begin{align*}
+        \gamma_4\xi^3=\alpha_0-\beta_0&=\beta_3\xi^3+\beta_2\xi^2+\beta_1\xi-\alpha_3\xi^3-\alpha_2\xi^2-\alpha_1\xi\\
+        &=(\beta_3-\alpha_3)\xi^3+(\beta_2-\alpha_2)\xi^2+(\beta_1-\alpha_1)\xi\\
+        &=(\beta_3-\alpha_3)\xi^3-3(\beta_3-\alpha_3)\xi^3+3(\beta_3-\alpha_3)\xi^3\tag{by (4) and (5)}\\
+        &=(\beta_3-\alpha_3)\xi^3.\tag{6}
+    \end{align*}
+    Examining (4), (5), and (6) we see that $\gamma_4=\beta_3-\alpha_3$ satisfies all members of the system of equations. Thus, setting
+    \begin{align*}
+        g(x)=\alpha_0+\alpha_1x+\alpha_2x^2\alpha_3x^3+(\beta_3-\alpha_3)(x-\xi)^3_+\quad\Rightarrow\quad g\equiv f.
+    \end{align*}
+    The coefficients $\beta_i$, $i=0,1,2$ do not appear in our truncated-power basis representation of $f$ since $f$ is overspecified. That is, we only need five parameters to
+    specify a cubic spline with a single interior knot in the first place.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 6}\\[5pt]
+    Consider the truncated-power series representation for cubic splines with $K$ knotes $\xi_1<\dots<\xi_K$. Let
+    \[f(x)=\sum_{j=0}^3\beta_jx^j+\sum_{k=1}^K\theta_k(x-\xi_k)^3_+\tag{1}\]
+    {\bf a)}\hspace{5pt} Prove that the natural boundary conditions for natural cubic splines imply the following linear constraints on the coefficients:
+    \begin{align*}
+        \beta_2=0,\quad\beta_3=0,\tag{2}\\
+        \sum_{i=1}^K\theta_i=0,\quad\sum_{i=1}^K\xi_i\theta_i=0\tag{3}.
+    \end{align*}
+    {\bf Proof}\hspace{5pt} First, notice that when $x<\xi_1$ we have $f(x)=\sum_{j=1}^3\beta_jx^j$. However, the natural boundary conditions require that $f^{\prime\prime}(x)=0$ for all $x<\xi_1$ too, so now
+    \begin{align*}
+        f^{\prime\prime}(x)=2\beta_2+6\beta_3x=0\quad\Leftrightarrow\quad 2\beta_2=-6\beta_3x
+    \end{align*}
+    which holds $\forall x<\xi_1$, so it must be the case that $\beta_2=\beta_3=0$. Similarly, when $x>\xi_K$, $f$ is linear so $f^{\prime\prime}(x)=0$. This, along with the finding that $\beta_2=\beta_3=0$ gives us
+    \begin{align*}
+        f^{\prime\prime}(x)=6\sum_{i=1}^K\theta_i(x-\xi_i)=0\quad\Leftrightarrow\quad 6x\sum_{i=1}^K\theta_i=6\sum_{i=1}^K\theta_i\xi_i
+    \end{align*}
+    where, again, since this must hold $\forall x>\xi_K$, it must be the case that $\sum_{i=1}^K\theta_i=\sum_{i=1}^K\theta_i\xi_i=0$.\hfill{$\qed$}\\[5pt]
+    {\bf b)}\hspace{5pt} Define 
+    \[N_1(x)=1,\quad N_2(x)=x,\quad N_{i+2}(x)=d_i(x)-d_{K-1}(x),\quad i=1,\dots,K-2,\]
+    where 
+    \[d_i(x)=\frac{(x-\xi_i)^3_+-(x-\xi_K)^3_+}{\xi_K-\xi_i}\quad i=1,2,\dots, K-2.\]
+    First, show that $g(x)=\sum_{i=1}^K\theta_iN_i(x)$ is a natural cubic spline. Then, show that if $f$ has form (1) and satisfies (2) and (3) then it can be written as
+    \[\beta_0N_1(x)+\beta_1N_2(x)+\sum_{i=1}^{K-2}(\xi_K-\xi_i)\theta_iN_{i+2}(x).\tag{4}\]
+    Conclude that $N_1,\dots N_K$ is a set of basis functions for the natural cubic spline with respect to knots $\xi_1,\dots,\xi_K$. \\[5pt]
+    {\bf Proof}\hspace{5pt} First we shall show that $g$ satisfies the natural boundary conditions. When $x<\xi_1$, we have $d_i(x)=0$ for $i=1,2,\dots,K-1$, so $N_i(x)=0$ for $i=3,\dots,K$ and thus
+    \begin{align*} 
+        g(x)=\theta_1+\theta_2x
+    \end{align*}
+    which is linear. Now, letting $x>\xi_K$, we have that for $m=3,\dots,K$
+    \begin{align*}
+        N_m^{\prime\prime}(x)&=\frac{1}{\xi_K-\xi_m}\bp{6(x-\xi_m)-6(x-\xi_K)}-\frac{1}{\xi_K-\xi_{K-1}}\bp{6(x-\xi_{K-1})-6(x-\xi_K)}\\
+        &=6\bp{\frac{\xi_K-\xi_m}{\xi_K-\xi_m}}-6\bp{\frac{\xi_K-\xi_{K-1}}{\xi_K-\xi_{K-1}}}\\
+        &=0
+    \end{align*}
+    and
+    \begin{align*}
+        N^{\prime\prime\prime}(x)&=\frac{1}{\xi_{K}-\xi_m}(6-6)-\frac{1}{\xi_K-\xi_{K-1}}(6-6)=0
+    \end{align*}
+    so it must be that $g(x)$ is linear when $x>\xi_K$. It is easy to see that $g$ is a cubic polynomial piecewise defined between each of the knots, since for $x\in[\xi_m,\xi_{m+1}]$, with $m=1,\dots,K-2$,
+    \begin{align*}
+        g(x)=\sum_{i=1}^K\theta_iN_i(x)=\theta_1+\theta_2x+\sum_{i=3}^{m+2}\theta_i\bp{\frac{(x-\xi_{i-2})^3}{\xi_K-\xi_{i-2}}}
+    \end{align*}
+    similarly, for $x\in[\xi_{K-1},\xi_K]$,
+    \begin{align*}
+        g(x)=\theta_1+\theta_2x+\sum_{i=3}^{K}\theta_i\bp{\frac{(x-\xi_{i-2})^3}{\xi_K-\xi_{i-2}}-\frac{(x-\xi_{K-1})^3}{\xi_K-\xi_{K-1}}}
+    \end{align*}
+    and finally for $x\in [\xi_{K},\infty)$
+    \begin{align*}
+        g(x)&=\theta_1+\theta_2x+\sum_{i=3}^K\theta_i\bp{\frac{(x-\xi_{i-2})^3-(x-\xi_K)^3}{\xi_K-\xi_{i-2}}-\frac{(x-\xi_{K-1})^3-(x-\xi_K)^3}{\xi_K-\xi_{K-1}}}
+    \end{align*}
+    all three of which are linear combinations of cubic polynomials and so are themselves cubic polynomials, as claimed. It only remains to show that $g$ satisfies the continuity conditions at each of the knots. 
+    Showing this is straightforward but exceptionally tedious, given how the functional form of $g$ varies over its domain. We compute
+    \begin{align*}
+        \lim_{x\rightarrow\xi_1^-}g(x)&=\lim_{x\rightarrow\xi_1^-}\theta_1+\theta_2x=\theta_1+\theta_2\xi_1\\
+        \lim_{x\rightarrow\xi_1^-}g^\prime(x)&=\lim_{x\rightarrow\xi_1^-}\theta_2=\theta_2
+    \end{align*}
+    whereby the natural boundary condition we have $\lim_{x\rightarrow\xi_1^-}g^{\prime\prime}(x)=0$. For notational expediency, in what follows we adopt the convention that sums with final indices smaller than initial indices are equal to $0$. Letting $i=1,2\dots,K-2$:
+    \begin{align*}
+        \lim_{x\rightarrow\xi_i^+}g(x)&=\lim_{x\rightarrow\xi_i^+}\theta_1+\theta_2x+\sum_{j=3}^{i+2}\theta_j\bp{\frac{(x-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}}=\theta_1+\theta_2\xi_i+\sum_{j=3}^{i+1}\theta_j\bp{\frac{(\xi_i-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_i^+}g^\prime(x)&=\lim_{x\rightarrow\xi_i^+}\theta_2+\sum_{j=3}^{i+2}\theta_j\bp{\frac{3(x-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}}=\theta_2+\sum_{j=3}^{i+1}\theta_j\bp{\frac{3(\xi_i-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_i^+}g^{\prime\prime}(x)&=\lim_{x\rightarrow\xi_i^+}\sum_{j=3}^{i+2}\theta_j\bp{\frac{6(x-\xi_{j-2})}{\xi_K-\xi_{j-2}}}=\sum_{j=3}^{i+1}\theta_j\bp{\frac{6(\xi_i-\xi_{j-2})}{\xi_K-\xi_{j-2}}}\\
+    \end{align*}
+    where in the limit, the final term of the sums vanishes since $\xi_{i}-\xi_{i+2-2}=0$. In particular (and recalling our convention for sums with inadmissable indices) we can now see that when $i=1$, $\lim_{x\rightarrow\xi_i^-}g^{(m)}(x)=\lim_{x\rightarrow\xi_i^+}g^{(m)}(x)$ for $m=0,1,2$. Next, for $i=2,3,\dots,K-1$ we have
+    \begin{align*}
+        \lim_{x\rightarrow\xi_i^-}g(x)&=\lim_{x\rightarrow\xi_i^-}\theta_1+\theta_2x+\sum_{j=3}^{i+1}\theta_j\bp{\frac{(x-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}}=\theta_1+\theta_2\xi_i+\sum_{j=3}^{i+1}\theta_j\bp{\frac{(\xi_i-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_i^-}g^\prime(x)&=\lim_{x\rightarrow\xi_i^-}\theta_2+\sum_{j=3}^{i+1}\theta_j\bp{\frac{3(x-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}}=\theta_2+\sum_{j=3}^{i+1}\theta_j\bp{\frac{3(\xi_i-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_i^-}g^{\prime\prime}(x)&=\lim_{x\rightarrow\xi_i^-}\sum_{j=3}^{i+1}\theta_j\bp{\frac{6(x-\xi_{j-2})}{\xi_K-\xi_{j-2}}}=\sum_{j=3}^{i+1}\theta_j\bp{\frac{6(\xi_i-\xi_{j-2})}{\xi_K-\xi_{j-2}}}\\
+    \end{align*}
+    so now the necessary continuity conditions $\lim_{x\rightarrow\xi_i^-}g^{(m)}(x)=\lim_{x\rightarrow\xi_i^+}g^{(m)}(x)$ are verified on knots $i=1,2,\dots,K-2$ and for $m=0,1,2$. Now, on the interval $[\xi_{K-1},\xi_K]$:
+    \begin{align*}
+        \lim_{x\rightarrow\xi_{K-1}^+}g(x)&=\lim_{x\rightarrow\xi_{K-1}^+}\theta_1+\theta_2x+\sum_{j=3}^K\theta_j\bp{\frac{(x-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}-\frac{(x-\xi_{K-1})^3}{\xi_K-\xi_{K-1}}}=\theta_1+\theta_2\xi_{K-1}+\sum_{j=3}^K\theta_j\bp{\frac{(\xi_{K-1}-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_{K-1}^+}g^\prime(x)&=\lim_{x\rightarrow\xi_{K-1}^+}\theta_2+\sum_{j=3}^K\theta_j\bp{\frac{3(x-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}-\frac{3(x-\xi_{K-1})^2}{\xi_K-\xi_{K-1}}}=\theta_2+\sum_{j=3}^K\theta_j\bp{\frac{3(\xi_{K-1}-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}}\\
+        \lim_{x\rightarrow\xi_{K-1}^+}g^{\prime\prime}(x)&=\lim_{x\rightarrow\xi_{K-1}^+}\sum_{j=3}^K\theta_j\bp{\frac{6(x-\xi_{j-2})}{\xi_K-\xi_{j-2}}-\frac{6(x-\xi_{K-1})}{\xi_K-\xi_{K-1}}}=\sum_{j=3}^K\theta_j\bp{\frac{6(\xi_{K-1}-\xi_{j-2})}{\xi_K-\xi_{j-2}}}\\
+    \end{align*}
+    where now with the previous set of limits we can observe that $\lim_{x\rightarrow\xi_{K-1}^-}g^{(m)}(x)=\lim_{x\rightarrow\xi_{K-1}^+}g^{(m)}(x)$ for $m=0,1,2$. Now, for the final knot: 
+    \begin{align*}
+        \lim_{x\rightarrow\xi_{K}^-}g(x)&=\lim_{x\rightarrow\xi_{K}^-}\theta_1+\theta_2x+\sum_{j=3}^K\theta_j\bp{\frac{(x-\xi_{j-2})^3}{\xi_K-\xi_{j-2}}-\frac{(x-\xi_{K-1})^3}{\xi_K-\xi_{K-1}}}=\theta_1+\theta_2\xi_{K}+\sum_{j=3}^K\theta_j\bp{(\xi_{K}-\xi_{j-2})^2-(\xi_K-\xi_{K-1})^2}\\
+        \lim_{x\rightarrow\xi_{K}^-}g^\prime(x)&=\lim_{x\rightarrow\xi_{K}^-}\theta_2+\sum_{j=3}^K\theta_j\bp{\frac{3(x-\xi_{j-2})^2}{\xi_K-\xi_{j-2}}-\frac{3(x-\xi_{K-1})^2}{\xi_K-\xi_{K-1}}}=\theta_2+\sum_{j=3}^K\theta_j\bp{3(\xi_{K}-\xi_{j-2})-3(\xi_K-\xi_{K-1})}\\
+        \lim_{x\rightarrow\xi_{K}^-}g^{\prime\prime}(x)&=\lim_{x\rightarrow\xi_{K}^-}\sum_{j=3}^K\theta_j\bp{\frac{6(x-\xi_{j-2})}{\xi_K-\xi_{j-2}}-\frac{6(x-\xi_{K-1})}{\xi_K-\xi_{K-1}}}=\sum_{j=3}^K\theta_j\bp{6-6}=0\\
+    \end{align*}
+    checking the right-continuity of the functions at $\xi_K$, we once again need only check up to the first derivative since we know $g$ satisfies the natural boundary conditions. That is, 
+    \begin{align*}
+        \lim_{x\rightarrow\xi_K^+}g(x)&=\lim_{x\rightarrow\xi_K^+}\theta_1+\theta_2x+\sum_{j=3}^K\theta_j\bp{\frac{(x-\xi_{j-2})^3-(x-\xi_K)^3}{\xi_K-\xi_{j-2}}-\frac{(x-\xi_{K-1})^3-(x-\xi_K)^3}{\xi_K-\xi_{K-1}}}\\
+        &=\theta_1+\theta_2\xi_{K}+\sum_{j=3}^K\theta_j\bp{(\xi_{K}-\xi_{j-2})^2-(\xi_K-\xi_{K-1})^2}\\
+        \lim_{x\rightarrow\xi_K^+}g^\prime(x)&=\lim_{x\rightarrow\xi_K^+}\theta_2+\sum_{j=3}^K\theta_j\bp{\frac{3(x-\xi_{j-2})^2-3(x-\xi_K)^2}{\xi_K-\xi_{j-2}}-\frac{3(x-\xi_{K-1})^2-3(x-\xi_K)^2}{\xi_K-\xi_{K-1}}}\\
+        &=\theta_2+\sum_{j=3}^K\theta_j\bp{3(\xi_{K}-\xi_{j-2})-3(\xi_K-\xi_{K-1})}
+    \end{align*}
+    so, at long last, we have shown finally that $\lim_{x\rightarrow\xi_K^-}g^{(m)}(x)=\lim_{x\rightarrow\xi_K^+}g^{(m)}(x)$ for $m=0,1,2$. Since $g$ is a piecewise defined cubic polynomial satisfying the natural boundary conditions and has continuous derivatives up to second order, $g$
+    is a natural cubic spline.\\[5pt]
+    Next, we show that a function $f$ of the form specified in (1) satisfying (2) and (3) can be written as (4). Specifically, we have $\beta_2=\beta_3=0$ and $\sum_{j=1}^K\theta_j=\sum_{j=1}^K\theta_j\xi_j=0$, and so find
+    \begin{align*}
+        f(x)=\sum_{j=1}^3\beta_jx^j+\sum_{i=1}^K\theta_i(x-\xi_i)^3_+=\beta_0+\beta_1x+\sum_{i=1}^K\theta_i(x-\xi_i)^3_+=\beta_0N_1(x)+\beta_1N_2(x)+\sum_{i=1}^K\theta_i(x-\xi_i)^3_+
+    \end{align*}
+    so that we need only analyze the sum $\sum_{i=1}^K\theta_i(x-\xi_i)^3_+$. Fixing some $1\leq i\leq K$, we can write
+    \begin{align*}
+        \theta_i(x-\xi_i)^3_+&=\theta_i(\xi_K-\xi_i)\bp{\frac{(x-\xi_i)^3_+}{\xi_K-\xi_i}-\frac{(x-\xi_K)^3_+}{\xi_K-\xi_{i}}+\frac{(x-\xi_K)^3_+}{\xi_K-\xi_i}}\\
+        &=\theta_i(\xi_K-\xi_i)\bp{\frac{(x-\xi_i)^3_+-(x-\xi_K)^3_+}{\xi_K-\xi_i}-\frac{(x-\xi_{K-1})^3_+-(x-\xi_K)^3_+}{\xi_K-\xi_{K-1}}+\frac{(x-\xi_K)^3_+}{\xi_K-\xi_i}+\frac{(x-\xi_{K-1})^3_+-(x-\xi_K)^3_+}{\xi_K-\xi_{K-1}}}\\
+        &=\theta_i(\xi_K-\xi_i)N_{i+2}(x)+\theta_i(x-\xi_K)^3_++\theta_i(\xi_K-\xi_i)d_{K-1}(x)
+    \end{align*}
+    and so
+    \begin{align*}
+        f(x)&=\beta_0N_1(x)+\beta_1N_2(x)+\sum_{i=1}^K\theta_i(x-\xi_i)^3_+\\
+        &=\beta_0N_1(x)+\beta_1N_2(x)+\bp{\sum_{i=1}^K\theta_i(\xi_K-\xi_i)N_{i+2}(x)}+\bp{(x-\xi_K)^3_+\sum_{i=1}^K\theta_i}+d_{K-1}\bp{\xi_K\sum_{i=1}^K\theta_i-\sum_{i=1}^K\theta_i\xi_i}\\
+        &=\beta_0N_1(x)+\beta_1N_2(x)+\sum_{i=1}^K\theta_i(\xi_K-\xi_i)N_{i+2}(x)
+    \end{align*}
+    with the last equality holding since $f$ satisfies (3). Finally, note that when $i=K$, $(\xi_K-\xi_i)=0$, and when $i=K-1$, $N_{K-1}(x)=0$, so these terms of the sum are equal to zero and we arrive at
+    \[f(x)=\beta_0N_1(x)+\beta_1N_2(x)+\sum_{i=1}^{K-2}\theta_i(\xi_K-\xi_i)N_{i+2}(x)\]
+    which was the desired expression for $f$. Moreover, we have shown that the functions $N_1,N_2,\dots N_K$ form a basis in the space of natural cubic splines with respect to knots $\{\xi_i\}_{i=1}^K$.\hfill{$\qed$}
+\end{document}

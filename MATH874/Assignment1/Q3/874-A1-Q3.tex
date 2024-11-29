@@ -1,0 +1,95 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Information Theory: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent{\bf Problem 3} Let $X$ and $Y$ be two jointly distributed discrete {\it r.v.}s with identical marginal distributions.
+Define $\beta(X,Y)$ as
+\[\beta(X,Y)=1-\frac{H(Y|X)}{H(X)}.\]
+{\bf a)} Compare $\beta(X,Y)$ to $\frac{I(X;Y)}{H(X)}$.\\[10pt]
+{\bf Solution} Exploring the relationship between $\beta(X,Y)$ and $\frac{I(X;Y)}{H(X)}$, we find
+\begin{align*}
+    \frac{I(X;Y)}{H(X)}&=\frac{H(X)+H(Y)-H(X,Y)}{H(X)}\\
+    &=1+\frac{H(Y)-H(X)-H(Y|X)}{H(X)}\tag{expanding $H(X,Y)=H(X)+H(Y|X)$}\\
+    &=1-\frac{H(Y|X)}{H(X)}+\frac{H(Y)-H(X)}{H(X)}\\
+    &=\beta(X,Y)+\frac{H(Y)-H(X)}{H(X)}.\tag{1}
+\end{align*}
+From this, we glean the following relationship
+\begin{align*}
+    \begin{cases}
+        \frac{I(X;Y)}{H(X)}<\beta(X,Y),\quad\text{if $H(X)>H(Y)$}\\[5pt]
+        \frac{I(X;Y)}{H(X)}>\beta(X,Y),\quad\text{if $H(X)<H(Y)$}\\[5pt]
+        \frac{I(X;Y)}{H(X)}=\beta(X,Y),\quad\text{if $H(X)=H(Y)$}
+    \end{cases}\tag{2}
+\end{align*}
+which follows from (1) since $H(W)\geq 0$ for any {\it r.v.} $W$ (with equality iff $W$ is deterministic).\\[10pt]
+{\bf b)} Is $\beta(X,Y)=\beta(Y,X)$?\\[10pt]
+{\bf Solution} Not in general, since we have
+\begin{align*}
+    \beta(X,Y)&=\frac{H(X)-H(Y|X)}{H(X)}\\
+    &=\frac{H(X)-H(Y)+I(X;Y)}{H(X)}\tag{since $H(Y|X)=H(Y)-I(X;Y)$}\\
+    &=\frac{I(X;Y)}{H(X)}+\frac{H(X)-H(Y)}{H(X)}\\
+    &\neq\frac{I(X;Y)}{H(Y)}+\frac{H(Y)-H(X)}{H(Y)}\tag{3}\\
+    &=\frac{H(Y)}{H(Y)}+\frac{-H(X)+I(X,Y)}{H(Y)}\\
+    &=1-\frac{H(X|Y)}{H(Y)}\\
+    &=\beta(Y,X)
+\end{align*}
+where we instead have equality in (3) iff $H(X)=H(Y)$. Thus, $\beta(X,Y)=\beta(Y,X)$ iff $H(X)=H(Y)$. It should be noted that, while we continue to analyze the general case,
+the distributions (that is, the probability mass function and support) of $X$ and $Y$ are identical, so we in fact have $H(X)=H(Y)$ and further $\beta(X,Y)=\beta(Y,X)$ in this problem.\\[10pt]
+{\bf c)} Show that $0\leq \beta(X,Y)\leq 1$.\\[10pt]
+{\bf Proof} First note that
+\[\frac{I(X;Y)}{H(X)}=\frac{H(X)-H(X|Y)}{H(X)}\]
+but $0\leq H(X|Y)\leq H(X)$, with $H(X|Y)=0$ iff $X|Y$ is deterministic and $H(X|Y)=H(X)$ iff $X$ and $Y$ are independent.
+From this, we get
+\[0=\frac{H(X)-H(X)}{H(X)}\leq\frac{H(X)-H(Y|X)}{H(X)}\leq\frac{H(X)-0}{H(X)}=1\]
+so that $0\leq I(X;Y)/H(X)\leq 1$. Referring back to (2) in part {\bf a)}, we now have 
+\[\beta(X,Y)\leq \frac{I(X;Y)}{H(X)}\leq 1\]
+provided $H(X)\leq H(Y)$. Thus, we need only find an upper bound on $\beta(X,Y)$ in the case $H(X)>H(Y)$. To refine this objective, and
+simultaneously establish a lower bound on $\beta(X,Y)$, consider the following:
+\begin{align*}
+    0\leq\beta(X,Y)\leq 1&\Leftrightarrow 0\leq 1-\frac{H(Y|X)}{H(X)}\leq 1\\
+    &\Leftrightarrow -1\leq -\frac{H(Y|X)}{H(X)}\leq 0\\
+    &\Leftrightarrow 0\leq\frac{H(Y|X)}{H(X)}\leq 1\\
+    &\Leftrightarrow 0\leq H(Y|X)\leq H(X).\tag{4}
+\end{align*}
+Thus, showing that $0\leq H(Y|X)\leq H(X)$ gives us $0\leq\beta(X,Y)\leq 1$.\\[10pt]
+We already know that $H(Y|X)\geq 0$, but show a brief proof for the sake of completeness. \\[10pt]
+To see why $H(Y|X)\geq 0$, let $\mc{X}$ and $\mc{Y}$ be the alphabets of $X$ and $Y$ respectively, with joint probability mass function $p_{XY}(x,y)$ and
+conditional probability mass function $p_{Y|X}(y|x)$. Note that since $0\leq p_{Y|X}(y|x)\leq 1$, $\log_21/p_{X|Y}(x|y)\geq 0$. Therefore,
+\[H(Y|X)=\sum_{x\in\mc{X}}\sum_{y\in\mc{Y}}p_{XY(x,y)\log_2\frac{1}{p_{Y|X}(y|x)}}\geq 0.\]
+Returning to the right inequality in (4), we simply have
+\begin{align*}
+    H(Y|X)&\leq H(Y)\tag{since conditioning reduces entropy}\\
+    &<H(X)\tag{5}
+\end{align*}
+where we are assuming (5) holds since, as previously discussed, when $H(X)\leq H(Y)$, we have $\beta(X,Y)\leq 1$. Thus when $H(X)>H(Y)$ we have $0\leq H(X|Y)\leq H(X)$ which gives us $0\leq \beta(X,Y)\leq 1$, 
+and otherwise we have $0\leq\beta(X,Y)\leq I(X;Y)/H(X)\leq 1$. So, in all cases, $0\leq \beta(X,Y)\leq 1$.\hfill{$\qed$}\\[10pt]
+{\bf d)} When is $\beta(X,Y)=0$?\\[10pt]
+{\bf Solution} Setting $\beta(X,Y)=0$, we find that
+\[\beta(X,Y)=0\Rightarrow 1-\frac{H(Y|X)}{H(X)}=0\Rightarrow\frac{H(Y|X)}{H(X)}=1\Rightarrow H(Y|X)=H(X).\]
+which occurs when $X$ and $Y$ are independent and have the same entropy, since then $H(Y|X)=H(Y)=H(X)$. Note once more that in this problem, the distributions of $X$ and $Y$ are identical, so we have $H(X)=H(Y)$.\\[10pt]
+{\bf e)} Under what conditions is $\beta(X,Y)=1$?\\[10pt]
+{\bf Solution} Setting $\beta(X,Y)=1$, we find that
+\[\beta(X,Y)=1\Rightarrow 1-\frac{H(Y|X)}{H(X)}=1\Rightarrow\frac{H(Y|X)}{H(X)}=0\]
+which occurs when $H(Y|X)=0$. This could mean that either $Y$ is deterministic, or $Y$ is deterministic given $X$. Since $X$ and $Y$ have identical distributions in this problem, $Y$ deterministic implies that $X$ is too, which
+would produce $H(X)=0$ in the denominator, and render $\beta(X,Y)$ undefined. Thus, assuming neither $X$, $Y$ deterministic marginally, we require $H(Y|X)=0$, or equivalently $I(Y;X)=H(Y)$.
+\end{document}

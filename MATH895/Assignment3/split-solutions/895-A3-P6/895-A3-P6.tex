@@ -1,0 +1,83 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \noindent{\bf Problem 6}\\[5pt]
+    For each $n\geq 1$, let $P_n$ be a probability measure on $\mc{B}(\mbb{R})$ with density $f_n(x)=(1+\sin(2\pi nx))\1{[0,1]}(x)$, $x\in\mbb{R}$. Let $P$ be a probability measure on $\mc{B}(\mbb{R})$ with density $\1{[0,1]}(x)$, $x\in\mbb{R}$. Prove or disprove: $P_n\Longrightarrow P$ as $n\rightarrow\infty$.\\[5pt]
+    The statement is true.\\[5pt]
+    {\bf Proof}\hspace{5pt} Pointwise convergence of characteristic functions is equivalent to weak convergence of the corresponding measures. Thus, we will show that the sequence of characteristic functions $\{\varphi_n\}_{n\geq 1}$ corresponding to the laws $\{P_n\}_{n\geq 1}$ converge pointwise on $\mbb{R}$ to $\varphi$, the characteristic function of $P$.\\[5pt]
+    For $n\geq 1$, we find that
+    \begin{align*}
+        \varphi_n(t)=\int_\mbb{R}e^{itx}P_n(dx)=\int_\mbb{R}e^{itx}f_n(x)dx&=\int_0^1e^{itx}(1+\sin(2\pi nx))dx\\
+        &=\int_0^1e^{itx}+(\cos(tx)+i\sin(tx))\sin(2\pi nx)dx\\
+        &=\int_\mbb{R}e^{itx}\1{[0,1]}(x)dx+\int_0^1\cos(tx)\sin(2\pi nx)dx+i\int_0^1\sin(tx)\sin(2\pi nx)dx.
+    \end{align*}
+    The first term here is just $\varphi(t)$, so we need only compute the second two integrals. Using trigonometric product-sum identities [1], we compute
+    \begin{align*}
+        \varphi_n(t)-\varphi(t)&=\int_0^1\cos(tx)\sin(2\pi nx)dx+i\int_0^1\sin(tx)\sin(2\pi nx)dx\\
+        &=\frac{1}{2}\int_0^1\sin((2\pi n+t)x)+\sin((2\pi n-t)x)dx+\frac{i}{2}\int_0^1\cos((2\pi n-t)x)-\cos((2\pi n+t)x)dx\\
+        &=\frac{-\cos((2\pi n+t)x)-i\sin((2\pi n+t)x)}{4\pi n+2t}\bigg|_0^1+\frac{-\cos((2\pi n-t)x)+i\sin((2\pi n -t)x)}{4\pi n-2t}\bigg|_0^1\\
+        &=\frac{-\cos(2\pi n+t)-i\sin(2\pi n+t)+1}{4\pi n+2t}+\frac{-\cos(2\pi n-t)+i\sin(2\pi n -t)+1}{4\pi n-2t}\\
+        &=\frac{-\cos(t)-i\sin(t)+1}{4\pi n+2t}+\frac{-\cos(-t)+i\sin(-t)+1}{4\pi n-2t}
+    \end{align*}
+    since $\sin$ and $\cos$ are $2\pi$-periodic. Thus, for any $t\in\mbb{R}$ we have
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\varphi_n(t)-\varphi(t)=\lim_{n\rightarrow\infty}\bp{\frac{-\cos(t)-i\sin(t)+1}{4\pi n+2t}+\frac{-\cos(-t)+i\sin(-t)+1}{4\pi n-2t}}=0
+    \end{align*}
+    so indeed, $\varphi_n\rightarrow\varphi$ pointwise on $\mbb{R}$ as $n\rightarrow\infty$, and we conclude that $P_n\Longrightarrow P$ as $n\rightarrow\infty$, as claimed.\hfill{$\qed$\\[5pt]}
+\end{document}

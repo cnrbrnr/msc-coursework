@@ -1,0 +1,61 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 2} Let $X,Y,Z$ be discrete random variables with state spaces $\mc{X},\mc{Y},\mc{Z}$ respectively. Suppose that $X$ and $Y$ are
+    conditionally independent given $Z$. That is, whenever $(x,y,z)\in\mc{X}\times\mc{Y}\times\mc{Z}$ with $P(Z=z)>0$, we suppose
+    \[P(X=x,Y=y|Z=z)=P(X=x|Z=z)P(Y=y|Z=z).\]
+    Prove the following under these hypotheses:\\[10pt]
+    {\bf a)} If $A_1\subset\mc{X}$ and $A_2\subset\mc{Y}$, then
+    \[P(x\in A_1,y\in A_2|Z=z)=P(x\in A_1|Z=z)P(y\in A_2|Z=z).\]
+    {\bf Proof} By definition, $X$ and $Y$ are discrete so $\mc{X}$ and $\mc{Y}$ are at most countable. Then $A_1$ and $A_2$ are as well. The desired equivalence can be computed directly.
+    \begin{align*}
+        P(x\in A_1,y\in A_2|Z=z)&=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x,Y=y|Z=z)\tag{countable additivity}\\
+        &=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x|Z=z)P(Y=y|Z=z)\tag{conditional independence}\\
+        &=\sum_{x\in A_1}P(X=x|Z=z)\sum_{y\in A_2}P(Y=y|Z=z)\\
+        &=P(x\in A_1|Z=z)P(y\in A_2|Z=z)
+    \end{align*} 
+    as desired. To elaborate on the first equivalence in the above, recall the conventions
+    \[\{X=x\}=\{\omega\in\Omega:X(\omega)=x\}\quad\text{and}\quad\{x\in A_1\}=\{\omega\in\Omega:X(\omega)\in A_1\}\]
+    and likewise for $\{Y=y\}$ and $\{y\in A_2\}$. Further, when writing these as arguments of a probability measure the curly brackets are usually dropped. Nonetheless we find that
+    \begin{align*}
+        \{x\in A_1\}\cap \{y\in A_2\}=\left(\bigcup_{x\in A_1}\{X=x\}\right)\cap A_2=\bigcup_{x\in A_1}(\{X=x\}\cap A_2)
+    \end{align*}
+    where for $x_1,x_2\in A_1$ with $x_1\neq x_2$ we have $\{X=x_1\}\cap\{X=x_2\}=\emptyset$, so by countable additivity
+    \[P(x\in A_1, y\in A_2|Z=z)=\sum_{x\in A_1}P(X=x,y\in A_2|Z=z).\]
+    likewise, $\forall x\in \mc{X}$ we have
+    \[\{X=x\}\cap A_2=\{X=x\}\cap\left(\bigcup_{y\in A_2}\{Y=y\}\right)=\bigcup_{y\in A_2}(\{X=x\}\cap\{Y=y\})\]
+    so once more by countable additivity
+    \[\sum_{x\in A_1}P(X=x,y\in A_2|Z=z)=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x,Y=y|Z=z)\]
+    which was the first equality used in the proof of the result.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Under the above hypotheses, we have
+    \[P(x\in A_1|Z=z,y\in A_2)=P(x\in A_1|Z=z).\]
+    {\bf Proof} Equipped with the result from {\bf (a)} this proof follows from the definition of conditional probability. 
+    \begin{align*}
+        P(x\in A_1|Z=z,y\in A_2)&=\frac{P(x\in A_1,y\in A_2,Z=z)}{P(Z=z,y\in A_2)}\\
+        &=\frac{P(x\in A_1,y\in A_2|Z=z)P(Z=z)}{P(y\in A_2|Z=z)P(Z=z)}\\
+        &=\frac{P(x\in A_1|Z=z)P(y\in A_2|Z=z)}{P(y\in A_2|Z=z)}\tag{by {\bf (a)}}\\
+        &=P(x\in A_1|Z=z)
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[10pt]
+\end{document}

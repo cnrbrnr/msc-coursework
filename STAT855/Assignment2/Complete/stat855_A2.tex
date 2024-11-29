@@ -1,0 +1,333 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1} A particle undergoes a random walk on a bow tie graph as shown below.
+    \begin{center}
+    \makebox[\textwidth]{\includegraphics[width=40mm]{855A2-graphwalk.png}}
+    \end{center}
+    From any vertex, its next step is equally likely to be any of the neighboring vertices. Initially it is at $A$.
+    Compute the probability that the particle hits state $E$ before it hits $B$.\\[10pt]
+    {\bf Solution} Let $\mc{A}$ be the event that the particle is in state $E$ before it is in state $B$ and $\{X_n\}_{n\geq 0}$ the
+    stochastic process with $X_n$ the state of the particle after $n$ steps for $n\geq 0$. For compactness, we shall write
+    \[P_j=P(\mc{A}|X_0=j)\quad\text{for}\quad j\in\{A, B, C, D, E\}.\]
+    Then the quantity of interest can be decomposed by the law of total probability
+    \begin{align*}
+        P(\mc{A}|X_0=A)&=P(X_1=B)P(\mc{A}|X_0=A,X_1=B)+P(X_1=C)P(\mc{A}|X_0=A,X_1=C)\\
+        &=\frac{1}{2}P(\mc{A}|X_1=B)+\frac{1}{2}P(\mc{A}|X_1=C)\tag{Markov property}\\
+        &=\frac{1}{2}P(\mc{A}|X_0=B)+\frac{1}{2}P(\mc{A}|X_0=C)
+    \end{align*}
+    where we write the last expression simply as $(1/2)P_B+(1/2)P_C$. Of course, $P_B=0$, since if $X_0=B$ then we cannot hit $E$ at 
+    an earlier point. Similarly, $P_E=1$. Thus, we have $P_A=(1/2)P_C$, and using a similar sequence of justifications we can compute $P_C$ directly.
+    \begin{align*}
+        P_C&=\frac{1}{4}P_B+\frac{1}{4}P_D+\frac{1}{4}P_A+\frac{1}{4}P_E=\frac{1}{4}P_D+\frac{1}{4}P_A+\frac{1}{4}\tag{1}\\
+        P_D&=\frac{1}{2}P_E+\frac{1}{2}P_C=\frac{1}{2}+\frac{1}{2}P_C\tag{2}\\
+        P_C&=\frac{1}{4}\left(\frac{1}{2}P_C+\frac{1}{2}\right)+\frac{1}{4}P_A+\frac{1}{4}=\frac{1}{8}P_C+\frac{1}{8}+\frac{1}{4}P_A+\frac{1}{4}\tag{substituting (2) into (1)}
+    \end{align*}
+    which implies
+    \begin{align*}
+        \frac{7}{8}P_C=\frac{1}{4}P_A+\frac{3}{8}\quad\Rightarrow\quad P_C=\frac{2}{7}P_A+\frac{3}{7}
+    \end{align*}
+    so that 
+    \begin{align*}
+        P_A=\frac{1}{2}P_C=\frac{1}{2}\left(\frac{2}{7}P_A+\frac{3}{7}\right)=\frac{1}{7}P_A+\frac{3}{14}\quad\Rightarrow\quad \frac{6}{7}P_A=\frac{3}{14}\quad\Rightarrow\quad P_A=\frac{1}{4}\tag*{\qed}
+    \end{align*}
+
+    \noindent{\bf Problem 2} Let $X,Y,Z$ be discrete random variables with state spaces $\mc{X},\mc{Y},\mc{Z}$ respectively. Suppose that $X$ and $Y$ are
+    conditionally independent given $Z$. That is, whenever $(x,y,z)\in\mc{X}\times\mc{Y}\times\mc{Z}$ with $P(Z=z)>0$, we suppose
+    \[P(X=x,Y=y|Z=z)=P(X=x|Z=z)P(Y=y|Z=z).\]
+    Prove the following under these hypotheses:\\[10pt]
+    {\bf a)} If $A_1\subset\mc{X}$ and $A_2\subset\mc{Y}$, then
+    \[P(x\in A_1,y\in A_2|Z=z)=P(x\in A_1|Z=z)P(y\in A_2|Z=z).\]
+    {\bf Proof} By definition, $X$ and $Y$ are discrete so $\mc{X}$ and $\mc{Y}$ are at most countable. Then $A_1$ and $A_2$ are as well. The desired equivalence can be computed directly.
+    \begin{align*}
+        P(x\in A_1,y\in A_2|Z=z)&=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x,Y=y|Z=z)\tag{countable additivity}\\
+        &=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x|Z=z)P(Y=y|Z=z)\tag{conditional independence}\\
+        &=\sum_{x\in A_1}P(X=x|Z=z)\sum_{y\in A_2}P(Y=y|Z=z)\\
+        &=P(x\in A_1|Z=z)P(y\in A_2|Z=z)
+    \end{align*} 
+    as desired. To elaborate on the first equivalence in the above, recall the conventions
+    \[\{X=x\}=\{\omega\in\Omega:X(\omega)=x\}\quad\text{and}\quad\{x\in A_1\}=\{\omega\in\Omega:X(\omega)\in A_1\}\]
+    and likewise for $\{Y=y\}$ and $\{y\in A_2\}$. Further, when writing these as arguments of a probability measure the curly brackets are usually dropped. Nonetheless we find that
+    \begin{align*}
+        \{x\in A_1\}\cap \{y\in A_2\}=\left(\bigcup_{x\in A_1}\{X=x\}\right)\cap A_2=\bigcup_{x\in A_1}(\{X=x\}\cap A_2)
+    \end{align*}
+    where for $x_1,x_2\in A_1$ with $x_1\neq x_2$ we have $\{X=x_1\}\cap\{X=x_2\}=\emptyset$, so by countable additivity
+    \[P(x\in A_1, y\in A_2|Z=z)=\sum_{x\in A_1}P(X=x,y\in A_2|Z=z).\]
+    likewise, $\forall x\in \mc{X}$ we have
+    \[\{X=x\}\cap A_2=\{X=x\}\cap\left(\bigcup_{y\in A_2}\{Y=y\}\right)=\bigcup_{y\in A_2}(\{X=x\}\cap\{Y=y\})\]
+    so once more by countable additivity
+    \[\sum_{x\in A_1}P(X=x,y\in A_2|Z=z)=\sum_{x\in A_1}\sum_{y\in A_2}P(X=x,Y=y|Z=z)\]
+    which was the first equality used in the proof of the result.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Under the above hypotheses, we have
+    \[P(x\in A_1|Z=z,y\in A_2)=P(x\in A_1|Z=z).\]
+    {\bf Proof} Equipped with the result from {\bf (a)} this proof follows from the definition of conditional probability. 
+    \begin{align*}
+        P(x\in A_1|Z=z,y\in A_2)&=\frac{P(x\in A_1,y\in A_2,Z=z)}{P(Z=z,y\in A_2)}\\
+        &=\frac{P(x\in A_1,y\in A_2|Z=z)P(Z=z)}{P(y\in A_2|Z=z)P(Z=z)}\\
+        &=\frac{P(x\in A_1|Z=z)P(y\in A_2|Z=z)}{P(y\in A_2|Z=z)}\tag{by {\bf (a)}}\\
+        &=P(x\in A_1|Z=z)
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[10pt]
+    \noindent{\bf Problem 3} Suppose that an experiment consists of an infinite sequence of independent coin tosses, where the coin has
+    a probability $p$ of landing heads each flip. For each $n\geq 0$, let $X_n$ be equal to $0,1,2$ or $3$ depending on whether the $(n+1)$st and $(n+2)$nd coin toss
+    come up $HH$, $HT$, $TH$ or $TT$ respectively.\\[10pt]
+    {\bf a)} Show that $\{X_n\}_{n\geq 0}$ is a Markov chain and identify its one-step transition probability matrix.\\[10pt]
+    {\bf Solution} Let $\{Z_j\}_{j=1}^\infty$ be a random outcome of the coin flip process. Then the elements of this sequence are {\it i.i.d.} with $Z_1\sim Bernoulli(p)$, provided
+    we designate  'success' on the $k$th flip $Z_k=1$ to be an outcome of heads. We will let $q=1-p$ denote the probability of flipping tails. Next, let $f:\{0,1\}\times\{0,1\}\rightarrow\{0,1,2,3\}$ so that
+    \[f(1,1)=0\quad f(1,0)=1\quad f(0,1)=2\quad f(0,0)=3.\]
+    Then the process of interest can be written $\{X_n\}_{n\geq 0}=\{f(Z_{n+1},Z_{n+2})\}_{n\geq 0}$.\\[10pt] 
+    We next endeavor to determine $P$, the transition probability matrix of $\{X_n\}_{n\geq 0}$. Let $k^\prime,k\in\{0,1,2,3\}$ and $f^{-1}:\{0,1,2,3\}\rightarrow\{0,1\}\times\{0,1\}$ be the inverse of $f$,
+    which exists since clearly $f$ is a bijection between $\{0,1\}\times\{0,1\}$ and $\{0,1,2,3\}$. Then $f^{-1}(k^\prime)=(i^\prime,j^\prime)$ and $f^{-1}(k)=(i,j)$ for some $i,j,i^\prime,j^\prime\in\{0,1\}$ and
+    \begin{align*}
+        p_{k,k^\prime}&=P(X_{n+1}=k^\prime|X_n=k)\\
+        &=P(f^{-1}(X_{n+1})=f^{-1}(k^\prime)|f^{-1}(X_n)=f^{-1}(k))\\
+        &=P((Z_{n+2},Z_{n+3})=(i^\prime,j^\prime)|(Z_{n+1},Z_{n+2})=(i,j))\\
+        &=\begin{cases}
+            p\quad\text{if $i^\prime=j$ and $j^\prime=1$}\\
+            q\quad\text{if $i^\prime=j$ and $j^\prime=0$}\\
+            0\quad\text{{\it o.w.}}
+        \end{cases}
+    \end{align*}
+    Using this information we can construct a state transition diagram for $\{X_n\}_{n\geq 0}$, depicted below.
+\begin{center}
+  \makebox[\textwidth]{\includegraphics[width=90mm]{855A2-Dynkin.png}}
+\end{center}
+{\bf Figure 1} State transition diagram for the augmented coin flip process $\{X_n\}_{n\geq 0}$, where $p$ is the probability of flipping heads and $1-p=q$ is the probability of flipping tails.\\[10pt]
+This visualization makes it simple to deduce $P$.
+\begin{align*}
+    P=[p_{i-1,j-1}]_{1\leq i,j\leq 4}=\begin{pmatrix}
+        p & q & 0 & 0 \\
+        0 & 0 & p & q \\
+        p & q & 0 & 0 \\
+        0 & 0 & p & q \\
+    \end{pmatrix}.
+\end{align*}
+Noting that we index the matrix starting at $1$, but the transition probabilities by the states $0,1,2,3$.\\[10pt]
+{\it It turns out that this was all we need to show, but I will leave in my argument for why this process satisfies the Markov property for the sake of posterity.}\\[10pt]
+By the above construction it can also be shown that $\{X_n\}_{n\geq 0}$ obeys the Markov property. Fix $n\in\mbb{N}$ and let $\{x_j\}_{j=0}^{n+1}$ be a realization of $\{X_j\}_{j\geq 0}$ up to the $(n+1)$st element. Corresponding to this
+realization is the set of coin flips $\{z_j\}_{j=1}^{n+3}$ so that $x_j=(z_{j+1},z_{j+2})$ for $j=0,1,\dots,n+1$. Then
+\begin{align*}
+    P(X_{n+1}=x_{n+1}|X_n=x_{n},\dots,X_0=x_0)&=P(f^{-1}(X_{n+1})=f^{-1}(x_{n+1})|f^{-1}(X_n)=f^{-1}(x_{n}),\dots,f^{-1}(X_0)=f^{-1}(x_0))\\
+    &=P(Z_{n+3}=z_{n+3},Z_{n+2}=z_{n+2}|Z_{n+2}=z_{n+2},Z_{n+1}=z_{n+1},\dots,Z_1=z_1)\\
+    &=P(Z_{n+3}=z_{n+3},Z_{n+2}=z_{n+2}|Z_{n+2}=z_{n+2},Z_{n+1}=z_{n+1})\tag{3}\\
+    &=P(f(Z_{n+2},Z_{n+3})=f(z_{n+2},z_{n+3})|f(Z_{n+1}Z_{n+2})=f(z_{n+1},z_{n+2}))\\
+    &=P(X_{n+1}=x_{n+1}|X_n=x_n)
+\end{align*}
+where (3) holds since each of the coin flips are independent. So $\{X_n\}_{n\geq 0}$ obeys the Markov property and is thus a Markov process.\hfill{$\qed$}\\[10pt]
+{\bf b)} For each $n\geq 0$ find the probability mass function of $X_n$.\\[10pt]
+{\bf Solution} Let us first determine the probability mass function of $X_0$ over state space $S=\{0,1,2,3\}$. Taking $f:\{0,1\}\times\{0,1\}\rightarrow S$ as
+in the previous problem, we get
+\begin{align*}
+    P(X_0=0)=P(f^{-1}(X_0)=f^{-1}(0))=P((Z_1,Z_2)=(1,1))&=P(Z_1=1)P(Z_2=1)\tag{independence of flips}\\
+    &=p^2
+\end{align*}
+which is just the probability of flipping heads twice in a row. By precisely the same argument we find
+\[P(X_0=1)=pq,\quad P(X_0=2)=pq\quad\text{and}\quad P(X_0=3)=q^2\]
+so that the initial distribution is given by the vector
+\[\lambda=(p^2,pq,pq,q^2)\]
+where $\lambda:S\rightarrow [0,1]$, and we write $\lambda_j=\lambda(j)$ for $j\in S$. Now, letting $\lambda^{(n)}:S\rightarrow[0,1]$ be the probability mass function of $X_n$ for $n\geq 0$ (with the same indexing convention as $\lambda$), we have the result
+\[\lambda^{(n)}_j=P(X_n=j)=\sum_{i_0,i_1,\dots,i_{n-1}\in S}\lambda_{i_0}p_{i_0,i_1}p_{i_1,i_2}\cdots p_{i_{n-1},j}=(\lambda P^n)_j\]
+which is an explicit formula for the distribution $\lambda^{(n)}$ for any $n\geq 0$. Using this, we can find the form of $\lambda^{(n)}$ by induction.\\[10pt]
+Let $k=1$. Then
+\begin{align*}
+    \lambda^{(k)}&=\lambda P\\
+    &=(p^2,pq,pq,q^2)\begin{pmatrix}
+       p & q & 0 & 0\\
+       0 & 0 & p & q\\ 
+       p & q & 0 & 0\\
+       0 & 0 & p & q
+    \end{pmatrix}\\
+    &=(p^3+p^2q,p^2q+pq^2,p^2q+pq^2,pq^2+q^3)\\
+    &=(p^2(p+q), pq(p+q), pq(p+q), q^2(p+q))\\
+    &=(p^2,pq, pq, q^2)\tag{$p+q=p+1-p=1$}\\
+    &=\lambda
+\end{align*}
+so we have $\lambda^{(k)}=\lambda$ for $k=1$. Now, suppose that $\lambda^{(k)}=\lambda$ for some $k\geq 1$. Then
+\begin{align*}
+    \lambda^{(k+1)}&=\lambda P^{k+1}\\
+    &=(\lambda P^k)P\tag{associativity}\\
+    &=\lambda^{(k)}P\\
+    &=\lambda P\tag{inductive hypothesis}
+\end{align*}
+but $\lambda P=\lambda^{(1)}=\lambda$ as shown in the inductive basis, so $\lambda^{(k+1)}=\lambda$. Then, by the principle of
+mathematical induction, we have $\lambda^{(n)}=\lambda$ for all $n\geq 1$, and definitionally $\lambda^{(0)}=\lambda P^0=\lambda$, so the
+probability mass function of $X_n$ for any $n\geq 0$ is given by $\lambda=(p^2,pq,pq,q^2)$\hfill{$\qed$}.\\[10pt]
+\noindent{\bf Problem 4} Let $X_n$, $n\geq 0$ be a markov chain on $S=\{0,1,2,\dots\}$ with transition probabilities given by
+\[p_{0,1}=1,\quad p_{i,i+1}+p_{i,i-1}=1,\quad p_{i,i+1}=\left(\frac{i+1}{i}\right)^2p_{i,i-1},\quad\text{for $i\geq 1$}.\]
+Then
+\[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=\frac{6}{\pi^2}.\]
+{\bf Proof} First, rewrite the probability of interest
+\[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=1-P(X_n=0\;\text{for some\;}n\geq 0|X_0=1).\]
+Next, write $\mc{A}=\{\omega\in\Omega:X_n(\omega)=0\;\text{for some\;}n\geq 0\}$ and let $H^0:\Omega\rightarrow \mbb{Z}_{\geq 0}$ with $H^0(\omega)=\inf\{n\geq 0:X_n(\omega)=0\}$,
+called the hitting time associated to $\{0\}\subset S$ and realization $\omega\in\Omega$. Letting $\mc{B}=\{\omega\in\Omega:H^0(\omega)<\infty\}$, we find that $\mc{A}=\mc{B}$. To see this, suppose $\omega\in\mc{A}$.
+Then $\{n\geq 0: X_n(\omega)=0\}\neq\emptyset$, and in particular it is bounded below by $0$, so $H^0(\omega)$ exists and is finite. But this is precisely $\mc{B}$, so $\omega\in\mc{B}$.
+Conversely, suppose that $\omega\in\mc{B}$. Then $H^0(\omega)<\infty$, so $\exists n\geq0$ with $X_n(\omega)=0$, and thus $\omega\in\mc{A}$. Armed with this equivalence, the probability of interest becomes
+\[P(X_n\geq 1\;\forall n\geq 0|X_0=1)=1-P(H^0<\infty|X_0=1)=1-h_1^0\tag{3}\]
+where $h_1^0$ is the probability of hitting $\{0\}$ starting at $X_0=1$, but we will simply write $h_1=h^0_1$, and for $j\in S$, $P(H^0<\infty|X_0=j)=:h_j$. We know that these hitting probabilities are the minimal solution to
+the system of linear equations
+\begin{align*}
+    x_0&=1\\
+    x_i&=\sum_{j\in S}p_{ij}x_j\quad\text{for $i\in S\setminus\{0\}$}
+\end{align*}
+where the equation for $i\geq 1$ simplifies considerably for this problem:
+\[x_i=p_{i,i+1}x_{i+1}+p_{i,i-1}x_{i-1}\]
+since $p_{i,k}=0$ for $|k-i|>1$. To conserve space, we write $p_{i,i+1}=p_i$ and $p_{i,i-1}=q_i$. Then $p_i+q_i=1$ and we can write
+\begin{align*}
+    &(p_i+q_i)x_i=p_ix_{i+1}+q_ix_{i-1}\\
+    \Rightarrow\quad&p_i(x_i-x_{i+1})=q_i(x_{i-1}-x_i)
+\end{align*}
+which can be reexpressed as a recurrence relation under the substitute $u_i=x_i-x_{i+1}$ (valid for $i\geq 1$) so that
+\begin{align*}
+    &p_iu_i=q_iu_{i-1}\\
+    \Rightarrow\quad&u_i=\frac{q_i}{p_i}u_{i-1}
+\end{align*}
+proceeding by recursion, we obtain the equation
+\begin{align*}
+    u_i&=\left(\frac{q_i}{p_i}\right)\left(\frac{q_{i-1}}{p_{i-1}}\right)\cdots\left(\frac{q_1}{p_1}\right)u_0\\
+    &=\prod_{j=1}^i\left(\frac{q_j}{p_j}\right)(x_0-x_1)\\
+    &=\prod_{j=1}^i\left(\frac{q_j}{p_j}\right)(1-x_1)
+\end{align*}
+which gives us a new recurrence relation
+\[x_{i+1}=x_i-\prod_{j=1}^i\left(\frac{q_j}{p_i}\right)(1-x_1).\]
+From this formula it is easy to see that every element of the sequence can be expressed in terms of $x_1$, namely
+\[x_{i+1}=x_1-(1-x_1)\sum_{j=1}^i\prod_{k=1}^j\left(\frac{q_k}{p_k}\right).\tag{4}\]
+Next we shall obtain a more ruly expression for the summation in the second term.
+\begin{align*}
+    \sum_{j=1}^i\prod_{k=1}^j\left(\frac{q_k}{p_k}\right)&=\sum_{j=1}^i\prod_{k=1}^j\left(\frac{p_{k,k-1}}{\left(\frac{k+1}{k}\right)^2p_{k,k-1}}\right)\\
+    &=\sum_{j=1}^i\prod_{k=1}^j\left(\frac{k}{k+1}\right)^2\\
+    &=\sum_{j=1}^i\left(\frac{j!}{(j+1)!}\right)^2\\
+    &=\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)-1\tag{simplify factorials and reindex}
+\end{align*}
+subsituting this back into (4) we find
+\begin{align*}
+    x_{i+1}&=x_1-(1-x_1)\left(\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)-1\right)\\
+    &=x_1-(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)+1-x_1\\
+    &=1-(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)\tag{5}
+\end{align*}
+which is much simpler to analyze. In particular, the minimal solution is required to satisfy $h_i\in[0,1]$ $\forall i\geq 0$
+so we can first constrain $(1-x_1)\geq 0$. Further, the sequence of partial sums $S_N:=\sum_{k=1}^N(1/k^2)$ is increasing, so the second term in (5) is decreasing
+and we apply the additional constraint
+\[\lim_{i\rightarrow\infty}\left|(1-x_1)\left(\sum_{k=1}^{i+1}\frac{1}{k^2}\right)\right|\leq 1\]
+to ensure that $x_i\in[0,1]$ $\forall i\geq 0$. Taking the fact that $\lim_{i\rightarrow\infty}\sum_{k=1}^{i+1}(1/k^2)=\pi^2/6$, this constraint implies
+\begin{align*}
+    &(1-x_1)\frac{\pi^2}{6}\leq 1\\
+    \Rightarrow\quad&x_1\geq 1-\frac{6}{\pi^2}.
+\end{align*}
+Finally, the hitting probabilities are the minimal solution to the original system of equations, so we take
+\[h_1=1-\frac{6}{\pi^2}.\]
+Returning to (3), the probability of interest is found to be
+\begin{align*}
+    P(X_n\geq 1\;\forall n\geq 0|X_0=1)&=1-h_1\\
+    &=1-1+\frac{6}{\pi^2}\\
+    &=\frac{6}{\pi^2}
+\end{align*}
+and we are done.\hfill{$\qed$}\\[10pt]
+{\bf Problem 5} Consider a Markov chain $X_n$, $n\geq 0$ with state space $S=\{0,1,2\}$. The initial distribution $\lambda$ and transition matrix $P$ are given as 
+\[\lambda=\begin{pmatrix}
+    \frac{1}{2}\\[1.2pt]
+    \frac{1}{6}\\[1.2pt]
+    \frac{1}{3}
+\end{pmatrix}\qquad P=\begin{pmatrix}
+    \frac{1}{2} & \frac{1}{3} & \frac{1}{6}\\[1.2pt]
+    \frac{3}{4} & 0 & \frac{1}{4}\\[1.2pt]
+    0 & 1 & 0
+\end{pmatrix}.\]
+Compute the probability mass function of $X_n$ for $n\geq 0$.\\[10pt]
+{\bf Solution} Let $c_P(\mu)$ denote the characteristic polynomial of $P$. In order to easily compute powers of $P$, we begin by finding its spectrum $\sigma (P)=\{\mu^\ast\in\mbb{C}:c_P(\mu^\ast)=0\}$ so as to diagonalize it.
+\begin{align*}
+    c_P(\mu)&=\det(P-\mu\mbb{I})\\
+    &=\left|\begin{pmatrix}
+        1/2-\mu & 1/3 & 1/6\\
+        3/4 & -\mu & 1/4\\
+        0 & 1 & -\mu
+    \end{pmatrix}\right|\\
+    &=-\left(\frac{1}{4}\left(\frac{1}{2}-\mu\right)-\frac{1}{8}\right)-\mu\left(-\mu\left(\frac{1}{2}-\mu\right)-\frac{1}{4}\right)\\
+    &=\frac{1}{4}\mu+\frac{1}{2}\mu^2-\mu^3+\frac{1}{4}\mu\\
+    &=-\mu\left(\mu^2-\frac{1}{2}\mu-\frac{1}{2}\right)\\
+    &=-\mu(\mu-1)(\mu+1/2)
+\end{align*}
+so we get $\sigma(P)=\{1,0,-1/2\}$. Since $P$ has three pairwise distinct eigenvalues, $P$ is diagonalizable. That is, $\exists U\in M_3(\mbb{R})$ invertible so that
+\[P=UDU^{-1}\quad\Rightarrow\quad P^n=UD^nU^{-1}\]
+where $D=\text{diag}\,\sigma(P)$. Next, we have $P^n=U(D^nU^{-1})$ by the associativity of matrix multiplication. For any $m\times m$ matrix $A$, let $A_{i,j}$ be the element in the $i$th row and $j$th column of $A$ for $1\leq i,j\leq m$.
+Then by the definition of matrix multiplication, for $1\leq i,j\leq 3$
+\begin{align*}
+    (D^nU^{-1})_{ij}&=\sum_{k=1}^3D^n_{i,k}U^{-1}_{k,j}\\
+    &=D^n_{i,i}U^{-1}_{i,j}\tag{since $D$ diagonal}\\
+    &=\mu_i^nU_{i,j}^{-1}
+\end{align*}
+where $\mu_i$ is the $i$th eigenvalue of $P$. Furthermore
+\begin{align*}
+    (P^n)_{i,j}&=(U(D^nU^{-1}))_{ij}\\
+    &=\sum_{k=1}^3U_{i,k}(D^nU^{-1})_{kj}\\
+    &=\sum_{k=1}^3U_{i,k}\mu^n_kU^{-1}_{k,j}\\
+    &=\alpha_{i,j}\mu_1^n+\beta_{i,j}\mu_2^n+\gamma_{i,j}\mu_3^n
+\end{align*}
+where we have designated $\alpha_{i,j}=U_{i,1}U^{-1}_{1,j}$, $\beta_{i,j}=U_{i,2}U^{-1}_{2,j}$, $\gamma_{i,j}=U_{i,3}U^{-1}_{3,j}$. Further designating $\mu_1=1$, $\mu_2=-1/2$ we get
+\[(P^n)_{i,j}=\alpha_{i,j}+\beta_{i,j}(-1/2)^n\]
+for any $1\leq i,j\leq 3$. Noting that $P^0=\mbb{I}_3$ the identity linear transformation on $\mbb{R}^3$, we can use known entries of $P^0$ and $P^1$ to find $\alpha_{i,j}$ and $\beta_{i,j}$
+which will determine all nine entries of $P^n$ for any $n\geq 0$. Quite a bit of tedious computation to complete this. Nonetheless, we begin by finding the constants for $p_{1,1}^n$ and $p_{1,2}^n$:
+\begin{align*}
+    p^0_{1,1}&=1=\alpha_{1,1}+\beta_{1,1}\quad\Rightarrow\quad\beta_{1,1}=1-\alpha_{1,1}\tag{6}\\
+    p_{1,1}^1&=1/2=\alpha_{1,1}+\beta_{1,1}(-1/2)\quad\Rightarrow\quad 1=2\alpha_{1,1}+\alpha_{1,1}-1\quad\Rightarrow\quad \alpha_{1,1}=2/3\quad\Rightarrow\quad \beta_{1,1}=1/3\\[10pt]
+    p_{1,2}^0&=0=\alpha_{1,2}+\beta_{1,2}\quad\Rightarrow\quad \alpha_{1,2}=-\beta_{1,2}\tag{7}\\
+    p_{1,2}^1&=1/3=\alpha_{1,2}+\beta_{1,2}(-1/2)\quad\Rightarrow\quad 1/3=\alpha_{1,2}(1+1/2)\quad\Rightarrow\quad\alpha_{1,2}=2/9\quad\Rightarrow\quad\beta_{1,2}=-2/9
+\end{align*}
+Here on we can make things a bit more terse by noticing that $P^0=\mbb{I}_3$, so $p^0_{i,i}=1$ and $p^0_{i,j}=0$ for $1\leq i,j\leq 3$ and $i\neq j$, so the implications in (6) and (7) hold
+for each these cases respectively. To be precise, $\beta_{i,i}=1-\alpha_{i,i}$ and $\alpha_{i,j}=-\beta_{i,j}$ for $1\leq i,j\leq 3$ and $i\neq j$. With this, the remaining fourteen constants can be found.
+\begin{align*}
+    p_{1,3}^1&=1/6=\alpha_{1,3}+\beta_{1,3}(-1/2)\quad\Rightarrow\quad 1/6=\alpha_{1,3}(1+1/2)\quad\Rightarrow\quad\alpha_{1,3}=1/9\quad\Rightarrow\quad\beta_{1,3}=-1/9\\
+    p_{2,1}^1&=3/4=\alpha_{2,1}+\beta_{2,1}(-1/2)\quad\Rightarrow\quad 3/4=\alpha_{2,1}(1+1/2)\quad\Rightarrow\quad\alpha_{2,1}=1/2\quad\Rightarrow\quad\beta_{2,1}=-1/2\\
+    p_{2,2}^1&=0=\alpha_{2,2}+\beta_{2,2}(-1/2)\quad\Rightarrow\quad 0=1-3/2\beta_{2,2}\quad\Rightarrow\quad\beta_{2,2}=2/3\quad\Rightarrow\quad\alpha_{2,2}=1/3\\
+    p_{2,3}^1&=1/4=\alpha_{2,3}+\beta_{2,3}(-1/2)\quad\Rightarrow\quad 1/4=\alpha_{2,3}(1+1/2)\quad\Rightarrow\quad\alpha_{2,3}=1/6\quad\Rightarrow\quad\beta_{2,3}=-1/6\\
+    p_{3,1}^1&=0=\alpha_{3,1}+\beta_{3,1}(-1/2)\quad\Rightarrow\quad 0=\alpha_{3,1}(1+1/2)\quad\Rightarrow\quad\alpha_{3,1}=0=\beta_{2,1}\\
+    p_{3,2}^1&=1=\alpha_{3,2}+\beta_{3,2}(-1/2)\quad\Rightarrow\quad 1=\alpha_{3,2}(1+1/2)\quad\Rightarrow\quad\alpha_{3,2}=2/3\quad\Rightarrow\quad\beta_{3,2}=-2/3\\
+    p_{3,3}^1&=0=\alpha_{3,3}+\beta_{3,3}(-1/2)\quad\Rightarrow\quad 0=1-3/2\beta_{3,3}\quad\Rightarrow\quad\beta_{3,3}=2/3\quad\Rightarrow\quad\alpha_{3,3}=1/3
+\end{align*}
+allowing us to write out the $n$ step transition probability matrix
+\begin{align*}
+    P^n=\begin{pmatrix}
+        6/9+3/9(-1/2)^n & 2/9 -2/9(-1/2)^n & 1/9 - 1/9(-1/2)^n\\
+        3/6 - 3/6(-1/2)^n & 2/6+4/6(-1/2)^n & 1/6 - 1/6(-1/2)^n\\
+        0 & 2/3 - 2/3(-1/2)^n & 1/3 + 2/3(-1/2)^n
+    \end{pmatrix}
+\end{align*}
+where in particular we observe that $P^n$ is indeed a stochastic matrix for any $n\geq 0$. Finally, denote $\lambda_n:S\rightarrow[0,1]$ be the probability mass function of
+$X_n$ for $n\geq 0$. That is, $\lambda_n(j)=P(X_n=j)$ for $n\geq 0$. Then the Chapman-Kolmogorov equation furnishes us with $\lambda_n$.
+\begin{align*}
+    \lambda_n&=\lambda^T P^n\\
+    &=\begin{pmatrix}
+        1/2, & 1/6, & 1/3
+    \end{pmatrix}\begin{pmatrix}
+        6/9+3/9(-1/2)^n & 2/9 -2/9(-1/2)^n & 1/9 - 1/9(-1/2)^n\\
+        3/6 - 3/6(-1/2)^n & 2/6+4/6(-1/2)^n & 1/6 - 1/6(-1/2)^n\\
+        0 & 2/3 - 2/3(-1/2)^n & 1/3 + 2/3(-1/2)^n
+    \end{pmatrix}\\
+    &=\begin{pmatrix}
+        15/36+3/36(-1/2)^n, & 14/36 - 8/36(-1/2)^n, & 7/36 + 5/36(-1/2)^n
+    \end{pmatrix}
+\end{align*}
+where, just for fun, we find the limiting distribution $\lambda_\infty$ to be
+\[\lambda_\infty\lim_{n\rightarrow\infty}(15/36+3/36(-1/2)^n, 14/36 - 8/36(-1/2)^n, 7/36 + 5/36(-1/2)^n)=(15/36,14/36,7/36).\]
+and we are done.\hfill{$\qed$}
+\end{document}

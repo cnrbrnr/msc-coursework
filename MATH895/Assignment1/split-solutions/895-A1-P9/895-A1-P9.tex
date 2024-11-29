@@ -1,0 +1,91 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 9}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ defined in (16) satisfies condition $3$ of Kolmogorov's theorem. Conclude that it obeys the Weak Law of Large Numbers.\\[5pt]
+    {\bf Proof}\hspace{5pt} As was found previously, when $2\leq k<n^{2/5}$ we have $\E(X_{k,n})=\E(X_k)=0$, so
+    \begin{align*}
+        \Var(X_{k,n})=\E(X_{k,n}^2)=\bp{(-1)^kk^{5/2}}^2\frac{1}{k^2}+\bp{(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}}^2(1-k^{-2})=k^3+\frac{k}{1-k^{-2}}<k^3+\frac{4}{3}k\leq 2k^3
+    \end{align*}
+    with $\Var(X_{1,n})=0$ trivially. If instead $n^{2/5}\leq k\leq n$, we previously showed that $\E(X_{k,n})=(-1)^{k+1}k^{1/2}$. With this, we compute
+    \begin{align*}
+        \Var(X_{k,n})=\E((X_{k,n}-(-1)^{k+1}k^{1/2})^2)&=\E(X_{k,n}^2-2(-1)^{k+1}k^{1/2}X_{k,n}+k)\\
+        &=\E(X_{k,n}^2)+2(-1)^{k+2}k^{1/2}\E(X_{k,n})+k\\
+        &=\bp{\frac{(-1)^{k+1}k^{1/2}}{1-k^{-2}}}^2(1-k^{-2})+2(-1)^{k+2}k^{1/2}(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}(1-k^{-2})+k\\
+        &=\frac{k}{1-k^{-2}}-2k+k\\
+        &=\frac{k}{1-k^{-2}}-k\\
+        &=\frac{1}{k(1-k^{-2})}\\
+        &\leq\frac{4}{3k}
+    \end{align*}
+    where we have used the hints provided in the last couple steps of both variance computations. We can proceed to bound the sum of interest from above.
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=1}^n\Var(X_{k,n})&\leq\frac{1}{n^2}\bp{\sum_{k=1}^{\ceil{n^{2/5}}-1}2k^3+\sum_{k=\ceil{n^{2/5}}}^n\frac{4}{3k}}\\
+        &=\frac{2}{n^2}\sum_{k=1}^{\ceil{n^{2/5}}-1}k^3+\frac{4}{3n^2}\sum_{k=\ceil{n^{2/5}}}^n\frac{1}{k}\\
+        &= \frac{2}{n^2}\bp{\frac{\bp{\ceil{n^{2/5}}-1}\bp{\ceil{n^{2/5}}}}{2}}^2+\frac{4}{3n^2}\sum_{k=1}^n\frac{1}{k}.
+    \end{align*}
+    where the last step uses an equality for the finite sum of positive integers cubed (see Appendix A.1). At this point we need some elementary inequalities in order to complete the proof. First, let $x\geq1$. Then
+    \begin{align*}
+        (x-1)^2x^2=(x^2-2x+1)x^2=x^4-2x^3+x^2=x^4-x^2(2x-1)\leq x^4.\tag{20}
+    \end{align*}
+    Additionally, we have that $\tfrac{1}{k}\geq\tfrac{1}{x}\geq\tfrac{1}{k+1}$ for $x\in[k,k+1]$, so
+    \begin{align*}
+        \frac{1}{k}\geq\int_{k}^{k+1}\frac{dx}{x}\geq\frac{1}{k+1}\quad\Rightarrow\quad\frac{1}{k+1}\leq\log(k+1)-\log(k)\leq\frac{1}{k}\quad\Rightarrow\quad\sum_{k=2}^n\frac{1}{k}=\sum_{k=1}^{n-1}\frac{1}{k+1}\leq\log(n)\quad\Rightarrow\quad \sum_{k=1}^n\frac{1}{k}\leq\log(n)+1.\tag{21}
+    \end{align*}
+    With these we can pick up where we left off to find
+    \begin{align*}
+        \frac{1}{n^2}\sum_{k=1}^n\Var(X_{k,n})&\leq \frac{1}{2n^2}\ceil{n^{2/5}}^4+\frac{4}{3n^2}(\log(n)+1)\tag{by (20) and (21)}\\
+        &\leq \frac{1}{2n^2}(n^{2/5}+1)^4+\frac{4}{3n^2}\log(n)+\frac{4}{3n^2}\\
+        &\leq \frac{n^{8/5}}{2n^2}\bp{1+\frac{1}{n^{2/5}}}^4+\frac{4n}{3n^2}+\frac{4}{3n^2}\tag{$\log(n)\leq n$}\\
+        &=\frac{1}{2n^{2/5}}\bp{1+\frac{1}{n^{2/5}}}^4+\frac{4}{3n}+\frac{4}{3n^2}
+    \end{align*}
+    where now it is plain to see that each term goes to zero as $n\rightarrow\infty$, yielding the desired result.\hfill{$\qed$}\\[5pt]
+\end{document}

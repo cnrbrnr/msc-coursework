@@ -1,0 +1,371 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{\dimexpr\paperwidth-10cm}
+            Some solutions presented here were the product of collaboration with my fellow students. To be more precise, problems 4, 5, 7, 8 and 9 incorporate ideas presented to me during discussion with Anthony Pasion (problems 4 and 5),
+            Timothy Liu (problem 8) and Jack Heimrath (problems 7 and 9).
+            Problem 9 was completed with reference to [1]. 
+        \end{minipage}
+    \end{center}
+    \vspace{5pt}
+    {\bf Problem 1}\\[5pt]
+    Prove the following theorem using the so-called 'method of higher moments', as described in the provided steps.\\[5pt]
+    {\bf Theorem}\hspace{5pt} Let $(X_k)_{k\geq 1}$ be a sequence of independent, mean zero random variables. Suppose that $\exists C>0$ such that
+    for all $k\geq 1$ we have $|X_k|<C$ almost surely. Then
+    \[\frac{1}{n}\sum_{k=1}^nX_k\overunderset{\as}{n\rightarrow\infty}{\longrightarrow}0.\] 
+    {\bf a)}\hspace{5pt} Let $S_n=\sum_{k=1}^nX_k$. Prove that $\E\bp{\bp{\frac{S_n}{n}}^4}\leq \frac{4C^4}{n^2}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $\sigma^{(n)}_2:=\{(i,j):1\leq i,j\leq n,\;i\neq j\}$ and $\sigma_3^{(n)}:=\{(i,j,k):1\leq i,j,k\leq n\;i\neq j,\;j\neq k,\;i\neq k\}$ be the set of all permutations of two (respectively three) indices up to $n$.
+    By the multinomial theorem, we have
+    \begin{align*}
+        S_n^4=\bp{\sum_{k=1}^nX_k}^4&=\sum_{k=1}^nX_k^4+6\bp{\sum_{1\leq i<j\leq n}X_i^2X_j^2}\\
+        &\qquad+4\bp{\sum_{(i,j)\in\sigma_2^{(n)}}X_i^3X_j}+12\bp{\sum_{(i,j,k)\in\sigma_3^{(n)}}X_iX_jX_k^2}+24\bp{\sum_{1\leq i<j<k<\ell\leq n}X_iX_jX_kX_{\ell}}.
+    \end{align*}
+    In the following step, we simultaneously invoke the linearity of expectation, the independence of the random variables and the fact that $\E(X_n)=0$ for $n\geq 1$:
+    \begin{align*}
+        \E\bp{\frac{S_n^4}{n^4}}&=\frac{1}{n^4}\bp{\sum_{k=1}^n\E(X_k^4)+6\sum_{1\leq i<j\leq n}\E(X_i^2)\E(X_j^2)}\\
+        &\leq \frac{1}{n^4}\bp{nC^4+6\frac{n!}{(n-2)!2!}C^4}\\
+        &=\frac{1}{n^3}C^4\bp{3n-2}\\
+        &=\frac{4}{n^2}C^4\bp{\frac{3}{4}-\frac{1}{2n}}\\
+        &\leq \frac{4}{n^2}C^4
+    \end{align*}
+    as desired.\hfill{$\qed$}\\[5pt]
+    {\bf b)}\hspace{5pt} Use Beppo Levi's theorem to conclude the proof.\\[5pt]
+    {\bf Proof}\hspace{5pt} For $k\geq 1$, let $X_k$ be defined on a common probability space $(\Omega,\mc{F},P)$. From the previous part we have
+    \[\sum_{n=1}^\infty\E\bp{\bp{\frac{S_n}{n}}^4}\leq\sum_{k=1}^\infty\frac{4C}{n^2}<\infty\quad\Rightarrow\quad\sum_{n=1}^\infty\int_{\Omega}\bp{\frac{S_n}{n}}^4P(d\omega)<\infty.\]
+    Now, since $\left\{\bp{\tfrac{S_n}{n}}^4\right\}_{n=1}^\infty$ is a sequence of nonnegative, integrable functions on $\Omega$, by Beppo Levi's theorem we have
+    \begin{align*}
+        \sum_{k=1}^\infty\bp{\frac{S_k}{k}}^4<\infty\quad P-\ale
+    \end{align*} 
+    In particular, this implies that $\bp{\tfrac{S_n}{n}}^4\rightarrow 0$ $\as$ as $n\rightarrow\infty$, and further that $\tfrac{S_n}{n}\rightarrow 0$ $\as$ as $n\rightarrow\infty$, which is precisely the statement of the theorem.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 2}\\[5pt]
+    Prove the following lemma, used in a proof of the Borel-Cantelli lemma.\\[5pt]
+    {\bf Lemma}\hspace{5pt} Let $(p_n)_{n\geq 1}$ be a sequence of real numbers with $0\leq p_n<1$ for $n\geq 1$. Then
+    \[\prod_{n=1}^\infty(1-p_n)=0\quad\ifff\quad\sum_{n=1}^\infty p_n=\infty.\]
+    {\bf Proof}\hspace{5pt} To begin, suppose $\prod_{n=1}^\infty(1-p_n)=0$. Additionally, suppose that $p_n\rightarrow 0$ as $n\rightarrow \infty$, for otherwise the consequent follows trivially. We have
+    \begin{align*}
+        -\infty=\log\bp{\lim_{N\rightarrow\infty}\prod_{n=1}^N(1-p_n)}&=\lim_{N\rightarrow\infty}\log\bp{\prod_{n=1}^N(1-p_n)}\tag{continuity of logarithms}\\
+        &=\lim_{N\rightarrow\infty}\sum_{n=1}^N\log(1-p_n)=\sum_{n=1}^\infty\log(1-p_n)
+    \end{align*}
+    which further implies that 
+    \[\sum_{n=1}^\infty\log\bp{\frac{1}{1-p_n}}=\infty.\]
+    Using the well-known upper bound $\log(x)\leq x-1$, where $x\geq 1$, established by
+    \[\log(x)=\int_1^x\frac{1}{t}dt\leq \int_1^xdt=x-1\]
+    we have that
+    \begin{align*}
+        \infty=\sum_{n=1}^\infty\log\bp{\frac{1}{1-p_n}}\leq\sum_{n=1}^\infty\frac{1}{1-p_n}-1=\sum_{n=1}^\infty\frac{p_n}{1-p_n}.
+    \end{align*}
+    Now, since $p_n\rightarrow 0$ as $n\rightarrow\infty$, $\exists K\in\mbb{N}:$ $n\geq K$ implies that $p_n<\tfrac{1}{2}$, and further that $1-p_n\geq \tfrac{1}{2}$. By the above, this yields
+    \begin{align*}
+        \infty\leq\sum_{n=1}^\infty\frac{p_n}{1-p_n}=\sum_{n<K}\frac{p_n}{1-p_n}+\sum_{n\geq K}\frac{p_n}{1-p_n}\leq \sum_{n<K}\frac{p_n}{1-p_n}+2\sum_{n=K}^\infty p_n\quad\Rightarrow\quad \infty \leq 2\sum_{n=K}^\infty p_n \leq 2\sum_{n=1}^\infty p_n
+    \end{align*}
+    which, of course, implies that $\sum_{n=1}^\infty p_n=\infty$ as desired. For the converse, suppose that $\sum_{n=1}^\infty p_n=\infty$. Then, taking the Taylor expansion of $\log(1-x)$ with $0\leq x<1$ about $1$, we obtain
+    \begin{align*}
+        \log(1-x)&=\log(1)+(1-x-1)-\frac{1}{2!}(1-x-1)^2+\frac{2}{3!}(1-x-1)^3-\dots\\
+        &=-x-\frac{x^2}{2}-\frac{x^3}{3}-\dots\\
+        &=-\sum_{k=1}^\infty\frac{x^k}{k}\\
+        &\leq -x.\tag{1}
+    \end{align*}
+    Using this along with the hypothesis, we have
+    \begin{align*}
+        \sum_{n=1}^\infty p_n=\infty\quad\Rightarrow\quad -\infty=-\sum_{n=1}^\infty p_n&\geq \sum_{n=1}^\infty\log(1-p_n)\tag{by (1)}\\
+        &=\log\bp{\prod_{n=1}^\infty(1-p_n)}
+    \end{align*}
+    where in the last equality we implicitly used the continuity of the natural logarithm. Similarly taking the continuity of $e^x$ for granted:
+    \begin{align*}
+        0\leq \prod_{n=1}^\infty(1-p_n)\leq \lim_{N\rightarrow\infty}e^{-\sum_{n=1}^Np_n}=0
+    \end{align*}
+    whereby the squeeze theorem we conclude that $\prod_{n=1}^\infty(1-p_n)=0$, and the lemma is thus proven.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 3}\\[5pt]
+    Let $(\Omega,\mc{F},P)$ be the probability space where $\Omega=[0,1]$, $\mc{F}$ is the Borel $\sigma$-field and $P$ is the Lebesgue measure. Fix $a>0$ and define
+    $X$, $(X_n)_{n\geq 2}$ so that $X(\omega)=2a\1{[\tfrac{1}{2},1]}(\omega)$ and $X_n(\omega)=-2na\1{(\tfrac{1}{2}-\tfrac{1}{n},\tfrac{1}{2})}(\omega)+X(\omega)$ for $n\geq 2$.
+    Show that $(X_n)_{n\geq 2}$ converges to $X$ almost surely as $n\rightarrow\infty$ but $\lim_{n\rightarrow\infty}\E(X_n)\neq \E(X)$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Fix $\varepsilon>0$ and let $A^\varepsilon_k:=\{\omega\in\Omega:\forall n\geq k,\;|X_n(\omega)-X(\omega)|<\varepsilon\}$. Observing both that $|X_n(\omega)-X(\omega)|=2na\1{(1/2-1/n,1/2)}(\omega)$ for any $\omega\in\Omega$, and $A_n\subset A_{n+1}$ for $n\geq 2$, we have
+    \begin{align*}
+        P\bp{\bigcup_{N=2}^\infty\bigcap_{n\geq N}\{\omega\in\Omega:|X_n(\omega)-X(\omega)|<\varepsilon\}}=P\bp{\bigcup_{N=2}^\infty A_N^\varepsilon}&=\lim_{N\rightarrow\infty}P(A_N^\varepsilon)\tag{since $A_n\subset A_{n+1}$, for $n\geq 2$}\\
+        &=\lim_{N\rightarrow\infty}P\bp{\bigcap_{n\geq N}\{\omega\in\Omega:2na\1{(1/2-1/n,1/2)}(\omega)<\varepsilon\}}\\
+        &=\lim_{N\rightarrow\infty}P\bp{\bigcap_{n\geq N}([0,1/2-1/n]\cup[1/2,1])}\tag{taking $\varepsilon<2a$}\\
+        &=\lim_{N\rightarrow\infty}P([0,1/2-1/N]\cup[1/2,1])\\
+        &=\lim_{N\rightarrow\infty}\frac{1}{2}+\frac{1}{2}-\frac{1}{N}\\
+        &=1.
+    \end{align*}
+    So the event $\Omega_\varepsilon:=\cup_{N=2}^\infty\cap_{n\geq N}\{|X_n-X|<\varepsilon\}\subset\Omega$ where $(X_n)_{n\geq 2}$ is eventually $\varepsilon$-close to $X$ occurs $\wip$ $1$. Since $\varepsilon>0$ was arbitrary, for any $q\in\mbb{Q}$ with $q>0$
+    we may similarly define $\Omega_q:=\cup_{N=2}^\infty\cap_{n\geq N}\{|X_n-X|<q\}$ which also occurs $\wip$ $1$. Then
+    \begin{align*}
+        P\bp{X_n\underset{n\rightarrow\infty}{\longrightarrow}X}=P\bp{\{\omega\in\Omega:\lim_{n\rightarrow\infty}X_n(\omega)=X(\omega)\}}&=P\bp{\bigcap_{\substack{q\in\mbb{Q} \\ q>0}}\bigcup_{N=2}^\infty\bigcap_{n\geq N}\{\omega\in\Omega:|X_n(\omega)-X(\omega)|<q\}}\\
+        &=P\bp{\bigcap_{\substack{q\in\mbb{Q} \\ q>0}}\Omega_q}\\
+        &=1
+    \end{align*}
+    which says that $X_n\overunderset{\as}{n\rightarrow\infty}{\longrightarrow} X$. Here we used the fact that an up to countable intersection of events with probability $1$ also has probability $1$. We may now compute
+    \begin{align*}
+        \lim_{n\rightarrow\infty}\E(X_n)&=\lim_{n\rightarrow\infty}\int_0^1-2na\1{(1/2-1/n,1/2)}(\omega)+X(\omega)P(d\omega)\\
+        &=\lim_{n\rightarrow\infty}-2a\int_{0}^1n\1{(1/2-1/n,1/2)}(\omega)P(d\omega)+\int_0^1X(\omega)P(d\omega)\\
+        &=\E(X)-2a\lim_{n\rightarrow\infty}n\int_{\tfrac{1}{2}-\tfrac{1}{n}}^{\tfrac{1}{2}}P(d\omega)\\
+        &=\E(X)-2a\lim_{n\rightarrow\infty}n\bp{\frac{1}{2}-\frac{1}{2}+\frac{1}{n}}\\
+        &=\E(X)-2a
+    \end{align*}
+    so that $\E(X_n)\nrightarrow\E(X)$ as $n\rightarrow\infty$. Thus, the sequence $(X_n)_{n\geq 2}$ converges almost surely to $X$, and yet the sequence of first moments $(\E(X_n))_{n\geq 2}$ does not converge to $\E(X)$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 4}\\[5pt]
+    Let $(X_n)_{n\geq 1}$ be a sequence of $\iid$ random variables. Prove that $P(|X_n|>n\;\text{for infinitely many $n$})=0$ if and only if $\E(|X_1|)<\infty$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Both directions can be proven using the Borel-Cantelli lemma. Let $(\Omega,\mc{F},P)$ be the common probability space on which $X_n$ is defined for $n\geq 1$, and define $A_k:=\{\omega\in\Omega:k\leq |X_1|<k+1\}$ for $k\geq 1$. Then
+    \begin{align*}
+        \sum_{n=1}^\infty P(|X_n|>n)&=\sum_{n=1}^\infty \sum_{k=n}^\infty P(A_k)=\sum_{k=1}^\infty\sum_{n=1}^kP(A_k)=\sum_{k=1}^\infty kP(A_k)
+    \end{align*}
+    where the first equality holds since $A_i\cap A_j=\emptyset$ whenever $i\neq j$. Next, define a new random variable $Y:(\Omega,\mc{F},P)\rightarrow\mbb{N}$ as $Y(\omega)=\sum_{k=1}^\infty k\1{A_k}(\omega)$ so that for any $\omega\in\Omega$:
+    \[Y(\omega)\leq |X_1(\omega)|<Y(\omega)+1\quad\Rightarrow\quad \E(Y)\leq \E(|X_1|)<\E(Y)+1\quad\Rightarrow\quad \E(|X_1|)-1 <\E(Y)\leq \E(|X_1|).\]
+    However, by construction, we also have
+    \[\E(Y)=\E\bp{\sum_{k=1}^\infty k\1{A_k}}=\sum_{k=1}^\infty k\E(\1{A_k})=\sum_{k=1}^\infty kP(A_k)=\sum_{n=1}^\infty P(|X_n|>n)\]
+    where the second equality holds by the monotone convergence theorem. With this we obtain a bound on the series
+    \begin{align*}
+        \E(|X_1|)-1\leq \sum_{n=1}^\infty P(|X_n|>n) \leq \E(|X_1|).\tag{2}
+    \end{align*}
+    Now, suppose that $\E(|X_1|)<\infty$. By (3), $\sum_{n=1}^\infty P(|X_n|>n)<\infty$ also, and by the Borel-Cantelli lemma we thus have that $P(|X_n|>n\;\io)=0$. \\[5pt]
+    For the converse, suppose instead that $P(|X_n|>n\;\io)=0$. Once more by (the contrapositive of) the Borel-Cantelli lemma, it must be that either $\sum_{n=1}^\infty P(|X_n|>n)<\infty$ or the events $(\{\omega\in\Omega:|X_n(\omega)|>n\})_{n\geq 1}$ are not mutually independent.
+    However, by assumption the random variables $(X_n)_{n\geq 1}$ are $\iid$, so the events $(\{\omega\in\Omega:|X_n(\omega)|>n\})_{n\geq 1}$ are mutually independent, and we are forced to conclude that $\sum_{n=1}^\infty P(|X_n|>n)<\infty$. Then, by (2):
+    \[\E(|X_1|)\leq 1+\sum_{n=1}^\infty P(|X_n|>n)\leq \infty\]
+    so that $X_1$ has finite expectation, and we are done.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 5}\\[5pt]
+    Let $0<p<1/2$  and $(X_k)_{k\geq 1}$ be a sequence of $\iid$ random variables defined on a common probability space $(\Omega,\mc{F},P)$ so that $P(X_k=-1)=p$ and $P(X_k=1)=1-p$. Define $S_n=\sum_{k=1}^nX_k$ and $D=\limsup_n\{S_n=0\}=\{S_n=0\;\io\}$. Compute $P(D)$.\\[5pt]
+    {\bf Solution}\hspace{5pt}
+    Let $Y_n=\sum_{k=1}^n\1{\{X_k=-1\}}$ so that for $0\leq k\leq n$ we have
+    \[P(Y_n=k)=\nck{n}{k}p^k(1-p)^{n-k}\]
+    which is the probability that exactly $k$ of $(X_i)_{1\leq i\leq n}$ are $-1$. Any such realization of $Y_n$ determines the value of $S_n$, since
+    \[S_n=\sum_{k=1}^n X_k=\sum_{k=1}^n\1{\{X_k=1\}}-\sum_{k=1}^n\1{\{X_k=-1\}}=n-2Y_n.\]
+    Thus, for any $n\geq 1$, we obtain the probability
+    \[P(S_n=0)=P(n-2Y_n=0)=P(Y_n=n/2)=\begin{cases}
+        0,\quad&\text{if $2\nmid n$}\\
+        \nck{n}{n/2}p^{n/2}(1-p)^{n/2},\quad&\text{if $2\mid n$}.
+    \end{cases}\]
+    Equipped with this, the result follows the Borel-Cantelli lemma and some elementary analysis. We wish to determine whether or not the series
+    \begin{align*}
+        \sum_{k=1}^\infty P(Sk=0)=\sum_{k=1}^\infty\nck{2k}{k}p^k(1-p^k)
+    \end{align*}
+    converges. For $n\geq 1$, let $a_n=\nck{2n}{n}p^n(1-p)^n$. By the ratio test:
+    \begin{align*}
+        \limsup_{n\rightarrow\infty}\left|\frac{a_{n+1}}{a_n}\right|=\limsup_{n\rightarrow\infty}\bp{\frac{(2n+2)!n!n!}{2n!(n+1)!(n+1)!}\cdot\frac{p^{n+1}((1-p)^{n+1})}{p^n(1-p)^{n}}}&=\limsup_{n\rightarrow\infty}\bp{\frac{(2n+2)(2n+1)p(1-p)}{(n+1)^2}}\\
+        &=\limsup_{n\rightarrow\infty}\bp{\frac{4n^2+6n+2}{n^2+2n+1}p(1-p)}\\
+        &=4p(1-p).
+    \end{align*}
+    Taking $f(x)=x(1-x)$, we get $f^\prime(x)=1-2x$ and $f^{\prime\prime}(x)=-2$. But $f^{\prime\prime}<0$ on all of $\mbb{R}$, so it is strictly concave and admits a global maximum at $x=1/2$ since $f^\prime(x)=0$ if and only if $x=1/2$. Further, $f(1/2)=1/4$, so $f(p)<1/4$ because $p\neq 1/2$. Then
+    \begin{align*}
+        \limsup_{n\rightarrow\infty}\left|\frac{a_{n+1}}{a_n}\right|=4p(1-p)=4f(p)<1
+    \end{align*}
+    and thus $\sum_{k=1}^\infty P(S_k=0)<\infty$. By direct application of the Borel-Cantelli lemma, this fact implies $P(\limsup_n\{S_n=0\})=0$. \\[5pt]
+    Treating $S_n$ as the position of an asymmetric random walk on $\mbb{Z}$ at time $n$, we conclude that, starting from $S_0=0$, there is almost surely
+    a finite number of steps after which the process will never return to the origin.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 6}\\[5pt]
+    We aim to show that the base-10 decimal expansion of a random number in $[0,1)$ satisfies the strong law of large numbers. For $x\in\mbb{R}$, let $\langle x\rangle:=x-\floor{x}$ denote the fractional part of $x$. Consider the transformation $T:[0,1)\rightarrow[0,1)$ given by $T(x)=\langle 10x\rangle$.\\[5pt]
+    {\bf a)}\hspace{5pt} Let $\mc{B}$ be the Borel $\sigma$-field on $[0,1)$ and $P$ the Lebesgue measure on $\mc{B}$. Show that $P$ is $T$-invariant.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $D=\{0,1,2,\dots,9\}$ and observe that for any $x\in[0,1)$, we may write $x=0.x_1x_2x_3\cdots$ with $x_i\in D$ for $i\geq 1$, a decimal expansion of $x$. From this perspective, $T$ can be viewed as a one-sided shift so that $T(x)=0.x_2x_3x_4\cdots$ and the preimage of $\{x\}$ under $T$ is given by
+    \begin{align*}
+        T^{-1}(\{x\})=\{0.x_0x_1x_2x_3\cdots:x_0\in D\}.
+    \end{align*}
+    Now, we seek to show that $\forall A\in\mc{B}$, $P(T^{-1}(A))=P(A)$. However, it suffices to check that this holds for elements of the generating class of $\mc{B}$. Fix one such set $(a,b)$, with $0\leq a,b<1$ and take $(a_i)_{i\geq 1}$, $(b_i)_{i\geq 1}$ with $a_i,b_i\in D$ for $i\geq 1$ so that $a=0.a_1a_2a_3\cdots,b=0.b_1b_2b_3\cdots$. We claim that
+    \begin{align*}
+        T^{-1}((a,b))=\bigsqcup_{k\in D}\left(\tfrac{a}{10}+\tfrac{k}{10},\tfrac{b}{10}+\tfrac{k}{10}\right).\tag{3}
+    \end{align*}
+    Supposing first that $\omega\in T^{-1}((a,b))$ with $\omega=0.\omega_1\omega_2\omega_3\cdots$, we have that $T(\omega)=0.\omega_2\omega_3\in(a,b)$, so
+    \[a<0.\omega_2\omega_3\cdots<b\quad\Rightarrow\quad\tfrac{a}{10}<0.0\omega_2\omega_3\cdots <\tfrac{b}{10}\quad\Rightarrow\quad \tfrac{a}{10}+\tfrac{\omega_1}{10}<\omega<\tfrac{b}{10}+\tfrac{\omega_1}{10}\]
+    so $\omega\in(a/10+k/10,b/10+k/10)$ for some $k\in D$. If instead $\omega\in (a/10+k/10,b/10+k/10)$ for some fixed $k\in D$, then we may write $\omega=0.k\omega_1\omega_2\cdots$ so that
+    \begin{align*}
+        \tfrac{a}{10}+\tfrac{k}{10}<\omega<\tfrac{b}{10}+\tfrac{k}{10}\quad&\Rightarrow\quad 0.ka_1a_2\cdots <0.k\omega_1\omega_2\cdots <0.kb_1b_2\cdots\\
+        &\Rightarrow\quad 0.a_1a_2\cdots <0.\omega_1\omega_2\cdots < 0.b_1b_2\cdots\\
+        &\Rightarrow\quad a<T(\omega)<b
+    \end{align*}
+    so indeed, $T(\omega)\in(a,b)$ and $\omega\in T^{-1}((a,b))$. This establishes (3), from which we may directly compute
+    \begin{align*}
+        P(T^{-1}((a,b)))=P\bp{\bigsqcup_{k=0}^9\bp{\tfrac{a}{10}+\tfrac{k}{10},\tfrac{b}{10}+\tfrac{k}{10}}}=\sum_{k=0}^9P\bp{\tfrac{a}{10}+\tfrac{k}{10},\tfrac{b}{10}+\tfrac{k}{10}}=\sum_{k=0}^9\bp{\tfrac{b}{10}-\tfrac{a}{10}}=b-a=P((a,b)).
+    \end{align*}
+    Thus, for any member $A$ of a generating class of $\mc{B}$, we have $P(T^{-1}(A))=P(A)$, so $P$ is $T$-invariant.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Write $x\in[0,1)$ in base ten as $x=\sum_{n=1}^\infty\tfrac{d_n}{10^n}$, where $d_n\in D$. Note that, almost surely, this representation for $x$ is unique, and so $d_n=d_n(x)$ is a $P-\ale$ defined function of $x$. Find some $f\in L^{1}([0,1),\mc{B},P)$ so that $f(T^{n-1}(x))=d_n(x)$ for every $n\geq 1$.\\[5pt]
+    {\bf Solution}\hspace{5pt} For any $n\geq 1$, $x\in[0,1)$, we have $T^{n-1}(x)=\sum_{k=n}^\infty\tfrac{d_k(x)}{10^k}$. Setting $f:[0,1)\rightarrow D$ with $f(x)=\floor{10x}$, we have
+    \[f(T^{n-1}(x))=\floor{10T^{n-1}(x)}=\floor{d_n(x)+\sum_{k=n+1}^\infty\tfrac{d_k(x)}{10^k}}=d_n(x)\]
+    as desired. We need only verify that $f\in L^1([0,1),\mc{B},P)$. To see that $f$ is measurable, let us express it as
+    \begin{align*}
+        f(x)=\sum_{k=1}^9\1{\{10x\geq k\}}=\sum_{k=1}^9\1{\{x\geq k/10\}}
+    \end{align*}
+    which is a measurable function since for $k\in D$, $\{x\in[0,1):10x\geq k\}=\{x\in[0,1):x\geq k/10\}=[0.k,1)\in\mc{B}$. Now we compute
+    \begin{align*}
+        \int_0^1|f|dx=\int_0^1f(x)dx=\int_0^1\sum_{k=1}^9\1{\{x\geq k/10\}}dx=\sum_{k=1}^9\int_{0.k}^1dx=\frac{\sum_{k=1}^9k}{10}=4.5<\infty
+    \end{align*}
+    and thus $f\in L^1([0,1),\mc{B},P)$, the set of measurable and integrable functions on $([0,1),\mc{B},P)$.\hfill{$\qed$}\\[5pt]
+    {\bf c)}\hspace{5pt} Assuming that $T$ is ergodic (which can be proved using Fourier series) find a constant $\alpha$ so that 
+    \begin{align*}
+        lim_{N\rightarrow\infty}\frac{1}{N}\sum_{n=1}^Nd_n=\alpha\qquad\as
+    \end{align*}
+    {\bf Solution}\hspace{5pt} Let $x\in[0,1)$. Since $d_n(x)=f(T^{n-1}(x))$ for $n\geq 1$ with $f\in L^1([0,1),\mc{B},P)$ and $T$ $P$-preserving, by the Birkhoff ergodic theorem $\exists \alpha\in L^1([0,1),\mc{B}_{inv(T)},P|_{\inv(T)})$ so that
+    \[\frac{1}{N}\sum_{n=1}^Nd_n\overunderset{\as\text{ and in $L^1$}}{N\rightarrow\infty}{\xrightarrow{\hspace*{40pt}}}\alpha\]
+    where $\mc{B}_{\inv(T)}$ is the $\sigma$-field of sets $A\in\mc{B}$ satisfying $T^{-1}(A)=A$ and $P|_{\inv(T)}$ is the restriction of $P$ to this $\sigma$-field. However, since $T$ is ergodic, $\alpha$ is constant $\as$ and furthermore
+    \[\alpha=\int_0^1f(x)dx=4.5\]
+    almost surely. Thus, we have found a constant $\alpha$ so that for any $x\in[0,1)$, the digits of the decimal expansion of $x$ satisfy the strong law of large numbers:
+    \[\lim_{N\rightarrow\infty}\sum_{n=1}^Nd_n(x)=\alpha\qquad\as\]
+    and we are finished.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 7}\\[5pt]
+    Prove the following corollary of the Hewitt-Savage $0-1$ Law:\\[5pt]
+    {\bf Corollary}\hspace{5pt}Let $(X_n)_{n\geq 1}$ be a sequence of $\iid$ random variables taking values in $[0,\infty)$. Then (i) $\sum_{n=1}^\infty X_n$ either converges $\as$ or diverges $\as$ Further, (ii) if $E(X_1)>0$, then this series diverges $\as$\\[5pt]
+    {\bf a)}\hspace{5pt} Prove (i).\\[5pt]
+    {\bf Proof}\hspace{5pt} We consider the sequence $(X_n)_{n\geq 1}$ to be defined on the product probability space $(\Omega,\mc{F},P)$ so that $\forall\omega\in\Omega$, $\omega=(\omega_k)_{k\geq 1}$ and each $\omega_i$ resides in the same space $(\Omega_1,\mc{F}_1,P_1)$ for $i\geq 1$. In particular, $(\Omega,\mc{F},P)=(\Omega_1,\mc{F}_1,P_1)^{\mbb{N}}$ and we take $\pi_k:\Omega\rightarrow\Omega_1$ to be a natural projection map so that $\pi_k(\omega)=\omega_k$ for $k\geq 1$ and any $(\omega_i)_{i\geq 1}\in\Omega$.\\[5pt]
+    With this setup, we consider the event
+    \begin{align*}
+        A:=\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\omega)<\infty\right\}\equiv\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\pi_n(\omega))<\infty\right\}\equiv \left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\omega_n)<\infty\right\}
+    \end{align*}
+    where the series $\sum_{n=1}^\infty X_n$ converges. Next, let $\sigma:\mbb{N}\rightarrow\mbb{N}$ be a finite permutation such that $N_p:=\{k\in\mbb{N}:\sigma(k)\neq k\}$ is finite, and define $T_\sigma:\Omega\rightarrow\Omega$ by $T_\sigma((\omega_k)_{k\geq 1})=(\omega_{\sigma(k)})_{k\geq 1}$ for any $(\omega_k)_{k\geq 1}\in\Omega$. We aim to establish the exchangeability of $A$ by showing that $T_\sigma(A)=A$.\\[5pt]
+    For this, take some $\omega=(\omega_k)_{k\geq 1}\in A$ and observe that
+    \begin{align*}
+        \sum_{n=1}^\infty X_n(\omega_{\sigma(n)})=\sum_{n\in N_p}X_n(\omega_{\sigma(n)})+\sum_{n\notin N_p}X_n(\omega_{\sigma(n)})
+    \end{align*}
+    where for any $i\notin N_p$, $\sigma(i)=i$, and for $i\in N_p$, $\exists j\in N_p$ so that $\sigma(i)=j$. Further, let $\sigma^{-1}$ be the inverse of $\sigma$ so that $\sigma^{-1}(\sigma(n))=\sigma(\sigma^{-1}(n))=n$ $\forall n\in\mathbb{N}$. Since the variables are identically distributed, $X_n(\omega_j)=X_j(\omega_j)$ for any $n,j\geq 1$, and so the above becomes
+    \begin{align*}
+        \sum_{n\in N_p}X_n(\omega_{\sigma(n)})+\sum_{n\notin N_p}X_n(\omega_{\sigma(n)})&=\sum_{n\in N_p}X_{\sigma^{-1}(n)}(\omega_n)+\sum_{n\notin N_p}X_n(\omega_n)\tag{commutativity of addition}\\
+        &=\sum_{n\in N_p}X_n(\omega_n)+\sum_{n\notin N_p}X_n(\omega_n)\tag{$(X_n)_{n\geq 1}$ $\iid$}\\
+        &=\sum_{n=1}^\infty X_n(\omega)<\infty
+    \end{align*}
+    and thus $T_\sigma(A)\subset A$. Of course, this holds for arbitrary such $\sigma$, so in particular for $\sigma^{-1}$, the corresponding transformation on $\Omega$ satisfies $T_{\sigma^{-1}}(A)\subset A$. Now observe that $T^{-1}_\sigma\equiv T_{\sigma^{-1}}$ and take $\omega\in A$.
+    Since $T_{\sigma^{-1}}(\omega)=T^{-1}_\sigma(\omega)\in A$, we have $T_{\sigma}(T^{-1}_\sigma(\omega))=\omega$ so $\omega\in T_\sigma(A)$ and we conclude that $T_\sigma(A)=A$ for any finite permutation $\sigma$. That is, $A$ is exchangeable.\\[5pt]
+    Let $\mc{E}:=\{B\in\mc{F}:T_\sigma(B)=B\;\text{for all finite permutations $\sigma$}\}$ be the set of exchangeable events in $(\Omega,\mc{F},P)$. It turns out that $\mc{E}$ is a $\sigma$-field (see Appendix A.1 for a proof), so 
+    \[\Omega\setminus A=\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n=\infty\right\}\]
+    is also exchangeable. Thus, by the Hewitt-Savage $0-1$ law, $P(A),P(\Omega\setminus A)\in\{0,1\}$. That is, either $\sum_{n=1}^\infty X_n$ converges $\as$, or else it diverges $\as$\hfill{$\qed$}\\[5pt]
+    {\bf b)} Prove (ii).\\[5pt]
+    {\bf Proof}\hspace{5pt} Suppose that $\E(X_1)>0$, so that $\E(X_n)>0$ for any $n\geq 1$ too. Since $X_n$ is $[0,\infty)$-valued, $P(X_n=0)<1$ for all $n\geq 1$, since otherwise
+    \begin{align*}
+        \E(X_n)=\int_{\Omega_1}X_nP_1(d\omega)=\int_{\{\omega\in\Omega_1:X_n(\omega)=0\}}X_nP_1(d\omega)=0
+    \end{align*}
+    contradicting the positive expectation of the random variables. Setting $p=P(X_n=0)<1$, we have
+    \begin{align*}
+        \prod_{i=1}^\infty p=\lim_{n\rightarrow\infty}p^n=0
+    \end{align*}
+    which, by problem 2, implies that $\sum_{n=1}^\infty(1-p)=\sum_{n=1}^\infty P(X_n>0)=\infty$. By the Borel-Cantelli lemma, along with the fact that $(X_n)_{n\geq1}$ are mutually independent, we have that
+    $P(X_n>0\;\io)=1$. This says that for any $N\in\mbb{N}$, $\exists n\geq N:\;X_n>\varepsilon$ for some $\varepsilon>0$ almost surely. Since the $X_n$ are independent, $\varepsilon$ does not depend on $N$, and so $X_n\nrightarrow 0$ as $n\rightarrow\infty$ almost surely. Then, by the divergence test, $\sum_{n=1}^\infty X_n=\infty$ almost surely.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 8}\\[5pt]
+    For $n\geq 1$, let $X_n$ be a uniform random variable on the interval $[-n,n]$. Let $F_n$ denote the distribution function of $X_n$. For every $x\in\mbb{R}$, find $\lim_{n\rightarrow\infty}F_n(x)$, if the limit exists.\\[5pt]
+    {\bf Solution}\hspace{5pt} For $n\geq 1$, the uniform distribution function $F_n$ is given by
+    \begin{align*}
+        F_n(x)=\begin{cases}
+            0,\quad&\text{if $x<-n$}\\
+            \frac{x+n}{2n},\quad&\text{if $-n\leq x<n$}\\
+            1,\quad&\text{if $x\geq 1$}.
+        \end{cases}
+    \end{align*}
+    Now, fixing $x\in\mbb{R}$, we are interested in the limiting behavior of the sequence $\{F_n(x)\}_{n\geq 1}$. For this arbitrary point, $\exists N\in\mbb{N}$ so that $n\geq N$ implies that $|x|< n$, and further $F_n(x)=\tfrac{x+n}{2n}$. Of course, the limit of $(F_n(x))_{n\geq 1}$ and $F_n(x)_{n\geq N}$ are the same, so we may compute
+    \begin{align*}
+        \lim_{n\rightarrow\infty} F_n(x)=\lim_{n\rightarrow\infty}\frac{x+n}{2n}=\frac{1}{2}
+    \end{align*}
+    which implies that $\lim_{n\rightarrow\infty}F_n=1/2=:F$ pointwise, a constant function over $\mbb{R}$. Interestingly, this limit is not a distribution function since $\lim_{x\rightarrow-\infty}F(x)=1/2\neq 0$, and $\lim_{x\rightarrow\infty}F(x)=1/2\neq 1$.\hfill{$\qed$}\\[5pt]
+    {\bf Problem 9}\\[5pt]
+    Prove the following:\\[5pt]
+    {\bf Theorem}\hspace{5pt} Let $X_1,\dots X_n$ be independent, real-valued random variables. Sppose that $0<\varepsilon,\delta<1$ are such that, for every $1\leq k\leq n$, we have
+    $P\bp{\left|\sum_{j=k}^nX_j\right|\geq \frac{\varepsilon}{2}}\leq \delta$. Then
+    \begin{align*}
+        P\bp{\max_{1\leq k\leq n}\left|\sum_{j=1}^kX_j\right|\geq \varepsilon}\leq \frac{\delta}{1-\delta}.
+    \end{align*}
+    {\bf Proof}\hspace{5pt} We follow [1] in this proof. Let $(\Omega,\mc{F},P)$ be the common probability space on which $X_1,\dots, X_n$ are defined. As per the hint, we proceed in a manner similar to the proof of the Kolmogorov maximal inequality. That is, we partition our target event as
+    \begin{align*}
+        \mc{C}:=\bigsqcup_{k=1}^n\mc{C}_k\quad\text{with}\quad \mc{C}_k:=\left\{\omega\in\Omega:\left|\sum_{i=1}^jX_i\right|<\varepsilon\;\text{for $1\leq j<k$, and }\left|\sum_{i=1}^kX_i\right|\geq\varepsilon\right\}
+    \end{align*}
+    so $\mc{C}_k$ is the event that the $k$th partial sum $\sum_{j=1}^kX_k$ is the first to exceed $\varepsilon$ in absolute value. Observe that we have the inclusion
+    \begin{align*}
+        \left\{\omega\in\Omega:\left|\sum_{j=1}^{n}X_j-\sum_{j=1}^kX_j\right|<\frac{\varepsilon}{2},\quad\omega\in\mc{C}_k\right\}\subset\left\{\omega\in\Omega:\left|\sum_{j=1}^nX_j\right|\geq\frac{\varepsilon}{2},\quad\omega\in\mc{C}_k\right\}\tag{4}
+    \end{align*}
+    for $k\leq n$. For this, take $k\leq n$, and henceforth denote $S_k:=\sum_{j=1}^kX_j$ for $1\leq k\leq n$ as shorthand. If $\omega\in\Omega$ is such that $|S_n-S_k|<\tfrac{\varepsilon}{2}$ and $\omega\in\mc{C}_k$, then $|S_k|\geq\varepsilon$ and so $|S_n|\geq\tfrac{\varepsilon}{2}$. To see why, assume instead instead that $|S_n|<\tfrac{\varepsilon}{2}$, then we could produce the lower bound
+    \begin{align*}
+        \left|S_n-S_k\right|=\left|S_k-S_n\right|\geq ||S_k|-|S_n||\geq |S_k|-|S_n|>\varepsilon-\frac{\varepsilon}{2}=\frac{\varepsilon}{2}
+    \end{align*}
+    violating our assumption that $|S_n-S_k|<\tfrac{\varepsilon}{2}$. Equipped with (4), we compute
+    \begin{align*}
+        \delta\geq P\bp{\left|S_n\right|\geq\frac{\varepsilon}{2}}\geq P\bp{\left|S_n\right|\geq\frac{\varepsilon}{2},\;\max_{1\leq k\leq n}\left|S_k\right|\geq\varepsilon}&=P\bp{\left|S_n\right|\geq\frac{\varepsilon}{2},\;\bigsqcup_{k=1}^n\mc{C}_k}\\
+        &=\sum_{k=1}^nP\bp{\left|S_n\right|\geq\frac{\varepsilon}{2},\; \mc{C}_k}\\
+        &\geq \sum_{k=1}^nP\bp{|S_{n}-S_k|<\frac{\varepsilon}{2},\;\mc{C}_k}.\tag{by (4)}
+    \end{align*}
+    However, $\mc{C}_k$ depends only on $X_1,\dots,X_k$, and $\{|S_n-S_k|<\tfrac{\varepsilon}{2}\}$ only on $X_{k+1},\dots,X_n$ (or else is zero if $k=n$). Since $X_1,\dots,X_n$ are $\iid$, the probability in the last inequality factorizes, and we obtain
+    \begin{align*}
+        \delta\geq\sum_{k=1}^nP\bp{|S_{n}-S_k|<\frac{\varepsilon}{2},\;\mc{C}_k}&=\sum_{k=1}^nP\bp{|S_n-S_k|<\frac{\varepsilon}{2}}P\bp{\mc{C}_k}\\
+        &=\sum_{k=1}^n(1-\delta)P(\mc{C}_k)\tag{since $P(|\sum_{j=k}^nX_j|\geq\tfrac{\varepsilon}{2})\leq\delta$}\\
+        &=(1-\delta P\bp{\bigsqcup_{k=1}^n\mc{C}_k})\\
+        &=(1-\delta)P\bp{\max_{1\leq k\leq n}\left|\sum_{j=1}^kX_j\right|\geq\varepsilon} 
+    \end{align*}
+    which implies the result
+    \[P\bp{\max_{1\leq k\leq n}\left|\sum_{j=1}^kX_j\right|\geq \varepsilon}\leq \frac{\delta}{1-\delta}.\tag*{$\qed$}\]
+    \vspace{10pt}
+    \hrule
+    \begin{center}
+        {\bf\large Appendix}
+    \end{center}
+    {\bf A.1\hspace{5pt} Proofs of supplementary theorems}\\[5pt]
+    {\bf Lemma} (Problem 7). Let $(\Omega,\mc{F},P)=(\Omega_1,\mc{F}_1,P_1)^{\mbb{N}}$ be the infinite product probability space on which a sequence of $\iid$ random variables $(X_k)_{k\geq 1}$ is defined. The set of
+    exchangeable events
+    \[\mc{E}=\{B\in\mc{F}:T_\sigma(B)=B\;\text{for all finite permutations $\sigma$}\}\]
+    is a $\sigma$-field, where for a finite permutation $\sigma:\mbb{N}\rightarrow\mbb{N}$, $T_\sigma:\Omega\rightarrow\Omega$ is defined by
+    $T_\sigma((\omega_i)_{i\geq 1})=(\omega_{\sigma(i)})_{i\geq 1}$.\\[5pt]
+    {\bf Proof}\hspace{5pt} Let $\sigma$ be an arbitrary finite permutation, and note that $\sigma$ is a bijection. First, $\Omega\in\mc{E}$, since
+    taking $\omega\in\Omega$, $\exists\omega^\prime\in\Omega:$ $T_\sigma(\omega^\prime)=\omega$ (surjectivity of $\sigma$) so $\Omega\subset T_\sigma(\Omega)$. But $T_\sigma(\omega)\in\Omega$ too, so we get $T_\sigma(\Omega)=\Omega$, and $\Omega\in\mc{E}$. Now, take $A\in\mc{E}$. Then
+    \begin{align*}
+        T_\sigma(\Omega\setminus A)=\Omega\setminus T_\sigma(A)=\Omega\setminus A
+    \end{align*}
+    so $\Omega\setminus A\in\mc{E}$, and $\mc{E}$ is closed under complementation. The first equality holds since if $\omega\in T_\sigma(\Omega\setminus A)$, then $\exists!\omega^\prime\in\Omega\setminus A:T_\sigma(\omega^\prime)=\omega$ (bijectivity of $\sigma$). From this, we get that $\forall \omega^{\prime\prime}\in A$, $T_\sigma(\omega^{\prime\prime})\neq\omega$, and thus $\omega\in\Omega\setminus T_\sigma(A)$.
+    Conversely, if $\omega\in\Omega\setminus T_\sigma(A)$, then $\exists\omega^\prime\in\Omega:\omega= T_\sigma(\omega^\prime)$ (surjectivity of $\sigma$), but $\omega^\prime\notin A$ since $\omega\in\Omega\setminus T_\sigma(A)$, so $\omega\in T_\sigma(\Omega\setminus A)$.\\[5pt]
+    Finally, let $(A_i)_{i\geq 1}\subset\mc{E}$ be a countable sequence of exchangeable events. Then
+    \[T_\sigma\bp{\bigcup_{i=1}^\infty A_i}=\bigcup_{i=1}^\infty T_\sigma(A_i)=\bigcup_{i=1}^\infty A_i\]
+    so $\cup_{i=1}^\infty A_i\in\mc{E}$, and $\mc{E}$ is closed under countable unions. Thus, $\mc{E}$ satisfies all $\sigma$-field axioms.\hfill{$\qed$}\\[5pt]
+    \hrule
+    \begin{center}
+        {\bf\large References}
+    \end{center}
+    1. R.M. Dudley, {\it Real Analysis and Probability}, Cambridge University Press, Cambridge, 2002. \\[5pt]
+
+\end{document}

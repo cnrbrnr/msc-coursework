@@ -1,0 +1,207 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+\usepackage{array, booktabs, ragged2e}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf PROJECT REPORT} \hfill {\bf Connor Braun} \hfill {\bf 2024-04-17}
+    \end{center}
+\noindent{\bf\large Introduction}\\[5pt]
+In this technical report I detail\_the process supporting each of my submissions to the Kaggle contest W24 457/857 project
+(username 'conBrauner'). Contestants were tasked with constructing a regression model to predict log-price of Airbnb destinations
+from multimodal feature data, including location/property characteristics, customer reviews {\it et cetera}. At the time of writing,
+I place $11$-th out of $37$ submissions. Preprocessing and model I were implemented in Python 3.11 using scikit-learn 1.4. Deep neural networks (model II)
+were implemented using TensorFlow 2.16 and the Keras application programming interface (API).\\[5pt]
+{\bf\large Data Preprocessing}\\[5pt]
+Before any modeling efforts were made, I began with the general methodology of first understanding (at a descriptive level) the data at hand followed by feature selection/engineering. In table 1., I categorize the raw features according
+to their type; either ordinal, nominal, numerical or text. For clarity, nominal data are those taking value in an unordered, discrete set,
+ordinal in an ordered discrete set and numerical on a (at least approximate) continuum. Text data is self-explanatory.
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Table 1.} Features of the Airbnb training and test datasets categorized according to datatype. The training data consisted of $27$
+        features over $52000$ samples. Not a number (NaN) counts for the test and train datasets are included next to each feature, and indicate the number of missing entires.
+    \end{minipage}
+\end{center}
+\begin{center}
+    \begin{tabular}{@{}ccccccccc@{}}\toprule
+            \multicolumn{3}{c}{Nominal} & \multicolumn{3}{c}{Ordinal} & \multicolumn{3}{c}{Numerical}\\
+            \cmidrule(lr){1-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+        Name & Train & Test & Name & Train & Test & Name & Train & Test \\\midrule
+        property\_type & 0 & 0 & accommodates & 0 & 0 & latitude & 0 & 0\\ 
+        room\_type & 0 & 0 &  bathrooms & 142 & 58 & longitude & 0 & 0\\
+        bed\_type & 0 & 0 & number\_of\_reviews & 0 & 0 & review\_scores\_rating & 11717 & 5005\\
+        cancellation\_policy & 0 & 0 & bedrooms & 70 & 21 & & &\\
+        cleaning\_fee& 0 & 0 & beds & 95 & 36 & & &\\
+        city& 0 & 0 & & & & & &\\
+        host\_has\_profile\_pic& 136 & 52 & & & & & &\\
+        host\_identity\_verified& 136 & 52 & & & & & &\\
+        instant\_bookable& 0 & 0 & & & & & &\\
+        \bottomrule
+    \end{tabular}
+    \begin{tabular}{@{}cccccc@{}}
+            \multicolumn{3}{c}{Text} & \multicolumn{3}{c}{EXCLUDED} \\
+            \cmidrule(lr){1-3}\cmidrule(lr){4-6}
+        Name & Train & Test & Name & Train & Test\\\midrule
+        amenities & 0 & 0 &first\_review & 11134 & 4730\\
+        description & 0 & 0 & host\_response\_rate & 12878 & 5421\\
+        name & 0 & 0 & host\_since & 136 & 52\\
+        & & & last\_review & 11110 & 4717\\
+        & & & zipcode & 690 & 276\\
+        & & & ID & 0 & 0\\
+        & & & neighbourhood & 4865 & 2007\\
+        \bottomrule
+    \end{tabular}
+\end{center}
+The nominal, ordinal and numerical features are to undergo imputation to resolve missing values, while text data will be featurized directly.
+Date variables such as 'first\_review', 'host\_since' and 'last\_review' were excluded due to their high rate of missing entries combined with the lack of
+an obvious method for principled imputation. However, I suspect these features have predictive value, so their exclusion is at a loss. Conversely, the 'Zipcode', 'ID'
+and 'neighbourhood' variables were excluded due to a suspected lack of predictive value. Finally, 'host\_response\_rate' was excluded due to a high frequency of missing
+values in both datasets.\\[5pt]
+Before preprocessing, the train/test datasets were combined to more accurately estimate feature statistices and missing entries. Missing nominal and ordinal data were imputed by replacing NaN values with the most frequent entry
+in the corresponding feature across the sample. Missing numerical data were set to the mean value of that feature. Nominal/ordinal data were then encoded as onehot vectors, and numerical
+data -- including the response variable (log-price) -- was standardized.\\[5pt]
+Text data was featurized using the term frequency-inverse document frequency (tf-idf) transform. Briefly, text data across the train/test datasets were compiled into a collection of documents $\mc{D}$ and a corpus $\mc{D}^\prime$, where the cardinality $|\mc{D}^\prime|$
+defines the dimension the vectorized text features for each entry. For each term $t\in\mc{D}^\prime$ and document $d\in\mc{D}$, the term-frequency $tf(t,d)$, inverse document-frequency $idf(t)$ and tf-idf $tfidf(t,d)$ statistics are given in [1] as
+\begin{align*}
+    tf(t,d)=\frac{|\{w\in d: w=t\}|}{|d|},\quad idf(t)=\log\bp{\frac{1+|\mc{D}|}{1+|\{d\in\mc{D}:t\in d\}|}},\quad\text{and}\quad tfidf(t,d)=tf(t,d)\times idf(t).
+\end{align*}
+So, for an entry in the dataset $d\in\mc{D}$, we may construct a vector of dimension $|\mc{D}^\prime|$ by imposing an order on the corpus $\mc{D}^\prime=\{t_i\}_{i=1}^{|\mc{D}^\prime|}$ and using $tfidf(t_i,d)$ as the $i$-th entry of the feature vector. This has the effect of representing words which appear frequently in the corpus as small values, and infrequent words as numerically large.\\[5pt]
+Finally, we took a random 20-80 split of the training data, the smaller of which is henceforth referred to as the validation set, which we used to assess model performance after fitting in lieu of the responses for the test set.\\[5pt] 
+{\bf\large Model I: Elastic Net Regression}\\[5pt]
+As an initial effort, we construct a simple elastic net regression model. For each feature vector $x_i\in\mbb{R}^p$ (where after preprocessing, $p=72272+1$, up from $27$ in the raw data) with $1$ as the first entry to accomodate an intercept, one computes regression coefficients $\beta^\ast\in\mbb{R}^p$ according to
+\begin{align*}
+    \beta^\ast=\argmin_{\beta\in\mbb{R}^p}\left\{\frac{1}{2}\sum_{i=1}^n(y_i-\beta^Tx_i)^2+\lambda\bp{\tfrac{1}{2}(1-\alpha)\|\beta\|^2_2+\alpha\|\beta\|_1}\right\}
+\end{align*}
+where $y_i$ is the $i$-th training response, $\lambda$ is a regularization parameter and $\alpha$ is the penalty mixing parameter controlling the balance between the taxicab ($\|\cdot\|_1$) and Euclidean ($\|\cdot\|_2$) norm penalties. To select a pair $(\lambda,\alpha)$, I used sequential cross-validation (CV).
+A grid search CV would have been preferable, but computational limitations made this option impractical to explore.\\[5pt]
+After some experimentation, I settled first on a 5-fold CV at $10$ linearly-spaced points (including the endpoints) of the interval $[2\times10^{-5},1]$ with $\lambda=1$ fixed to select $\alpha$, followed by another 5-fold CV at $10$ linearly-spaced points on $[0.1,1]$ to select $\lambda$ with $\alpha=0.001$ fixed (where $\alpha$ is fixed here based on the 
+result of the preceding round of CV). This procedure was rather crude, but this was acceptable because this first model was only intended to serve as a baseline for assessing the performance of the next class of models considered. In figure 1. I present the CV results for selecting $\alpha$ followed by $\lambda$.\\[5pt]
+\begin{center}
+    \makebox[\textwidth]{\includegraphics[width=100mm]{elastic-net-cv.png}}
+\end{center}
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Figure 1.} Five-fold cross validation results for tuning parameters $\lambda$ and $\alpha$ separately.
+    \end{minipage}
+\end{center}
+It would appear that the model continues to improve in both decreasing $\lambda$ and $\alpha$ when the other is fixed. Perplexingly, I was unable to probe yet smaller values of either parameter -- from my testing the fitting time of the sci-kit learn elastic net implementation grows exponentially as either $\lambda$ or $\alpha$ decrease. I suspect that this is due to the
+high dimensionality of the training data. Nonetheless, setting $\lambda=0.1$ and $\alpha=0.00002$ we have the model for my first two submissions, with MSE scores $23.1743$ and $0.3012$ on the (hidden) test data. Both of these prediction scores originate from the same model; the only difference is that I did not rescale the predictions (i.e., reverse the standardization) for
+the first submission. This was quickly corrected for the second submission, and serves as a baseline for the more apt modeling strategy I tried next.\\[5pt]
+{\bf\large Model II: Regression Multi-Layer Perceptron}\\[5pt]
+Deep learning is generally well-suited for extracting complex features from even extremely high-dimensional data, and thus makes a promising candidate for the current problem. Further, these models are relatively straightforward to implement using TensorFlow. One of the major difficulties with this method is the enormity of the hyperparameter space. 
+All aspects of network architecture (number of layers, nodes per layer, activation functions) and optimization parameters (learning rate, cost function) can be tuned separately, using the validation data to guide model selection; I cannot claim my efforts to be exhaustive.\\[5pt]
+The general architecture that I used was a simple feedforward multilayer perceptron with ReLU activations and dropout regularization between each layer to promote sparsity of the learned weight parameters. Briefly, dropout regularization probabilistically blocks transmission of some proportion of activations
+from proceding to the next layer [3]. The terminal layer consisted of a single node (as a univariate regression model). The Adam method [2] was used for optimization and gradients were computed with respect to a mean squared error objective function.\\[5pt]
+For each architecture tested, the model was trained for $100$ epochs with the training data split into batches of $30$ samples. This means that in each epoch, the network would transform all the data in a single batch, and the outputs over this batch would be used to estimate the loss gradient. Then the weights would be adjusted according to this gradient estimate, and the next batch
+is loaded in. The batches form a partition of the training data, randomized at each epoch. At the end of each epoch, the current model forms a prediction on the validation dataset, and this information is used to estimate the test error, and determine at which epoch the model begins to overfit. The performance of a model corresponding to a particular set of hyperparameters is
+determined using the best validation error (in this case, the lowest MSE) across the $100$-epoch training history.\\[5pt]
+Most networks performed quite similarly, producing a minimum validation loss of approximately $0.30$ on the validation set before apparent overfitting occurred. The best of these by a narrow margin
+was a six layer network, with $(64,32,32,32,16,1)$ activations in each (in this notation, the input layer has $64$ nodes whilst the output has only $1$ and there are four hidden layers). Between each of the hidden layers I included a dropout regularization with probabilities $(p_1,p_2,p_3,p_4)=(0.6,0.4,0.3,0.3)$.
+This architecture (and in fact the general architecture of many networks tested) is depicted in figure 2.
+\begin{center}
+    \makebox[\textwidth]{\includegraphics[width=120mm]{mlp.png}}
+\end{center}
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Figure 2.} General multilayer perceptron architecture tested. The number of activations in each layer is left unspecified, but is generally similar between hidden layers. Initial layer has a large number of activations, and output has only one. Dropout regularization is included between hidden layers.
+    \end{minipage}
+\end{center}
+The training history for my best network is presented below in figure 3. Despite assessing prediction quality using MSE -- the same metric as for ranking competitor submissions -- network predictions performed better than their validation MSE would lead one to believe. In particular, a validation MSE of $\sim 0.30$ results in a test performance (after submission) of roughly $0.15-0.16$.
+I was unable to determine the source of this discrepancy. 
+\begin{center}
+    \makebox[\textwidth]{\includegraphics[width=120mm]{mlp-training-1.png}}
+\end{center}
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Figure 3.} Validation/training loss history for best network architecture found over $100$ epochs of training. Validation MSE is presented in red, training MSE in black. 
+    \end{minipage}
+\end{center}
+From figure 3, it can be seen that the validation and training loss curves diverge before the twentieth epoch, so this could be considered the point at which the model overfits the data. However, one would hope to see a clear degradation in validation performance to confirm this. Instead, the validation loss
+fluctuates wildly between $0.4-0.6$ over the duration of training, presenting several (roughly equal) minima as candidates for early stopping. When formulating submissions for the competition, I would identify the five best validation scores, and train the model up to those minima occurring before the $30$-th epoch.
+My seven remaining submissions were all generated in this way. In table 2., I summarize my submission history for the competition, and in figure 4. I include a screenshot of my best submission.\\[5pt]
+{\bf\large Submission Summary}
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Table 2.} Summary of contest submissions. 
+    \end{minipage}
+\end{center}
+\begin{center}
+    \begin{tabular}{@{}l|cccc@{}}\toprule
+        no. & Score & Model & Date & Notes  \\\midrule
+        1 & 23.1743 & Elastic Net & 03/13/24 & Forgot to unstandardize predictions\\
+        2 & 0.3012 & Elastic Net & 03/13/24 & Same model as entry 1, correcting the mistake\\
+        3 & 0.1515 & MLP & 03/15/24 & Best multilayer perceptron, which architecture as in figure 2.\\
+        4 & 0.1583 & MLP & 03/15/24 & Longer duration of training for same model as entry 3\\
+        5 & 0.1544 & MLP & 03/24/24 & Alternative architecture\\
+        6 & 0.1556 & MLP & 03/24/24 & Alternative architecture\\
+        7 & 0.1543 & MLP & 03/25/24 & Alternative architecture\\
+        8 & 0.1770 & MLP & 04/17/24 & Attempting to reproduce entry 3 for report\\
+        9 & 0.1575 & MLP & 04/17/24 & Attempting to reproduce entry 3 for report\\
+        \bottomrule
+    \end{tabular}
+\end{center}
+{\bf NOTE:}\hspace{5pt}In my best submission, I used the architecture described above and stopped training at epoch $10$, resulting in a test score of $0.1515$. I did not save the figures for this model, however, and was unable
+to reproduce the submission as I return to create this report and finalize my code. Instead, I report on entry no. 9, which performs similarly anyways.
+ \begin{center}
+    \makebox[\textwidth]{\includegraphics[width=200mm]{best-score.png}}
+\end{center}
+\begin{center}
+    \begin{minipage}{\dimexpr\paperwidth-5cm}
+        {\bf Figure 4.} Screenshot of best score to Kaggle competition.
+    \end{minipage}
+\end{center}
+\hrule
+\vspace{10pt}
+\noindent{\bf\large References}
+    \begin{enumerate}
+        \item L. Havrlant and V. Kreinovich, {\it A simple probabilistic explanation of term frequency-inverse document frequency (td-idf) heuristic (and variations motivated by this explanation)}, Int. J. Gen. Syst. {\bf 46} (2017), no. 1, 27-36, 10.1080/03081079.2017.1291635.
+        \item D. Kingma and J. Ba, {\it Adam: A method for stochastic optimization}, arXiv preprint (2017), 1412.6980. 
+        \item I. Salehin and K. Dae-Ki, {\it A review on dropout regularization approaches for deep neural networks within the scholarly domain}, Electronics {\bf 12} (2023), no.14, 3106, 10.3390/electronics12143106.
+    \end{enumerate}
+\end{document}

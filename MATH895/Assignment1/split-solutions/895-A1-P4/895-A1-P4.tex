@@ -1,0 +1,84 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 4}\\[5pt]
+    Recall that if $X$ and $Y$ are two real-valued random variables on the same probability space, we defined the {\it correlation coefficient of $X$ and $Y$} as $r(X,Y):=\frac{\Cov(X,Y)}{\sqrt{\Var(X)\Var{Y}}}$, provided $0<\Var(X),\Var(Y)<\infty$.
+    Prove the following theorem.
+    \begin{theorem}
+        Let $X$, $Y$ be two real-valued random variables defined on a probability space $(\Omega,\mc{F},P)$. Suppose that $X$ and $Y$ have finite, nonzero variances. Then
+        \begin{enumerate}
+            \item $|r(X,Y)|\leq 1$
+            \item If $|r(X,Y)|=1$ then $\exists a,b\in\mbb{R}:\;Y(\omega)=aX(\omega)+b$ for $P$-almost every $\omega\in\Omega$.
+        \end{enumerate}
+    \end{theorem}
+    \noindent{\bf Proof}\hspace{5pt}Let $t\in\mbb{R}$ and consider
+    \begin{align*}
+        0\leq\E((t(Y=\E(Y))+(X-\E(X)))^2)&=\E(t^2(Y-\E(Y))^2+2t(Y-\E(Y))(X-\E(X))+(X-\E(X))^2)\\
+        &=t^2\Var(Y)+2t\Cov(X,Y)+\Var(X)\tag{11}
+    \end{align*}
+    a nonnegative quadratic polynomial in $t$, which therefore has a nonpositive discriminant. That is,
+    \begin{align*}
+        4(\Cov(X,Y))^2-4\Var(Y)\Var(X)\leq 0\quad\Leftrightarrow\quad(\Cov(X,Y))^2\leq\Var(X)\Var(Y)\quad&\Leftrightarrow\quad|\Cov(X,Y)|\leq\sqrt{\Var(X)\Var(Y)}\\
+        &\Leftrightarrow\quad|r(X,Y)|\leq 1
+    \end{align*}
+    establishing part 1 of Theorem 1. For part 2, suppose $|r(X,Y)|=1$, so that $4(\Cov(X,Y))^2-4\Var(X)\Var(Y)=0$ and (11) has a single root of multiplicity two. Let $\hat{t}$ be this root. Then
+    \begin{align*}
+        \hat{t}=\frac{-2\Cov(X,Y)}{2\Var(Y)}=-\frac{\Cov(X,Y)}{\Var(Y)}.
+    \end{align*}
+    Evaluating the quadratic at this root, we find
+    \begin{align*}
+        0=\hat{t}^2\Var(Y)+2\hat{t}\Cov(X,Y)+\Var(X)=\E((\hat{t}(Y-\E(Y))+(X-\E(X)))^2)
+    \end{align*}
+    which can only hold if $\hat{t}(Y(\omega)-\E(Y(\omega)))+(X(\omega)-\E(X(\omega)))=0$ for $P$-almost every $\omega\in\Omega$. Then, isolating for $Y$
+    \[Y=-\frac{1}{\hat{t}}X+\frac{1}{\hat{t}}\E(X)+\E(Y)=\frac{\Var(Y)}{\Cov(X,Y)}X+\bp{\E(Y)-\frac{\Var(Y)}{\Cov(X,Y)}\E(X)}\]
+    where taking $a=\Var(Y)/\Cov(X,Y),\;b=\E(Y)-(\Var(Y)/\Cov(X,Y))\E(X)\in\mbb{R}$ we arrive at part 2 of Theorem 1.\hfill{$\qed$}\\[5pt]
+\end{document}

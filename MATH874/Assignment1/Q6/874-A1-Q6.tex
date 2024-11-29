@@ -1,0 +1,121 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Information Theory: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent{\bf Problem 6} A study of {\it H\"older's inequality}.\\[10pt]
+{\bf a)} Given two probability vectors $(p_1,p_2,\dots,p_m)$ and $(q_1,q_2,\dots,q_m)$ on the set $\{1,2,\cdots,m\}$, apply Jensen's inequality to
+show that for $0<\lambda<1$
+\[\sum_{i=1}^mq_i^\lambda p_i^{1-\lambda}\leq 1\]
+and give a necessary and sufficient condition for equality.\\[10pt]
+{\bf Solution} Let $X_i$ be a discrete {\it r.v.} with alphabet $\mc{X}_i=\{p_i,q_i\}$ and probabilities
+$Pr(X_i=p_i)=\lambda$ and $Pr(X_i=q_i)=1-\lambda$ for $i=1,2,\dots m$. Now let $f(x)=\log(x)$, which is concave on
+$(0,\infty)$. With these, Jensen's inequality says that
+\[\mbb{E}_i[f(X_i)]\leq f(\mbb{E}_i[X_i])\]
+with this, and fixing $1\leq i\leq m$, we have
+\begin{align*}
+    &\mbb{E}_i[f(X_i)]=\lambda\log p_i+(1-\lambda)\log q_i\leq f(\mbb{E}_i[X_i])=\log(\lambda p_i + (1-\lambda)q_i)\\
+   \Rightarrow\qquad &\log(p_i^\lambda q_i^{1-\lambda})\leq\log(\lambda p_i+(1-\lambda)q_i)\tag{9}
+\end{align*}
+further, since $g(x)=e^x$ is strictly monotonically increasing on $\mbb{R}$, we can eliminate the logarithm to find
+\begin{align*}
+    &e^{\log(p_i^\lambda q_i^{1-\lambda})}\leq e^{\log(\lambda p_i+(1-\lambda)q_i)}\\
+    \Rightarrow\qquad&p_i^\lambda q_i^{1-\lambda}\leq\lambda p_i+(1-\lambda)q_i.\tag{10}
+\end{align*}
+This inequality holds for any choice of $X_i$, so we can now sum over the indices $j=1,2,\dots,m$ to get the desired result.
+\begin{align*}
+    \sum_{j=1}^mp_j^\lambda q_j^{1-\lambda}&\leq\sum_{j=1}^m\lambda p_j+(1-\lambda)q_J\\
+    &=\lambda\sum_{j=1}^mp_j+(1-\lambda)\sum_{j=1}^mq_j\\
+    &=\lambda+1-\lambda\\
+    &=1.
+\end{align*}
+To find a necessary and sufficient condition for equality, notice that each term in the sum $\sum_{j=1}^mp_j^\lambda q_j^{1-\lambda}$ is positive, so we
+seek to maximize each of them individually. Further, each term is bounded by the inequality (10). To achieve equality in (10), we need equality in (9) since the exponential
+function is strictly increasing.\\[10pt]
+To find conditions for equality in (9), first notice that $f(x)=\log x$ is not only concave, but strictly so on $(0,\infty)$, since
+\[\frac{d^2}{dx^2}f(x)=\frac{d}{dx}x^{-1}=-x^{-2}<0\qquad\forall x\in(0,\infty).\]
+Thus, Jensen's inequality further furnishes equality in (9) iff $X_j=\mbb{E}_j[X_j]$ with probability 1 for $j=1,2,\dots,m$. However, from how the probability mass functions of
+each of the $X_j$ were defined, this only occurs in one of two ways. First, when either $\lambda=1$ or $\lambda=0$, we get
+\begin{align*}
+    \lambda=1\quad\Rightarrow\quad\begin{cases}
+        Pr(X_j=p_j)=1\\
+        Pr(X_j=q_j)=0
+    \end{cases}\quad\Rightarrow\mbb{E}_j[X_j]=p_j\quad\text{and}\quad\lambda=0\quad\Rightarrow\quad\begin{cases}
+        Pr(X_j=p_j)=0\\
+        Pr(X_j=q_j)=1
+    \end{cases}\quad\Rightarrow\mbb{E}_j[X_j]=q_j
+\end{align*}
+for $j=1,2,\dots, m$ and with probability 1. Second, we can have $p_j=q_j$ so that $\mbb{E}_j[X_j]=\lambda p_j+(1-\lambda)q_j=p_j=q_j$ for $j=1,2,\dots m$.
+Thus,
+\[\sum_{j=1}^mp_j^\lambda q_j^{1-\lambda}=1\]
+if and only if either $\lambda\in\{0,1\}$ or $p_j=q_j$ $\forall j$. In our specific problem where $\lambda\in(0,1)$, only the latter condition is possible.\hfill{$\qed$}\\[10pt]
+{\bf b)} Given positive real numbers $a_i$ and $b_i$, $i=1,2,\dots,m$, show via an appropriate use of the bound in {\bf a)} that for any $0<\lambda<1$
+\[\sum_{i=1}^ma_ib_i\leq\left(\sum_{i=1}^ma_i^{1/\lambda}\right)^{\lambda}\left(\sum_{i=1}^mb_i^{1/(1-\lambda)}\right)^{1-\lambda}\]
+with equality iff for some contant $c$
+\[a_i^{1/\lambda}=cb_i^{1/(1-\lambda)}\]
+for all $i$.\\[10pt]
+{\bf Proof} Define $\bs{a}=(a_1,a_2,\dots,a_m)$ and $\bs{b}=(b_1,b_2,\dots,b_m)$ and let $\lambda\in (0,1)$. Then, for $0<\gamma<1$, we define the function $\|\cdot\|_\gamma:\mbb{R}^m_{>0}\rightarrow\mbb{R}_{>0}$,
+where for $\bs{x}=(x_1,x_2,\dots x_m)\in\mbb{R}^m_{>0}$, 
+\[\|\bs{x}\|_\gamma=\left(\sum_{i=1}^mx_i^{1/\gamma}\right)^\gamma.\]
+Next, define the probability vectors $\bs{p}=(p_1,p_2,\dots,p_m)\in\mbb{R}^m_{>0}$ and $\bs{q}=(q_1,q_2,\dots q_m)\in\mbb{R}^m_{>0}$ on the finite set $\{1,2,\dots, m\}$ by
+\[p_i=\frac{a_i^{1/\lambda}}{\|\bs{a}\|_\lambda^{1/\lambda}}\quad\text{and}\quad q_i=\frac{b_i^{1/(1-\lambda)}}{\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}}\]
+for $i=1,2,\dots,m$. Notice that these vectors do indeed define a probability mass function on $\{1,2,\dots,m\}$, since
+\[\sum_{i=1}^m\frac{a_i^{1/\lambda}}{\|\bs{a}\|_\lambda^{1/\lambda}}=\frac{\sum_{i=1}^ma_i^{1/\lambda}}{\sum_{i=1}^ma_i^{1/\lambda}}=1\quad\text{and}\quad\sum_{i=1}^m\frac{b_i^{1/(1-\lambda)}}{\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}}=\frac{\sum_{i=1}^mb_i^{1/(1-\lambda)}}{\sum_{i=1}^mb_i^{1/(1-\lambda)}}=1.\]
+Then, by the inequality discovered in part {\bf a)}, we have
+\begin{align*}
+    &\sum_{i=1}^mp_i^\lambda q_i^{1-\lambda}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^m\left(\frac{a_i^{1/\lambda}}{\|\bs{a}\|_\lambda^{1/\lambda}}\right)^\lambda\left(\frac{b_i^{1/(1-\lambda)}}{\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}}\right)^{1-\lambda}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^m\frac{a_ib_i}{\|\bs{a}\|_\lambda\|\bs{b}\|_{1-\lambda}}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^ma_ib_i\leq\|\bs{a}\|_\lambda\|\bs{b}\|_{1-\lambda}\\
+    \Rightarrow\quad&\sum_{i=1}^ma_ib_i\leq\left(\sum_{i=1}^ma_i^{1/\lambda}\right)^{\lambda}\left(\sum_{i=1}^mb_i^{1/(1-\lambda)}\right)^{1-\lambda}\tag{11}
+\end{align*}
+as desired. Since we are disallowed $\lambda\in\{0,1\}$, equality holds in (11) iff $p_i=q_i$ for $i=1,2,\dots m$. That is, we require
+\[\frac{a_i^{1/\lambda}}{\|\bs{a}\|_\lambda^{1/\lambda}}=\frac{b_i^{1/(1-\lambda)}}{\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}}\quad\Leftrightarrow\quad a_i^{1/\lambda}=\frac{\|\bs{a}\|_\lambda^{1/\lambda}}{\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}}b_i^{1/(1-\lambda)}\]
+for all $i$. Setting $c=\|\bs{a}\|_{\lambda}^{1/\lambda}/\|\bs{b}\|_{1-\lambda}^{1/(1-\lambda)}\in\mbb{R}$, we have the necessary and sufficient condition for equality in (11); that is that we require
+\[a_i^{1/\lambda}=cb_i^{1/(1-\lambda)}\]
+for all $i$.\hfill{$\qed$}\\[10pt]
+{\bf c)} Another form of H\"older's inequality is as follows:
+\[\sum_{i=1}^mp_ia_ib_i\leq\left(\sum_{i=1}^mp_ia_i^{1/\lambda}\right)^{\lambda}\left(\sum_{i=1}^mp_ib_i^{1/(1-\lambda)}\right)^{1-\lambda}\]
+where $\bs{p}=(p_1,p_2,\dots,p_m)$ is a probability vector as in {\bf a)}. Prove this inequality, and show that equality holds iff
+\[p_ia_i^{1/\lambda}=cp_ib_i^{1/(1-\lambda)}\]
+for all $i$.\\[10pt]
+{\bf Proof} The arguments are precisely those from part {\bf b)}. Let $\lambda\in(0,1)$ and define $\bs{a^p}=(p_1^\lambda a_1,p_2^\lambda a_2,\dots p_m^\lambda a_m)$ and $\bs{b^p}=(p_1^{1-\lambda}b_1,p_2^{1-\lambda}b_2,\dots,p_m^{1-\lambda}b_m)$.
+For $0<\gamma<1$, define $\|\cdot\|_\gamma:\mbb{R}^m_{>0}\rightarrow\mbb{R}_{>0}$, where for $\bs{x}=(x_1,x_2,\dots,x_m)\in\mbb{R}^m_{>0}$
+\[\|\bs{x}\|_\gamma=\left(\sum_{i=1}^mx_i^{1/\gamma}\right)^\gamma.\]
+Next, define the probability vectors $\bs{r}=(r_1,r_2,\dots,r_m)\in\mbb{R}^m_{>0}$ and $\bs{s}=(s_1,s_2,\dots s_m)\in\mbb{R}^m_{>0}$ on the finite set $\{1,2,\dots, m\}$ by
+\[r_i=\frac{p_ia_i^{1/\lambda}}{\|\bs{a^p}\|_\lambda^{1/\lambda}}\quad\text{and}\quad s_i=\frac{p_ib_i^{1/(1-\lambda)}}{\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}}\]
+for $i=1,2,\dots,m$. Notice that these vectors do indeed define a probability mass function on $\{1,2,\dots,m\}$, since
+\[\sum_{i=1}^m\frac{p_ia_i^{1/\lambda}}{\|\bs{a^p}\|_\lambda^{1/\lambda}}=\frac{\sum_{i=1}^mp_ia_i^{1/\lambda}}{\sum_{i=1}^mp_ia_i^{1/\lambda}}=1\quad\text{and}\quad\sum_{i=1}^m\frac{p_ib_i^{1/(1-\lambda)}}{\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}}=\frac{\sum_{i=1}^mp_ib_i^{1/(1-\lambda)}}{\sum_{i=1}^mp_ib_i^{1/(1-\lambda)}}=1.\]
+Then, by the inequality discovered in part {\bf a)}, we have
+\begin{align*}
+    &\sum_{i=1}^mr_i^\lambda s_i^{1-\lambda}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^m\left(\frac{p_ia_i^{1/\lambda}}{\|\bs{a^p}\|_\lambda^{1/\lambda}}\right)^\lambda\left(\frac{p_ib_i^{1/(1-\lambda)}}{\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}}\right)^{1-\lambda}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^m\frac{p_i^\lambda p_i^{1-\lambda}a_ib_i}{\|\bs{a^p}\|_\lambda\|\bs{b^p}\|_{1-\lambda}}\leq 1\\
+    \Rightarrow\quad&\sum_{i=1}^mp_ia_ib_i\leq\|\bs{a^p}\|_\lambda\|\bs{b^p}\|_{1-\lambda}\\
+    \Rightarrow\quad&\sum_{i=1}^mp_ia_ib_i\leq\left(\sum_{i=1}^mp_ia_i^{1/\lambda}\right)^{\lambda}\left(\sum_{i=1}^mp_ib_i^{1/(1-\lambda)}\right)^{1-\lambda}\tag{11}
+\end{align*}
+as desired. Since we are disallowed $\lambda\in\{0,1\}$, equality holds in (11) iff $r_i=s_i$ for $i=1,2,\dots m$. That is, we require
+\[\frac{p_ia_i^{1/\lambda}}{\|\bs{a^p}\|_\lambda^{1/\lambda}}=\frac{p_ib_i^{1/(1-\lambda)}}{\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}}\quad\Leftrightarrow\quad p_ia_i^{1/\lambda}=\frac{\|\bs{a^p}\|_\lambda^{1/\lambda}}{\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}}p_ib_i^{1/(1-\lambda)}\]
+for all $i$. Setting $c=\|\bs{a^p}\|_{\lambda}^{1/\lambda}/\|\bs{b^p}\|_{1-\lambda}^{1/(1-\lambda)}\in\mbb{R}$, we have the necessary and sufficient condition for equality in (11); that is that we require
+\[p_ia_i^{1/\lambda}=cp_ib_i^{1/(1-\lambda)}\]
+for all $i$.\hfill{$\qed$}
+\end{document}

@@ -1,0 +1,86 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 3} Consider a finite state space $S=\{0,1,2,\dots, N\}$ where $N$ is a positive integer. Let $P$ be an irreducible transition matrix on $S$.\\[10pt]
+    {\bf a)} If $P_{i,j}=P_{j,i}$ for any $i,j\in S$, find the invariant distribution of $P$.\\[10pt]
+    {\bf Solution} We proceed by finding a solution to the detailed balance equations. Note that for any $i,j$ with $P_{i,j}=0$, the equations hold trivially. Thus, we check $P_{i,j}=P_{j,i}>0$ only:
+    \begin{align*}
+        &\pi_iP_{i,j}=\pi_j P_{j,i}\quad\Rightarrow\quad \pi_iP_{i,j}=\pi_j P_{i,j}\quad\Rightarrow\quad \pi_i=\pi_j\tag{1}
+    \end{align*}
+    which says that the invariant distribution is uniform on $S$. The only such distribution is given defined by
+    \[\pi_i=\frac{1}{|S|}=\frac{1}{N+1},\quad\text{for $i\in S$}\]
+    which obviously satisfies (1), but also $\sum_{n=0}^{N}1/(N+1)=1$. Since this system is irreducible with finite state space, the Perron-Fr\:obenius theorem tells us that this invariant distribution {\it w.r.t.} $P$ is unique.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $\{w_{i,j}:i,j\in S\}$ be a collection of non-negative numbers. Assume that $w_{i,j}=w_{j,i}$ for any $i,j\in S$, and that $\sum_{j\in S}w_{i,j}>0$ for each $i\in S$. Further assume that
+    \[P_{i,j}=\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}},\quad\text{for any $i,j\in S$.}\]
+    Find the invariant distribution of $P$ in terms of $\{w_{i,j}:i,j\in S\}$.\\[10pt]
+    {\bf Solution} This, once again, can be done by solving the detailed balance equations. We find that
+    \[\pi_i P_{i,j}=\pi_j P_{j,i}\quad\Rightarrow\quad \pi_{i}\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}}=\pi_j\frac{w_{j,i}}{\sum_{k\in S}w_{j,k}}\quad\Rightarrow\quad\pi_{i}\frac{w_{i,j}}{\sum_{k\in S}w_{i,k}}=\pi_j\frac{w_{i,j}}{\sum_{k\in S}w_{j,k}}\]
+    where we note that in the event that we have $w_{i,j}=0$ then the equations hold trivially, so we consider only $w_{i,j}>0$. Continuing, we then obtain
+    \[\frac{\pi_i}{\sum_{k\in S}w_{i,k}}=\frac{\pi_j}{\sum_{k\in S}w_{j,k}}.\tag{2}\]
+    Letting $W=\sum_{k,\ell\in S}w_{k,\ell}$ and defining 
+    \[\pi_i=\frac{\sum_{k\in S}w_{i,k}}{W},\quad\text{for $i\in S$}\tag{3}\]
+    we get that
+    \[\sum_{i\in S}\pi_i=\frac{\sum_{i,k\in S}w_{i,k}}{W}=\frac{\sum_{i,k\in S}w_{i,k}}{\sum_{k,\ell\in S}w_{k,\ell}}=1\quad\text{and}\quad \frac{\pi_i}{\sum_{k\in S}w_{i,k}}=\frac{1}{W}=\frac{\pi_j}{\sum_{k\in S}w_{j,k}}\]
+    so that the vector $\pi=\{\pi_i:i\in S\}$ defined in (3) satisfies the detailed balance condition in (2) and sums to 1, and so is the unique invariant distribution of the irreducible transition matrix $P$ defined on finite state space $S$.\hfill{$\qed$}\\[10pt]
+    {\bf c)} Assume that $P_{i,j}=0$ if $|i-j|\geq2$ and $i,j\in S$. Let $\pi$ be the unique invariant distribution of $P$. Prove that $\pi$ and $P$ are in detailed balance.\\[10pt]
+    From the definition of invariance, the distributon $\pi=\{\pi_i:i\in S\}$ satisfies
+    \[\pi_i=\sum_{k\in S}\pi_k P_{k,i}\]
+    for $i\in S$. Further, since the chain is irreducible, it must be the case that $P_{n,n+1}>0$ for $0\leq n<N$ and $P_{n,n-1}>0$ for $0<n\leq N$. To see why this is, suppose that $P_{i,i+1}=0$ for some $i\in S$, $i\neq N$. Then, since $\forall j\in S$ with $j<i$, we get $|j-i|>1$ (trivially true if $i=0$) so there is no number of steps
+    delivering the state from $i$ to $i+1$, contradicting the assumed irreducibility of the system. Precisely the same argument gets us $P_{n,n-1}>0$ for $0<n\leq N$.\\[10pt]
+    We will also make use of the observation that:
+    \[i\in S\setminus\{0,N\}\quad\Rightarrow\quad P_{i,i-1}+P_{i,i}+P_{i,i+1}=1,\quad\text{otherwise}\quad P_{0,1}+P_{0,0}=1\quad\text{and}\quad P_{N,N-1}+P_{N,N}=1.\tag{4}\]
+    From this we get
+    \[\pi_0=\sum_{k\in S}\pi_kP_{k,0}=\pi_1P_{1,0}+\pi_0P_{0,0}\]
+    and further,
+    \[\pi_0-\pi_0P_{0,0}=\pi_1P_{1,0}\quad\Rightarrow\quad\pi_0(1-P_{0,0})=\pi_1P_{1,0}\quad\Rightarrow\quad \pi_0 P_{0,1}=\pi_1 P_{1,0}\]
+    so we could say that the states $0$ and $1$ are in detailed balance. This supplies us with a basis to proceed by induction. \\[10pt]
+    Suppose that for some $0\leq n\leq N-2$ we have
+    \[\pi_n P_{n,n+1}=\pi_{n+1}P_{n+1,n}\tag{IH}\]
+    where (IH) stands for inductive hypothesis. We then find that
+    \begin{align*}
+        P_{n+1,n+2}\pi_{n+1}&=P_{n+1,n+2}\left(\sum_{k\in S}\pi_kP_{k,n+1}\right)\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}P_{n+1,n+1}+\pi_{n+2}P_{n+2,n+1})\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}(1-P_{n+1,n}-P_{n+1,n+2})+\pi_{n+2}P_{n+2,n+1})\tag{by 4}\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}-\pi_{n+1}P_{n+1,n}-\pi_{n+1}P_{n+1,n+2}+\pi_{n+2}P_{n+2,n+1})\\
+        &=P_{n+1,n+2}(\pi_nP_{n,n+1}+\pi_{n+1}-\pi_{n}P_{n,n+1}-\pi_{n+1}P_{n+1,n+2}+\pi_{n+2}P_{n+2,n+1})\tag{IH}\\
+        &=P_{n+1,n+2}\pi_{n+1}-P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}+P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}.
+    \end{align*}
+    Noticing that the first term on the RHS is the LHS, this implies
+    \begin{align*}
+        &-P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}+P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}=0\\
+        \Rightarrow\qquad&P_{n+1,n+2}\pi_{n+1}P_{n+1,n+2}=P_{n+1,n+2}\pi_{n+2}P_{n+2,n+1}\\
+        \Rightarrow\qquad&\pi_{n+1}P_{n+1,n+2}=\pi_{n+2}P_{n+2,n+1}
+    \end{align*}
+    so that now state $n+1$ is in detailed balance with $n+2$. Thus, by the principle of mathematical induction, we have $\forall n\in\{0,1,\dots,N-2\}$
+    \[\pi_nP_{n,n+1}=\pi_{n+1}P_{n+1,n}.\tag{5}\] 
+    Finally, we have
+    \[\pi_N=\sum_{k\in S}\pi_k P_{k,N}=\pi_{N-1}P_{N-1,N}+\pi_N P_{N,N}\]
+    such that
+    \[\pi_N(1-P_{N,N})=\pi_{N-1}P_{N-1,N}\quad\Rightarrow\quad \pi_NP_{N,N-1}=\pi_{N-1}P_{N-1,N}\tag{6}\]
+    so $N$ and $N-1$ are in detailed balance too. Taking (5) and (6) together, we have than any two adjacent states are in detailed balance.\\[10pt]
+    With all of this, take $i,j\in S$. If $|i-j|>1$, then $P_{i,j}=0=P_{j,i}$ and the detailed balance equations hold for these states trivially.
+    Of course, when $i=j$ then they hold trivially once more. Finally, in the case that $|i-j|=1$, we can take $i<j$ without loss of generality so that $j=i+1$. But then
+    \[\pi_iP_{i,j}=\pi_iP_{i,i+1}=\pi_{i+1}P_{i+1,i}=\pi_jP_{j,i}\]
+    so that, in all cases, $i$ and $j$ are in detailed balance.\hfill{$\qed$}
+\end{document}

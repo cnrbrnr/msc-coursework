@@ -1,0 +1,434 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    {\noindent \bf Problem 1.} Suppose a gambler initially has 5 dollars and repeatedly places bets until he has 0 dollars. For each bet the probability
+    of winning is $p$ while the probability of losing is $1-p$. Assume that the outcomes of the bets are independent. Let $T$ be
+    the number of bets until they are ruined, and $M$ be the maximal amount of money they have between starting and ruin. Further, define
+    \[\mu_1(p)=\mbb{E}[T],\quad\mu_2(p)=\mbb{E}[M],\quad\mu_3(p)=P(M\geq 10).\]
+    Use the Monte Carlo method to estimate $\mu_1(p), \mu_2(p)$ and $\mu_3(p)$ for $p\in\{0.4, 0.45, 0.48\}$. The number of Monte Carlo repeats should
+    be at least $10^5$. Report estimates and associated estimated standard deviation.\\[10pt]
+    {\bf Solution.} Let $\hat{\mu}_i(p)$ be our estimate of $\mu_i(p)$ under probability of winning $p$ for $i=1,2,3$. Under the Monte Carlo method,
+    we proceed by simulating the gambler's run a prescribed $R=10^5$ times for $p\in\{0.4, 0.45, 0.48\}$. This generates an {\it i.i.d.} sample of stopping times $\{T_i\}_{i=1}^R$ and 
+    and an {\it i.i.d.} sample of maximum fortunes $\{M_i\}_{i=1}^R$. Then, by the strong law of large numbers, we have that 
+    \[\frac{1}{N}\sum_{i=1}^NT_i\longrightarrow \mbb{E}[T],\quad\frac{1}{N}\sum_{i=1}^N\mathbbm{1}_{\{M_i\geq 10\}}\longrightarrow P(M\geq 10),\quad \text{and}\quad\frac{1}{N}\sum_{i=1}^N M_i\longrightarrow\mbb{E}[M]\]
+    all {\it w.p.} 1 as $N\rightarrow\infty$. Note that the second of these holds because
+    \[\frac{1}{N}\sum_{i=1}^N\mathbbm{1}_{\{M_i\geq 10\}}\overset{w.p.\,1}{\longrightarrow}\mbb{E}[\mathbbm{1}_{\{M\geq 10\}}]\]
+    and
+    \[\mbb{E}[\mathbbm{1}_{\{M\geq 10\}}]=\sum_{j\in\{0, 1\}}jP(\mathbbm{1}_{\{M\geq 10\}} = j)=0P(\mathbbm{1}_{\{M\geq 10\}} = 0)+P(\mathbbm{1}_{\{M\geq 10\}}=1)=P(M\geq 10).\]
+    By the above, and since we consider $R=10^5$ large, we take
+    \[\hat{\mu}_1(p)=\frac{1}{R}\sum_{i=1}^RT_i,\quad,\hat{\mu}_2(p)=\frac{1}{R}\sum_{i=1}^RM_i,\quad\text{and}\quad\hat{\mu}_3(p)=\frac{1}{R}\sum_{i=1}^R\mathbbm{1}_{\{M\geq 10\}}\]
+    where, letting $\bs{T}=(T_1,T_2,\dots,T_R)^T$, $\bs{M}=(M_1,M_2,\dots,M_R)^T$ and $\bs{I}=(\mathbbm{1}_{\{M_1\geq 10\}},\mathbbm{1}_{\{M_2\geq 10\}},\dots,\mathbbm{1}_{\{M_R\geq 10\}})^T$ be our simulated data, we have
+    \[SD(\hat{\mu}_1(p))=SD(\bs{T})/\sqrt{R},\quad SD(\hat{\mu}_2(p))=SD(\bs{M})/\sqrt{R}\quad\text{and}\quad SD(\hat{\mu}_3(p))=SD(\bs{I})/\sqrt{R}\]
+    for $p\in\{0.4, 0.45, 0.48\}$.\\[10pt] 
+    {\bf Table 1.} Empirical estimates of $\mu_1(p)$, $\mu_2(p)$ and $\mu_3(p)$ and their standard deviations obtained by simulating the Gambler's ruin problem $R=10^5$ times for each of $p\in\{0.4, 0.45, 0.48\}$.
+    Reported values have been rounded to three decimal places.
+    \begin{center}
+        \begin{tabular}{@{}l|rrrrrrrrr@{}}\toprule
+                & \multicolumn{3}{c}{$p=0.4$} & \multicolumn{3}{c}{$p=0.45$} & \multicolumn{3}{c}{$p=0.48$}\\
+            \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+                & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ & $\hat{\mu}_1(p)$ & $\hat{\mu}_2(p)$ & $\hat{\mu}_3(p)$ \\\midrule
+            Value & 25.055 & 6.833 & 0.118 & 49.940 & 8.443 & 0.266 & 124.200 & 11.329 & 0.400 \\ 
+            SD & 0.078 & 0.008 & 0.001 & 0.224 & 0.014 & 0.001 & 0.873 & 0.029 & 0.002\\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    {\noindent \bf Problem 2.} Suppose there are $n$ types of coupon $\{c_1,c_2,\dots,c_n\}$ and that the type obtained is 1) independent of all past selections and 2) equally likely to be any of the $n$ types.
+    Denote by $T$ the number of collected coupons (counting multiplicity) until a complete set is obtained.\\[10pt]
+    {\bf a)} Write $\mbb{E}[T]$ as a function of $n$.\\[10pt]
+    {\bf Solution.} We endeavor to express $T$ as a linear combination of random variables with known expectation. First, let $\mathcal{C}=\{c_i\}_{i=1}^n$ be the complete set of pairwise unique coupons, $X_j$ be the $j$th coupon drawn (with realization $x_j\in\mathcal{C}$),
+    and $\mathcal{C}_j=\{c\in\mathcal{C}|\exists k\leq j:c=x_k\;\text{and}\;c\neq x_m\;\text{for}\;m<k\}$ for $j=1,2,3,\dots$. That is, $\mathcal{C}_j$ is the set of pairwise unique coupons obtained by the $j$th draw. As such, it is natural to define $\mathcal{C}_0=\emptyset$.\\[10pt]
+    Next, define the {\it r.v.} $T_k$ (with realization $t_k$) to be the draw on which the $k$th new coupon is obtained, where $k=1,2,\dots,n$. In particular, $T_k=t$ if both $x_t\notin \mathcal{C}_{t-1}$ and $|\mathcal{C}_{t-1}|=k-1$. Note, however, that for $j,k=1$ we have
+    \[|\mathcal{C}_{1-1}|=|\mathcal{C}_0|=|\emptyset|=0=1-1=k-1\]
+    and, regardless the value of $x_1$, we get
+    \[x_1\notin\emptyset\Rightarrow x_1\notin\mathcal{C}_0\Rightarrow x_1\notin\mathcal{C}_{1-1}\]
+    implying that
+    \[P(T_1=1)=1.\]
+    An unsurprising result, since this just says that {\it w.p.} 1 the first coupon we draw will be new to our collection. We now turn our attention to $T_k$ for $k\geq 2$.
+    In order for $T_k$ to be realized, $T_{k-1}$ must have been, at which point we have $|\mathcal{C}_{t_{k-1}}|=k-1$ until $T_k$ occurs.
+    This guarantees that on the support $\tau_k=\{t_{k-1}+1,t_{k-1}+2,\dots\}$ of $T_k$, $P(|\mathcal{C}_{\tau-1}|=k-1)=1$ $\forall\tau\in\tau_k$. Henceforth, we shall restrict the support of $T_k$ to $\tau_k$ for $2\leq k\leq n$,
+    allowing us to say that $T_k=t$ if $x_t\notin\mathcal{C}_{t-1}$.\\[10pt]
+    To complete the solution, we note that for $\tau\in\tau_k$, $k\geq 2$ and any $c\in\mathcal{C}$,
+    \[P(X_{\tau}=c)=\frac{1}{n},\quad\text{so}\quad P(X_\tau\in\mathcal{C}_{\tau-1})=\frac{|\mathcal{C}_{\tau-1}|}{n}=\frac{k-1}{n}\quad\text{and}\quad P(X_\tau\notin \mathcal{C}_{\tau-1})=1-\frac{|\mathcal{C}_{\tau-1}|}{n}=\frac{n-k+1}{n}.\]
+    which we get from the fact that the probability of obtaining any coupon is uniformly distributed on $\mathcal{C}$. Further, by the independence of each draw (i.e. $X_j\perp X_i$ for $i,j\in\mathbb{N}$, $i\neq j$) we can compute the probability that $T_k=t\in\tau_k$.
+    \[P(T_k=t)=P(X_t\notin\mathcal{C}_{t-1})\prod_{j=t_{k-1}+1}^{t-1}P(X_j\in\mathcal{C}_{j-1})=\left(\frac{n-k+1}{n}\right)\left(\frac{k-1}{n}\right)^{t-1}\] 
+    which is exactly the probability mass function of a geometric random variable with success probability $p_k=(n-k+1)/n$. Note that this also works for $T_1$, since then
+    $p_1=(n-1+1)/n=1$, giving us the previous result that $P(T_1=1)=1$. So we have found that for $1\leq k\leq n$, $T_k\sim geometric(p_k)$, with $p_k=(n-k+1)/n$.\\[10pt]
+    This finally allows us to compute $\mbb{E}[T]$. Noting that
+    \[T=\sum_{k=1}^nT_k\]
+    we have
+    \[\mbb{E}[T]=\mbb{E}\left[\sum_{k=1}^nT_k\right]=\sum_{k=1}^n\mbb{E}[T_k]=\sum_{k=1}^n\frac{n}{n-k+1}=n(\frac{1}{n}+\frac{1}{n-1}+\dots+\frac{1}{2}+1)=n\sum_{k=1}^n\frac{1}{k}.\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Denote by $X_i$ the number of collected coupons of type $c_i$ until a complete set is obtained, for $i=1,2,\dots,n$. Let $X=\max_{1\leq i\leq n}X_i$ be the maximal number. Define
+    \[\mu_1(n)=\mbb{E}[T]\quad\text{and}\quad \mu_2(n)=\mbb{E}[X].\]
+    Use the Monte Carlo method to estimate $\mu_1(n)$ and $\mu_2(n)$ for $n\in\{10,20\}$. For each $n$, the number of Monte Carlo repeats should be at least $10^5$. Report your estimates and the associated
+    standard deviations.\\[10pt]
+    {\bf Solution.} We proceed precisely as in problem 1, denoting our estimates of $\mu_i(n)$ with $\hat{\mu}_i(n)$ for $i=1,2$ and $n\in\{10,20\}$. We will obtain {\it i.i.d.} samples $\bs{X}=\{\chi_1,\chi_2,\dots,\chi_R\}$
+    and $\bs{T}=\{\mathcal{T}_1,\mathcal{T}_2,\dots,\mathcal{T}_R\}$, where $\mathcal{T}_j=T$ and $\chi_j=\max_{1\leq i\leq n}X_i$ for the $j$th simulation with $n\in\{10,20\}$ and $1\leq j\leq R=10^5$. Then we compute our estimates
+    \[\hat{\mu}_1(n)=\frac{1}{R}\sum_{j=1}^R\mathcal{T}_j\quad\text{and}\quad\hat{\mu}_2(n)=\frac{1}{R}\sum_{j=1}^R\chi_j\]
+    with standard deviations
+    \[SD(\hat{\mu}_1(n))=SD(\bs{T})/\sqrt{R}\quad\text{and}\quad SD(\hat{\mu}_2(n))=SD(\bs{X})/\sqrt{R}\]
+    for both $n=10$ and $n=20$.\\[10pt]
+    {\bf Table 2.} Empirical estimates of $\mu_1(n)$ and $\mu_2(n)$ along with the associated standard deviations obtained by simulating the coupon collection process
+    $R=10^5$ times for each of $n\in\{10,20\}$. Reported values have been rounded to three decimal places.
+    \begin{center}
+        \begin{tabular}{@{}l|rrrr@{}}\toprule
+                & \multicolumn{2}{c}{$n=10$} & \multicolumn{2}{c}{$n=20$}\\
+            \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+                & $\hat{\mu}_1(n)$ & $\hat{\mu}_2(n)$ & $\hat{\mu}_1(n)$ & $\hat{\mu}_2(n)$\\\midrule
+            Value & 29.285 & 5.715 & 71.967 & 7.466 \\ 
+            SD & 0.036 & 0.007 & 0.075 & 0.007 \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    {\bf Problem 3.} An urn contains $n$ red and $m$ blue balls that are removed randomly one at a time until the urn is empty. For each pair of nonnegative integers $(n,m)$, compute the probability that the 
+    number of red balls in the urn is never strictly less than the number of blue.\\[10pt]
+    {\bf Solution.} Letting $m$,$n\in\mbb{N}$ be the number of blue and red balls in the urn respectively at some moment, and $\mc{A}$ the event that the number of red is always at least the number of blue, define the probability of interest
+    \[P(\mc{A}|(m,n))=:P_{m,n}\]
+    then
+    \[P_{m,n}=\begin{cases}
+        \frac{n-m+1}{n+1},\quad\text{if $n\geq m$}\\
+        0,\quad\text{if $n<m$}
+    \end{cases}.\]
+    {\bf Proof.} We begin by defining some useful notation. For $m,n\in\mbb{N}$, where $m$ is the number of blue balls and $n$ the number of red (and $\max\{m,n\}>0$), define $P_r(m,n)$ the probability of drawing a red ball and 
+    $P_b(m,n)$ the probability of drawing blue. Since we assume each ball is equally likely to be drawn, these are given by uniform probabilities
+    \[P_r(m,n)=\frac{n}{n+m}\quad\text{and}\quad P_b(m,n)=\frac{m}{n+m}.\]
+    Now, by the definition of $\mc{A}$, whenever $j<i$ we have $P_{i,j}=0$. Further, we know $P_{0,0}=1$, since then the urn is empty for all time, and so the number of red balls is always greater than or equal to the number of blue. Letting $j=i=0$, we get
+    \[P_{i,j}=P_{0,0}=1=\frac{0-0+1}{0+1}=\frac{j-i+1}{j+1}.\]
+    Now suppose that for some $j\geq 0$, we have $P_{0,j}=\frac{j-0+1}{j+1}=1$.  Then, by the law of total probability we get
+    \[P_{0,j+1}=P_r(0,j+1)P(\mc{A}|(0,j))=\frac{j+1}{j+1}P_{0,j}=\frac{j-0+1}{j+1}=1\]
+    so that, by the principle of mathematical induction, we have $P_{0,n}=1=\frac{n-0+1}{n+1}$ for all $n\in\mbb{N}$. We begin another round of induction by now setting $j=i=1$. Then, once more by the law of total probability,
+    \[P_{i,j}=P_{1,1}=P_r(1,1)P_{1,0}+P_b(1,1)P_{0,1}=\frac{1}{2}0+\frac{1}{2}1=\frac{1}{2}=\frac{1-1+1}{1+1}=\frac{j-i+1}{j+1}.\]
+    For the inductive step, suppose that for some $j\geq 1$ we have $P_{1,j}=\frac{j-1+1}{j+1}$. Then we have
+    \[P_{1,j+1}=P_r(1,j+1)P_{1,j}+P_b(1,j+1)P_{0,j+1}=\frac{j+1}{j+1+1}\frac{j-1+1}{j+1}+\frac{1}{j+1+1}=\frac{(j+1)-1+1}{(j+1)+1}\]
+    so that, by the principle of mathematical induction, we have $P_{1,n}=\frac{n-1+1}{n+1}$ for all $n\in\mbb{N}$, $n\geq 1$. \\[10pt]
+    Next, suppose that for some $i-1\geq 0$, we have $P_{i-1,n}=\frac{n-(i-1)+1}{n+1}$ for all $n\geq i-1$. Under this hypothesis (denote it by $IH_1$), we aim to show that $P_{i,j}=\frac{j-i+1}{j+1}$ holds for all $j\geq i$. First, we have
+    \[P_{i,i}=P_r(i,i)P_{i,i-1}+P_b(i,i)P_{i-1,i}=\frac{1}{2}0+\frac{1}{2}\frac{i-(i-1)+1}{i+1}=\frac{1}{i+1}=\frac{i-i+1}{i+1}.\]
+    With this as a basis, we introduce an additional hypothesis: suppose that for some $k\geq i$, we have $P_{i,k}=\frac{k-i+1}{k+1}$ (denote this $IH_2$). We wish to show that $P_{i,k+1}=\frac{k-i+2}{k+2}$. 
+    \begin{align*}
+        P_{i,k+1}&=P_r(i,k+1)P_{i,k}+P_b(i,k+1)P_{i-1,k+1}\\
+        &=\frac{k+1}{k+1+i}\frac{k-i+1}{k+1}+\frac{i}{k+1+i}P_{i-1,k+1}\tag{$IH_2$}\\
+        &=\frac{k+1}{k+1+i}\frac{k-i+1}{k+1}+\frac{i}{k+1+i}\frac{k+1-i+1+1}{k+1+1}\tag{$IH_1$}\\
+        &=\frac{k-i+1}{k+1+i}+\frac{i}{k+1+i}\frac{k+3-i}{k+2}\\
+        &=\frac{1}{k+1+i}\left(k-i+1+i\left(\frac{k+3-i}{k+2}\right)\right)\\
+        &=\frac{1}{k+1+i}\left(k+1+i\left(\frac{k+3-i}{k+2}-1\right)\right)\\
+        &=\frac{1}{k+1+i}\left(k+1+i\left(\frac{1-i}{k+2}\right)\right)\\
+        &=\frac{(k+1)(k+2)+i-i^2}{(k+1+i)(k+2)}\\
+        &=\frac{k^2+3k+2+i-i^2}{(k+1+i)(k+2)}\\
+        &=\frac{k^2+k-ik+k+k+1-i+1+ik+i-i^2+i}{(k+1+i)(k+2)}\\
+        &=\frac{(k+1+i)(k+1-i+1)}{(k+1+i)(k+2)}\\
+        &=\frac{k-i+2}{k+2}.
+    \end{align*}
+    Which, by the principle of mathematical induction, tells us that for all $n\in\mbb{N}$, $n\geq i$, $P_{i,n}=\frac{n-i+1}{n+1}$. Finally, and once more by the 
+    principle of mathematical induction, for $m,n\in\mbb{N}$ with $n\geq m\geq 1$ we get $P_{m,n}=\frac{n-m+1}{n+1}$.\\[10pt]
+    Summarizing what was done:
+    \begin{enumerate}
+        \item We showed that $P_{0,n}=1=\frac{n-0+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq 0$ by induction.
+        \item Using (1), we showed $P_{1,n}=\frac{n-1+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq 1$ by induction.
+        \item Using (2) as a basis, we entered an inductive step under $IH_1$; supposing that for some $i-1\geq 0$, $P_{i-1,n}=\frac{n-(i-1)+1}{n+1}$ for all $n\in\mbb{N}$ with $n\geq i-1$.
+        \item Using $IH_1$, we proved a new basis $P_{i,i}=\frac{1}{i+1}$.
+        \item Using (4) as a basis, we entered a new (nested) inductive step under $IH_2$; supposing that for some $k\geq i$ we have $P_{i,k}=\frac{k-i+1}{k+1}$.
+        \item We exited the nested inductive step, concluding that $P_{i,n}=\frac{n-i+1}{n+1}$ $\forall n\in\mbb{N}$ with $n\geq i$.
+        \item We exited out of the outer inductive step, concluding that $\forall m,n\in\mbb{N}$ with $n\geq m\geq 1$, $P_{m,n}=\frac{n-m+1}{n+1}$, as desired.
+    \end{enumerate}
+    Thus we have shown that for all $n,m\in\mbb{N}$
+    \begin{align*}
+        P_{m,n}=\begin{cases}
+            \frac{n-m+1}{n+1},\quad\text{if $n\geq m$}\\
+            0,\quad\text{if $n<m$.}
+        \end{cases}
+    \end{align*}
+    where $P_{m,n}$ is the probability of drawing balls from the urn until it is empty, with the number of red balls never being strictly less than the number of blue balls.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 4.} Let $S=\{1,2,\dots,n\}$ and suppose $A$ and $B$ are independent, each equally likely to be any of the $2^n$ subsets of $S$.\\[10pt]
+    {\bf a)} Show that $P(A\subset B)=\left(\frac{3}{4}\right)^n$.\\[10pt]
+    {\bf Solution.} Define the independent random variables $\delta_i,\gamma_i$ for $i=1,2,\dots,n$ so that $\delta_i$ and $\gamma_i$ are equiprobable on the set $\{\emptyset, \{i\}\}$. Since these are independent, for $1\leq i\leq n$ we have the joint probabilities
+    \[P(\delta_i=\{i\},\gamma_i=\{i\})=P(\delta_i=\{i\})P(\gamma_i=\{i\})=\frac{1}{4}\]
+    and similarly
+    \begin{align*}
+        P(\delta_i=\emptyset,\gamma_i=\{i\})=\frac{1}{4},\quad
+        P(\delta_i=\emptyset,\gamma_i=\emptyset)=\frac{1}{4},\quad\text{and}\quad
+        P(\delta_i=\{i\},\gamma_i=\emptyset)=\frac{1}{4}.
+    \end{align*}
+    Then $A$ and $B$ can be constructed according to
+    \begin{align*}
+        A&=\bigcup_{j=1}^n\delta_j\quad\text{and}\quad B=\bigcup_{j=1}^n\gamma_j
+    \end{align*}
+    since these sets will be independent from one another (since $\delta_i\perp\delta_j$, $\gamma_i\perp\gamma_j$ for $i\neq j$ and $\delta_i\perp\gamma_j$ for $1\leq i,j\leq n$) and are each equiprobable on the power set of $S$.\\[10pt] 
+    Now, when $A\not\subset B$ $\exists k:$ $1\leq k\leq n$ where $\delta_k\in A$ but $\delta_k\notin B$. This can only be true if both $\delta_k=\{k\}$ (since if $\delta_k=\emptyset$ then it would
+    be trivially included in $B$) and $\gamma_k=\emptyset$ (since for all $j\neq k$, $P(\gamma_j=\{k\})=0$ by definition). The probability of this occuring for any particular $k\in\{1,2,\dots,n\}$ is
+    \[P(\delta_k=\{k\},\gamma_k=\emptyset)=\frac{1}{4}.\]
+    The negation of $A\not\subset B$ is $A\subset B$, and occurs when $\forall k:$ $1\leq k\leq n$, if $\delta_k\in A$ then $\delta_k\in B$. Of course, if $\delta_k=\emptyset$, then $\delta_k\in B$ is trivially true so we can have either $\gamma_k=\emptyset$ or $\gamma_k=\{k\}$. However, if $\delta_k=\{k\}$ then 
+    we require $\gamma_k=\{k\}$ for $A\subset B$ to hold. Thus,
+    \[P(A\subset B)=\prod_{j=1}^n\left(P(\delta_j=\{j\},\gamma_j=\{j\})+P(\delta_j=\emptyset)\right)=\prod_{j=1}^n\left(\frac{1}{4}+\frac{2}{4}\right)=\left(\frac{3}{4}\right)^n\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Show that $P(A\cap B=\emptyset)=\left(\frac{3}{4}\right)^n$.\\[10pt]
+    {\bf Solution.} Carring on with all of the same random variables and definitions as in {\bf a)}, the event $A\cap B$ occurs if $\forall k,$ $1\leq k\leq n$, if $\delta_k\in A$ then $\delta_k\notin B$. Further, this can only occur if whenever $\delta_k=\{k\}$, we have $\gamma_k=\emptyset$ for $1\leq k\leq n$.
+    As such, the probability of interest can be computed as
+    \[P(A\cap B)=\prod_{j=1}^n(P(\delta_k=\{k\}, \gamma_k=\emptyset)+P(\delta_k=\emptyset))=\prod_{j=1}^n\left(\frac{1}{4}+\frac{2}{4}\right)=\left(\frac{3}{4}\right)^n\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 5.} Let $X$ be a random variable and denote by $F(\cdot)$ its cumulative distribution function (CDF), i.e.,
+    \[F(t)=P(X\leq t)\quad \text{for $t\in\mbb{R}$}\]
+    and by $F^{-1}(\cdot)$ its quantile function (QF), i.e.,
+    \[F^{-1}(p)=\inf\{t\in\mbb{R}:F(t)\geq p\}\quad \text{for $p\in(0,1)$}.\]
+    {\bf a)} Show that $F(F^{-1}(p))\geq p$ for any $p\in(0,1)$.\\[10pt]
+    Let $p\in(0,1)$ and define $T_p=\{t\in\mbb{R}:F(t)\geq p\}$. Now, since $F$ is monotonically increasing, $\forall t\in T_p$, if $t^\prime\geq t$, then $F(t^\prime)\geq F(t)\geq p$, so $F(t^\prime)\geq p$, so $t^\prime\in T_p$ too.
+    Now fix $\varepsilon>0$ and let $F^{-1}(p)=t^\ast$. By definition of the infimum, $\exists t\in T_p:$ $t^\ast\leq t\leq t^\ast+\varepsilon$. But $t^\ast+\varepsilon\geq t$, so $t^\ast+\varepsilon\in T_p$. Thus we have 
+    \[F(t^\ast+\varepsilon)\geq p\]
+    and by the right-continuity of $F$
+    \[\lim_{\varepsilon\longrightarrow 0^+}F(t^\ast+\varepsilon)=F(t^\ast).\]
+    Now let $\{\varepsilon_n\}_{n=1}^\infty$ be a positive sequence with $\varepsilon_n\longrightarrow 0$ and $\varepsilon_n\geq\varepsilon_{n+1}$ for all $n\in\mbb{N}$. Then for all $n$, $\varepsilon_n>0$ so $\exists t_n\in T_p:$
+    \[t^\ast+\varepsilon_n\geq t_n\quad\Rightarrow\quad t^\ast+\varepsilon_n\in T_p\quad\Rightarrow\quad F(t^\ast+\varepsilon_n)\geq p\]
+    whereby the sequential characterization of continuity we get
+    \[F(t^\ast)=\lim_{\varepsilon\longrightarrow 0^+}F(t^\ast+\varepsilon)=\lim_{n\longrightarrow+\infty}F(t^\ast+\varepsilon_n).\]
+    To complete the proof, we need the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} For any sequence $\{a_n\}_{n=1}^\infty$, if $\forall n,$ $a_n\geq b$ and $a_n\longrightarrow a$, then $a\geq b$.\\[10pt]
+            {\bf Proof.} Assume for the purpose of deriving a contradiction that $a<b$. Then $\exists\delta>0$: $a+\delta\in(a,b)$, so $a+\delta<b$. Now, since
+            $a_n\longrightarrow a$, $\exists N:$ $|a_n-a|<\delta$ $\forall n\geq N$. But then $a_n<a+\delta<b$, so we have an element of the sequence strictly less than $b$ --
+            a contradiction stemming from our supposition that $a<b$. We conclude that $a\geq b$.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    But now we are done, since $F(t^\ast+\varepsilon_n)\geq p$ $\forall n$, so $\lim_{n\rightarrow+\infty}F(t^\ast+\varepsilon_n)=\lim_{\varepsilon\rightarrow 0^+}F(t^\ast+\varepsilon)=F(t^\ast)=F(F^{-1}(p))\geq p$,
+    with the inequality holding due to the above lemma.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Let $p\in(0,1)$ and $x\in\mbb{R}$. Show that $F^{-1}(p)\leq x$ iff $p\leq F(x)$.\\[10pt]
+    {\bf Solution.} For the forward implication, suppose that $F^{-1}(p)\leq x$. Then $F(F^{-1}(p))\leq F(x)$, since $F$ is monotonically increasing.
+    But from part {\bf a)}, $p\leq F(F^{-1}(p))\leq F(x)$, so $p\leq F(x)$ as needed.\\[10pt]
+    Now for the backward implication, suppose instead that $p\leq F(x)$. Then $F^{-1}(F(x))=\inf\{t\in\mbb{R}:F(t)\geq F(x)\}$. But $F(x)\geq F(x)$, so $x\in\{t\in\mbb{R}:F(t)\geq F(x)\}$. Thus,
+    $F^{-1}(F(x))\leq x$. To complete the proof, we need the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} $F^{-1}$ is weakly monotonically increasing on $(0,1)$.\\[10pt]
+            {\bf Proof.} Let $a,b\in(0,1)$ with $a\leq b$. Then $\{t\in\mbb{R}:F(t)\geq a\}\supseteq\{t\in\mbb{R}:F(t)\geq b\}$, since $F$ is
+            weakly monotonically increasing. But then $\inf\{t\in\mbb{R}:F(t)\geq a\}\leq\inf\{t\in\mbb{R}:F(t)\geq b\}$, so $F^{-1}(a)\leq F^{-1}(b)$.\hfill{$\qed$}
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    But then we have $F^{-1}(p)\leq F^{-1}(F(x))\leq x$, where the first inequality holds due to the above lemma, and thus $F^{-1}(p)\leq x$, as needed, and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf c)} If $U$ is a random variable that is uniformly distributed on $(0,1)$, then the CDF of the random variable $F^{-1}(U)$ is given by $F$.\\[10pt]
+    {\bf Proof.} Let $U\sim Uniform(0,1)$, with CDF given by
+    \begin{align*}
+        F_U(x)=\begin{cases}
+            \frac{x-0}{1-0}=x,\quad\text{if $0\leq x\leq1$}\\
+            0,\qquad\text{if $x<0$}\\
+            1,\qquad\text{if $x>1$}
+        \end{cases}\tag{5.1}
+    \end{align*}
+    Now define the random variable $\mc{Z}=F^{-1}(U)$, and denote its CDF by $F_\mc{Z}$. Then we have
+    \begin{align*}
+        F_\mc{Z}(t)&=P(F^{-1}(U)\leq t)\\
+        &=P(U\leq F(t))\tag{by part {\bf b)}}.
+    \end{align*}
+    But $0\leq F(t)\leq 1$, so we further get
+    \begin{align*}
+        F_\mc{Z}(t)&=P(U\leq F(t))\\
+        &=F_U(F(t))\\
+        &=F(t)\tag{by 5.1}
+    \end{align*}
+    which says that the CDF $F_\mc{Z}$ of $\mc{Z}=F^{-1}(U)$ is given by $F$.\hfill{$\qed$}\\[10pt]
+    {\bf Problem 6.} Prove the following.\\[10pt]
+    {\bf a)} Let $\{A_n:n=1,2,\dots\}$ be a sequence of events. Then
+    \[P\left(\limsup_{n\rightarrow\infty}A_n\right)=1-\lim_{n\rightarrow\infty}P\left(\bigcap_{m=n}^\infty A_m^c\right).\]
+    {\bf Proof.} The result follows the definition of the set $\limsup$, the axioms of probability and DeMorgan's Law for countable unions/intersections.
+    \begin{align*}
+        P\left(\limsup_{n\rightarrow\infty}A_n\right)&=P\left(\bigcap_{k=1}^\infty\bigcup_{n\geq k}A_n\right)\\
+        &=1-P\left(\left(\bigcap_{k=1}^\infty\bigcup_{n\geq k}A_n\right)^c\right)\tag{axiom of probability}\\
+        &=1-P\left(\bigcup_{k=1}^\infty\left(\bigcup_{n\geq k}A_n\right)^c\right)\tag{DeMorgan's law for countable intersection}\\
+        &=1-P\left(\bigcup_{k=1}^\infty\bigcap_{n\geq k}A_n^c\right).\tag{DeMorgan's law for countable union}
+    \end{align*}
+    Next, defining $B_k=\cap_{n\geq k}A_n^c$, $\{B_k\}\nearrow$ since if $x\in B_k$ for some $k$, then $x\in A_n^c$ for all $n\geq k$, so $x\in \cap_{n\geq k+1}A_n^c=B_{k+1}$ 
+    and moreover $B_k\subseteq B_{k+1}$ for all $k\geq 1$. But then we have
+    \begin{align*}
+        P\left(\limsup_{n\rightarrow\infty}A_n\right)&=1-P\left(\bigcup_{k=1}^\infty\bigcap_{n\geq k}A_n^c\right)\\
+        &=1-\lim_{k\rightarrow\infty}P\left(\bigcap_{n=k}^\infty A_n^c\right)
+    \end{align*}
+    as desired.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Suppose that $\{A_n:n=1,2,\dots\}$ are independent events and $\sum_{n=1}^\infty P(A_n)=\infty$. Then, for all $n$, 
+    \[P\left(\bigcap_{m=n}^\infty A_m^c\right)=0\quad\text{and further}\quad P\left(\limsup_{n\rightarrow\infty}A_n\right)=1.\]
+    {\bf Proof.} Let $n,N\in\mbb{N}$. Then we have
+    \begin{align*}
+        P\left(\bigcap_{m=n}^NA_m^c\right)&=\prod_{m=n}^NP(A_m^c)\tag{since $A_i\perp A_j$ for $i\neq j$}\\
+        &=\prod_{m=n}^N(1-P(A_m))\\
+        &\leq\prod_{m=n}^Ne^{-P(A_m)}\tag{since $(1-x)\leq e^{-x}$ $\forall x\in\mbb{R}$}\\
+        &=e^{-\sum_{m=n}^NP(A_m)}.\tag{2}
+    \end{align*}
+    Now define $B_j=\cap_{m=n}^j A_m^c$, where $j\geq n$. Then $B_j\searrow$, since if $x\in B_{j+1}$, then $x\in A_m^c$ for $n\leq m\leq j+1$, so $x\in A_m^c$ for $1\leq m\leq j$, so $x\in B_j$.
+    In other words, $B_j\supseteq B_{j+1}$ for any $j\geq n$. This allows us to evoke the continuity of probability in the following argument.
+    \begin{align*}
+        &0\leq P\left(\cap_{m=n}^N A_m^c\right)\leq e^{-\sum_{m=n}^NP(A_m)}\\
+        \Rightarrow\qquad&\lim_{N\rightarrow\infty}0\leq\lim_{N\rightarrow\infty}P(B_N)\leq\lim_{N\rightarrow\infty}e^{-\sum_{m=n}^NP(A_m)}\\
+        \Rightarrow\qquad&0\leq P(\cap_{N=n}^\infty B_N)\leq \lim_{N\rightarrow\infty}e^{-\sum_{m=1}^NP(A_m)+\sum_{m=1}^{n-1}P(A_m)}\tag{by the continuity of probability}\\
+        \Rightarrow\qquad&0\leq P(\cap_{N=n}^\infty (\cap_{m=n}^NA_m^c))\leq\left(\lim_{N\rightarrow\infty}e^{-\sum_{m=1}^\infty P(A_m)}\right)\left(e^{\sum_{m=1}^{n-1}P(A_m)}\right)\\
+        \Rightarrow\qquad&0\leq P((\cap_{m=n}^n A_m^c)\cap(\cap_{m=n}^{n+1}A_m^c)\cap(\cap_{m=n}^{n+2}A_m^c)\cap\dots)\leq \alpha e^{-\infty}\tag{where $\alpha=e^{\sum_{m=1}^{n-1}P(A_m)}$}\\
+        \Rightarrow\qquad&0\leq P(\cap_{m=n}^\infty A_m^c)\leq 0\tag{since $\alpha$ is finite}
+    \end{align*}
+    and thus $P(\cap_{m=n}^\infty A_m^c)=0$ $\forall n\in\mbb{N}$. But then, by the previous result, under the current hypotheses we get
+    \[P\left(\limsup_{n\rightarrow\infty}A_n\right)=1-\lim_{n\rightarrow\infty}P\left(\bigcap_{m=n}^\infty A_m^c\right)=1-\lim_{n\rightarrow\infty}0=1\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf c)} If $X_n$, $n=1,2,\dots$ is a sequence of independent Bernoulli random variables such that
+    \[P(X_n=0)=1-\frac{1}{n},\qquad P(X_n=1)=\frac{1}{n}\]
+    then $P(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty X_n=1})=1$.\\[10pt]
+    {\bf Proof.} Let $\Omega$ be the sample space for process $\{X_n\}_{n\geq 1}$ with $A_n\subset\Omega$ the event that $X_n=1$ for $n=1,\dots$. That is,
+    if $\omega\in A_n$, then $X_n(\omega)=1$. It follows that if instead $\omega\in A_n^c$ we get $X_n(\omega)=0$. Then $\forall n\in\mbb{N}$ we have
+    \[\frac{1}{n}=P(X_n=1)=P(\{\omega\in\Omega:X_n(\omega)=1\})=P(A_n)\]
+    and
+    \[1-\frac{1}{n}=P(X_n=0)=P(\{\omega\in\Omega: X_n(\omega)=0\})=P(A_n^c)\]
+    so that
+    \begin{align*}
+        \sum_{n=1}^\infty P(A_n)=\sum_{n=1}^\infty\frac{1}{n}=\infty\quad\text{and}\quad\sum_{n=1}^\infty P(A_n^c)=\sum_{n=1}^\infty(1-1/n)=\infty
+    \end{align*}
+    where the latter diverges by the divergence test (i.e., $\lim_{n\rightarrow\infty}(1-1/n)=1\neq0$). But then, by the theorem in {\bf b)} and since the $A_n$ are independent for $n=1,2,\dots$ we have
+    \[P(\limsup_{n\rightarrow\infty}A_n)=1\quad\text{and}\quad P(\limsup_{n\rightarrow\infty}A_n^c)=1.\tag{3}\]
+    The significance of which is clarified in the following lemma.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} For a sequence of events $\{B_n\}_{n=1}^\infty$, we have
+            \[\limsup_{n\rightarrow\infty}B_n=\{\omega\in\Omega:\omega\in B_m\text{ for infinitely many $m$}\}.\]
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    So now (3) says that {{\it w.p.}} 1, there will be index sets $\mc{I}$ and $\mc{J}$ (of course, with $\mc{I}\cap\mc{J}=\emptyset$) both infinite so that
+    $X_i=1$ $\forall i\in\mc{I}$ and $X_j=0$ $\forall j\in\mc{J}$. But then {\it w.p.} 1,
+    \[\limsup_{n\rightarrow\infty}X_n=\lim_{n\rightarrow\infty}\sup\{X_m\}_{m\geq n}=1\]
+    since if this weren't the case, then there would be some finite index $N$ so that $X_m=0$ $\forall m>N$. Similarly, and again {\it w.p.} 1 we have
+    \[\liminf_{n\rightarrow\infty}X_n=\lim_{n\rightarrow\infty}\inf\{X_m\}_{m\geq n}=0\]
+    since otherwise we would once more have some finite index $M$ so that $X_m=1$ $\forall m>M$. We need one final rudimentary lemma to complete the proof.\\[3pt]
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} Let $A,B$ be two events with $P(A)=1$ and $P(B)=1$. Then $P(A\cap B)=1$.\\[10pt]
+            {\bf Proof.} The result follows directly from, DeMorgan's law, finite subadditivity and elementary properties of probability measures.
+            \begin{align*}
+                P(A\cap B)&=1-P(A^c\cup B^c)\tag{DeMorgan's law}\\
+                &\geq1-P(A^c)-P(B^c)\tag{finite subadditivity}\\
+                &=1-(1-1)-(1-1)\\
+                &=1
+            \end{align*}
+            so $1\leq P(A\cap B)\leq 1\Rightarrow P(A\cap B)=1$.\hfill{$\qed$}
+        \end{minipage}\vspace{10pt}
+    \end{center}
+    With this, the joint probability of interest is found to be
+    \[P(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty}X_n=1)=1\]
+    since both events occur {\it w.p.} 1.\hfill{$\qed$}
+    \newpage
+    \noindent{\bf\Large Appendix}\\[10pt]
+    {\bf A.1 Simulation code and output for problem 1}
+    \begin{verbatim}
+        gr_run <- function(p, init){
+            # Simulate gambler's run once, returning stopping time and maximal fortune
+            T = 0 # initialize number of bets
+            fortune = init # initialize fortune
+            M = fortune # initialize maximal fortune
+            while(fortune > 0){
+                fortune = fortune + (2 * rbinom(1, 1, p) - 1) # +1 w.p. p, -1 w.p. (1-p)
+                if(fortune > M){
+                    M = fortune # update maximal fortune 
+                }
+                T = T + 1 # increment number of bets
+            }
+            return(c(T, M))
+        }
+
+        set.seed(196883)
+        p_vals = c(0.4, 0.45, 0.48) # win probabilities to check
+        R = 10^5 # number of Monte Carlo repeats
+        init = 5 # initial fortune
+        for(p in p_vals){
+            res = matrix(0, R, 2) # matrix to store results
+            for(r in 1:R){
+                res[r, ] = gr_run(p, init) # simulate, sample T_i and M_i
+            }
+            # Report E[T], E[M] along with SDs
+            cat(
+                '\np=', p,
+                '\nE[T]=', mean(res[,1]), ', SD(T)=', sd(res[,1])/sqrt(R),
+                '\nE[M]=', mean(res[,2]), ', SD(M)=', sd(res[,2])/sqrt(R)
+            )
+
+            # Report P(M \geq 10) estimated by E[1_{M \geq 10}] along with SD
+            cat(
+                '\nE[1_{M >= 10}]=', mean(res[,2] >= 10), ', SD(1_{M >= 10})=',
+                sd(res[,2] >= 10)/sqrt(R), '\n'
+            )
+        }
+    \end{verbatim}
+    The above program generates the following output:
+    \begin{verbatim}
+        p= 0.4 
+        E[T]= 25.05532 , SD(T)= 0.07834284 
+        E[M]= 6.83297 , SD(M)= 0.007445553
+        E[1_{M >= 10}]= 0.11749 , SD(1_{M >= 10})= 0.001018269 
+
+        p= 0.45 
+        E[T]= 49.93986 , SD(T)= 0.2238829 
+        E[M]= 8.44308 , SD(M)= 0.01393472
+        E[1_{M >= 10}]= 0.26554 , SD(1_{M >= 10})= 0.001396533 
+
+        p= 0.48 
+        E[T]= 124.2002 , SD(T)= 0.8726408 
+        E[M]= 11.32942 , SD(M)= 0.02864537
+        E[1_{M >= 10}]= 0.40036 , SD(1_{M >= 10})= 0.001549433 
+    \end{verbatim}
+    {\bf A.2 Simulation and output for problem 2}
+    \begin{verbatim}
+        collect_coupons <- function(n){
+
+            collection_size = 0
+            coupon_counter = matrix(0, n, 1)
+            coupons = 1:n
+            T = 0
+
+            while(collection_size < n){
+                c = sample(coupons, 1)
+                if(coupon_counter[c,] == 0){
+                    collection_size = collection_size + 1
+                }
+                coupon_counter[c,] = coupon_counter[c,] + 1
+                T = T + 1
+            }
+            return(c(T, max(coupon_counter)))
+        }
+
+        set.seed(196883)
+        n_vals = c(10, 20) # number of coupons to try
+        R = 10^5 # number of Monte Carlo repeats
+        for(n in n_vals){
+            res = matrix(0, R, 2) # matrix to store results
+            for(r in 1:R){
+                res[r, ] = collect_coupons(n) # simulate, sample T_i and M_i
+            }
+            # Report E[T], E[M] along with SDs
+            cat(
+                '\nn=', n,
+                '\nE[T]=', mean(res[,1]), ', SD(T)=', sd(res[,1])/sqrt(R),
+                '\nE[X]=', mean(res[,2]), ', SD(X)=', sd(res[,2])/sqrt(R)
+            )
+        }
+    \end{verbatim} 
+    The above program generates the following output:
+    \begin{verbatim}
+        n= 10 
+        E[T]= 29.28456 , SD(T)= 0.03544535 
+        E[X]= 5.71524 , SD(X)= 0.006816992
+        n= 20 
+        E[T]= 71.96648 , SD(T)= 0.07520682 
+        E[X]= 7.46607 , SD(X)= 0.007124282> 
+    \end{verbatim}
+\end{document}

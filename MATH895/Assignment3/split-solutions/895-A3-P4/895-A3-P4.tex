@@ -1,0 +1,93 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 3\hfill {\bf Connor Braun} \hfill {\bf 2024-03-22}
+    \end{center}
+    \noindent{\bf Problem 4}\\[5pt]
+    Let $\alpha,\beta>0$. Recall that a real-valued random variable $X$ with density
+    \begin{align*}
+        f_{\alpha,\beta}(x)=\begin{cases}
+            \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha-1}e^{\beta x}\quad&\text{if $x\geq 0$,}\\
+            0\quad&\text{if $x<0$.}
+        \end{cases}
+    \end{align*}
+    is called a gamma random variable with shape $\alpha$ and rate $\beta$. Let $\alpha_1,\alpha_2,\beta>0$ and suppose that $X_1,X_2$ are independent gamma random variables,
+    where $X_i$ has shape $\alpha_i$ and rate $\beta$ for $i=1,2$. Show that $X_1+X_2$ is a gamma random variable with rate $\alpha_1+\alpha_2$ and rate $\beta$.\\[5pt]
+    {\bf Proof}\hspace{5pt} We may compute the density of $\mc{L}(X_1+X_2)=\mc{L}(X_1)\ast\mc{L}(X_2)$ directly to verify the claim. Let $h$ be the density of $\mc{L}(X_1+X_2)$. Take $x\in\mbb{R}$
+    \begin{align*}
+        h(x)=\int_{\mbb{R}}f_{\alpha_1,\beta}(x-y)f_{\alpha_2,\beta}(y)dy
+        &=\int_0^x\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}(x-y)^{\alpha_1-1}e^{-\beta(x-y)}y^{\alpha_2-1}e^{-\beta y}dy
+    \end{align*}
+    where we restrict the region of integration since $f_{\alpha_1,\beta}(x-y)f_{\alpha_2,\beta}(y)\geq 0\;\Leftrightarrow\;x\geq y\geq 0$, so we further require $x\geq 0$. Continuing,
+    \begin{align*}
+        h(x)&=\int_0^x\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}(x-y)^{\alpha_1-1}e^{-\beta(x-y)}y^{\alpha_2-1}e^{-\beta y}dy
+        =\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}e^{-\beta x}\int_0^x(x-y)^{\alpha_1-1}y^{\alpha_2-1}dy\\
+    \end{align*}
+    and now focusing on the computation of the integral:
+    \begin{align*}
+        \int_0^x(x-y)^{\alpha_1-1}y^{\alpha_2-1}dy&=\int_0^1(x-tx)^{\alpha_1-1}(tx)^{\alpha_2-1}xdt\tag{substituting $y=tx$}\\
+        &=x^{\alpha_1+\alpha_2-1}\int_0^1(1-t)^{\alpha_1-1}t^{\alpha_2-1}dt\\
+        &=x^{\alpha_1+\alpha_2-1}B(\alpha_1,\alpha_2)
+    \end{align*}
+    where for $z,w>0$ we define $B(z,w):=\int_0^1(1-t)^{z-1}t^{w-1}dt$ the beta function which satisfies the identity [1]
+    \[B(z,w)=\frac{\Gamma(z)\Gamma(w)}{\Gamma(z+w)}\] 
+    so that our density function can now be written
+    \begin{align*}
+        h(x)=\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1)\Gamma(\alpha_2)}\frac{\Gamma(\alpha_1)\Gamma(\alpha_2)}{\Gamma(\alpha_1+\alpha_2)}x^{\alpha_1+\alpha_2-1}e^{-\beta x}=\frac{\beta^{\alpha_1+\alpha_2}}{\Gamma(\alpha_1+\alpha_2)}x^{\alpha_1+\alpha_2-1}e^{-\beta x}=f_{\alpha_1+\alpha_2,\beta}(x).
+    \end{align*}
+    Of course, when $x<0$, the original integral vanishes and $h(x)=0$. Thus, the density of $\mc{L}(X_1+X_2)$ is the gamma density with shape $\alpha_1+\alpha_2$ and rate $\beta$, as claimed.\hfill{$\qed$}\\[5pt]
+\end{document}

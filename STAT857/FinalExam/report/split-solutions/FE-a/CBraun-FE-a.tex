@@ -1,0 +1,96 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf FINAL EXAM} \hfill {\bf Connor Braun} \hfill {\bf 2024-04-16}
+    \end{center}
+\noindent{\bf Problem}\hspace{5pt} Consider the following model:
+\begin{align*}
+    &\Delta\sim\text{Bernoulli}(p)\\
+    &Y|\Delta=1\sim\mc{N}(\mathbbm{1}_{(x>c_1)},\sigma^2)\\
+    &Y|\Delta=0\sim\mc{N}(2\mathbbm{1}_{(x>c_0)}, \sigma^2).
+\end{align*}
+In the model, $Y$ is the response, $x$ is a nonrandom feature and $\Delta$ is a latent variable. The parameters are
+$c_1,c_0\in\mbb{R}$, $\sigma^2>0$ and $p\in(0,1)$.
+Let $\mc{D}=\{(x_i,Y_i)\}_{i=1}^n$ be the observed data and $\mc{D}_c=\{(x_i,Y_i,\Delta_i)\}_{i=1}^n$ the complete data.\\[5pt]
+{\bf a)}\hspace{5pt} Write down the complete data likelihood and complete data log-likelihood.\\[5pt]
+{\bf Solution}\hspace{5pt}Let $\theta=(c_1,c_0,\sigma^2,p)$. Since $x$ is deterministic, for $i=1,\dots, n$ we may write the density
+\begin{align*}
+    f_{Y,x}(Y_i,x)=f_Y(Y_i|\theta, x)\mathbbm{1}_{(x=x_i)}=\begin{cases}
+        0,\quad&\text{if $x\neq x_i$}\\
+        f_Y(Y_i|\theta,x_i)\quad&\text{o.w.}
+    \end{cases}
+\end{align*}
+and further
+\begin{align*}
+    f_Y(Y_i|\theta,x_i)=\sum_{k=0,1}f_Y(Y_i,\Delta=k|\theta,x_i)&=f_Y(Y_i|\Delta=k,\theta,x_i)f_\Delta(k)\\
+    &=\frac{(1-p)}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2}+\frac{p}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2}
+\end{align*}
+which reveals the form of the joint density $f_{Y,x,\Delta}$:
+\begin{align*}
+    f_{Y,x,\Delta}(Y_i,x,0)&=\begin{cases}
+        0,\quad&\text{if $x\neq x_i$}\\
+        \frac{(1-p)}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2}\quad&\text{o.w.}
+    \end{cases}\\
+    f_{Y,x,\Delta}(Y_i,x,1)&=\begin{cases}
+        0,\quad&\text{if $x\neq x_i$}\\
+        \frac{p}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2}\quad&\text{o.w.}
+    \end{cases}
+\end{align*}
+and thus the complete data likelihood function is given by
+\begin{align*}
+    \mc{L}_c(\theta|\mc{D}_c)=\prod_{i=1}^nf_{Y,x,\Delta}(Y_i,x_i,\Delta_i)=\prod_{i=1}^n\bp{\frac{(1-p)}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-2\mathbbm{1}_{(x_i>c_0)})^2}}^{1-\Delta_i}\bp{\frac{p}{\sqrt{2\pi\sigma^2}}\exp\bp{-\tfrac{1}{2\sigma^2}(Y_i-\mathbbm{1}_{(x_i>c_1)})^2}}^{\Delta_i}
+\end{align*}
+with corresponding complete data log-likelihood
+\begin{align*}
+    \ell_c(\theta|\mc{D}_c)=\sum_{i=1}^n(1-\Delta_i)\bp{\log(\phi(Y_i,2\mathbbm{1}_{(x_i>c_0)},\sigma^2))+\log(1-p)}+\Delta_i\bp{\log(\phi(Y_i,\mathbbm{1}_{(x_i>c_1)},\sigma^2))+\log(p)}
+\end{align*}
+where we have taken $\phi(y,\mu,\sigma^2)$ to be the Gaussian density evaluated at $y$ with mean $\mu$ and variance $\sigma^2$ as shorthand.\hfill{$\qed$}
+\end{document}

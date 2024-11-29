@@ -1,0 +1,55 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment II}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 1} A particle undergoes a random walk on a bow tie graph as shown below.
+    \begin{center}
+    \makebox[\textwidth]{\includegraphics[width=40mm]{855A2-graphwalk.png}}
+    \end{center}
+    From any vertex, its next step is equally likely to be any of the neighboring vertices. Initially it is at $A$.
+    Compute the probability that the particle hits state $E$ before it hits $B$.\\[10pt]
+    {\bf Solution} Let $\mc{A}$ be the event that the particle is in state $E$ before it is in state $B$ and $\{X_n\}_{n\geq 0}$ the
+    stochastic process with $X_n$ the state of the particle after $n$ steps for $n\geq 0$. For compactness, we shall write
+    \[P_j=P(\mc{A}|X_0=j)\quad\text{for}\quad j\in\{A, B, C, D, E\}.\]
+    Then the quantity of interest can be decomposed by the law of total probability
+    \begin{align*}
+        P(\mc{A}|X_0=A)&=P(X_1=B)P(\mc{A}|X_0=A,X_1=B)+P(X_1=C)P(\mc{A}|X_0=A,X_1=C)\\
+        &=\frac{1}{2}P(\mc{A}|X_1=B)+\frac{1}{2}P(\mc{A}|X_1=C)\tag{Markov property}\\
+        &=\frac{1}{2}P(\mc{A}|X_0=B)+\frac{1}{2}P(\mc{A}|X_0=C)
+    \end{align*}
+    where we write the last expression simply as $(1/2)P_B+(1/2)P_C$. Of course, $P_B=0$, since if $X_0=B$ then we cannot hit $E$ at 
+    an earlier point. Similarly, $P_E=1$. Thus, we have $P_A=(1/2)P_C$, and using a similar sequence of justifications we can compute $P_C$ directly.
+    \begin{align*}
+        P_C&=\frac{1}{4}P_B+\frac{1}{4}P_D+\frac{1}{4}P_A+\frac{1}{4}P_E=\frac{1}{4}P_D+\frac{1}{4}P_A+\frac{1}{4}\tag{1}\\
+        P_D&=\frac{1}{2}P_E+\frac{1}{2}P_C=\frac{1}{2}+\frac{1}{2}P_C\tag{2}\\
+        P_C&=\frac{1}{4}\left(\frac{1}{2}P_C+\frac{1}{2}\right)+\frac{1}{4}P_A+\frac{1}{4}=\frac{1}{8}P_C+\frac{1}{8}+\frac{1}{4}P_A+\frac{1}{4}\tag{substituting (2) into (1)}
+    \end{align*}
+    which implies
+    \begin{align*}
+        \frac{7}{8}P_C=\frac{1}{4}P_A+\frac{3}{8}\quad\Rightarrow\quad P_C=\frac{2}{7}P_A+\frac{3}{7}
+    \end{align*}
+    so that 
+    \begin{align*}
+        P_A=\frac{1}{2}P_C=\frac{1}{2}\left(\frac{2}{7}P_A+\frac{3}{7}\right)=\frac{1}{7}P_A+\frac{3}{14}\quad\Rightarrow\quad \frac{6}{7}P_A=\frac{3}{14}\quad\Rightarrow\quad P_A=\frac{1}{4}\tag*{\qed}
+    \end{align*}
+\end{document}

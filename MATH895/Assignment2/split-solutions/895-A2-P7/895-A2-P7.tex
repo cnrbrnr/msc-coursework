@@ -1,0 +1,96 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\as}{a.s.}
+\DeclareMathOperator{\ale}{a.e.}
+\DeclareMathOperator{\st}{s.t.}
+\DeclareMathOperator{\io}{i.o.}
+\DeclareMathOperator{\wip}{w.p.}
+\DeclareMathOperator{\iid}{i.i.d.}
+\DeclareMathOperator{\ifff}{if\;and\;only\;if}
+\DeclareMathOperator{\inv}{inv}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 2\hfill {\bf Connor Braun} \hfill {\bf 2024-02-17}
+    \end{center}
+    \noindent{\bf Problem 7}\\[5pt]
+    Prove the following corollary of the Hewitt-Savage $0-1$ Law:\\[5pt]
+    {\bf Corollary}\hspace{5pt}Let $(X_n)_{n\geq 1}$ be a sequence of $\iid$ random variables taking values in $[0,\infty)$. Then (i) $\sum_{n=1}^\infty X_n$ either converges $\as$ or diverges $\as$ Further, (ii) if $E(X_1)>0$, then this series diverges $\as$\\[5pt]
+    {\bf a)}\hspace{5pt} Prove (i).\\[5pt]
+    {\bf Proof}\hspace{5pt} We consider the sequence $(X_n)_{n\geq 1}$ to be defined on the product probability space $(\Omega,\mc{F},P)$ so that $\forall\omega\in\Omega$, $\omega=(\omega_k)_{k\geq 1}$ and each $\omega_i$ resides in the same space $(\Omega_1,\mc{F}_1,P_1)$ for $i\geq 1$. In particular, $(\Omega,\mc{F},P)=(\Omega_1,\mc{F}_1,P_1)^{\mbb{N}}$ and we take $\pi_k:\Omega\rightarrow\Omega_1$ to be a natural projection map so that $\pi_k(\omega)=\omega_k$ for $k\geq 1$ and any $(\omega_i)_{i\geq 1}\in\Omega$.\\[5pt]
+    With this setup, we consider the event
+    \begin{align*}
+        A:=\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\omega)<\infty\right\}\equiv\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\pi_n(\omega))<\infty\right\}\equiv \left\{\omega\in\Omega:\sum_{n=1}^\infty X_n(\omega_n)<\infty\right\}
+    \end{align*}
+    where the series $\sum_{n=1}^\infty X_n$ converges. Next, let $\sigma:\mbb{N}\rightarrow\mbb{N}$ be a finite permutation such that $N_p:=\{k\in\mbb{N}:\sigma(k)\neq k\}$ is finite, and define $T_\sigma:\Omega\rightarrow\Omega$ by $T_\sigma((\omega_k)_{k\geq 1})=(\omega_{\sigma(k)})_{k\geq 1}$ for any $(\omega_k)_{k\geq 1}\in\Omega$. We aim to establish the exchangeability of $A$ by showing that $T_\sigma(A)=A$.\\[5pt]
+    For this, take some $\omega=(\omega_k)_{k\geq 1}\in A$ and observe that
+    \begin{align*}
+        \sum_{n=1}^\infty X_n(\omega_{\sigma(n)})=\sum_{n\in N_p}X_n(\omega_{\sigma(n)})+\sum_{n\notin N_p}X_n(\omega_{\sigma(n)})
+    \end{align*}
+    where for any $i\notin N_p$, $\sigma(i)=i$, and for $i\in N_p$, $\exists j\in N_p$ so that $\sigma(i)=j$. Further, let $\sigma^{-1}$ be the inverse of $\sigma$ so that $\sigma^{-1}(\sigma(n))=\sigma(\sigma^{-1}(n))=n$ $\forall n\in\mathbb{N}$. Since the variables are identically distributed, $X_n(\omega_j)=X_j(\omega_j)$ for any $n,j\geq 1$, and so the above becomes
+    \begin{align*}
+        \sum_{n\in N_p}X_n(\omega_{\sigma(n)})+\sum_{n\notin N_p}X_n(\omega_{\sigma(n)})&=\sum_{n\in N_p}X_{\sigma^{-1}(n)}(\omega_n)+\sum_{n\notin N_p}X_n(\omega_n)\tag{commutativity of addition}\\
+        &=\sum_{n\in N_p}X_n(\omega_n)+\sum_{n\notin N_p}X_n(\omega_n)\tag{$(X_n)_{n\geq 1}$ $\iid$}\\
+        &=\sum_{n=1}^\infty X_n(\omega)<\infty
+    \end{align*}
+    and thus $T_\sigma(A)\subset A$. Of course, this holds for arbitrary such $\sigma$, so in particular for $\sigma^{-1}$, the corresponding transformation on $\Omega$ satisfies $T_{\sigma^{-1}}(A)\subset A$. Now observe that $T^{-1}_\sigma\equiv T_{\sigma^{-1}}$ and take $\omega\in A$.
+    Since $T_{\sigma^{-1}}(\omega)=T^{-1}_\sigma(\omega)\in A$, we have $T_{\sigma}(T^{-1}_\sigma(\omega))=\omega$ so $\omega\in T_\sigma(A)$ and we conclude that $T_\sigma(A)=A$ for any finite permutation $\sigma$. That is, $A$ is exchangeable.\\[5pt]
+    Let $\mc{E}:=\{B\in\mc{F}:T_\sigma(B)=B\;\text{for all finite permutations $\sigma$}\}$ be the set of exchangeable events in $(\Omega,\mc{F},P)$. It turns out that $\mc{E}$ is a $\sigma$-field (see Appendix A.1 for a proof), so 
+    \[\Omega\setminus A=\left\{\omega\in\Omega:\sum_{n=1}^\infty X_n=\infty\right\}\]
+    is also exchangeable. Thus, by the Hewitt-Savage $0-1$ law, $P(A),P(\Omega\setminus A)\in\{0,1\}$. That is, either $\sum_{n=1}^\infty X_n$ converges $\as$, or else it diverges $\as$\hfill{$\qed$}\\[5pt]
+    {\bf b)} Prove (ii).\\[5pt]
+    {\bf Proof}\hspace{5pt} Suppose that $\E(X_1)>0$, so that $\E(X_n)>0$ for any $n\geq 1$ too. Since $X_n$ is $[0,\infty)$-valued, $P(X_n=0)<1$ for all $n\geq 1$, since otherwise
+    \begin{align*}
+        \E(X_n)=\int_{\Omega_1}X_nP_1(d\omega)=\int_{\{\omega\in\Omega_1:X_n(\omega)=0\}}X_nP_1(d\omega)=0
+    \end{align*}
+    contradicting the positive expectation of the random variables. Setting $p=P(X_n=0)<1$, we have
+    \begin{align*}
+        \prod_{i=1}^\infty p=\lim_{n\rightarrow\infty}p^n=0
+    \end{align*}
+    which, by problem 2, implies that $\sum_{n=1}^\infty(1-p)=\sum_{n=1}^\infty P(X_n>0)=\infty$. By the Borel-Cantelli lemma, along with the fact that $(X_n)_{n\geq1}$ are mutually independent, we have that
+    $P(X_n>0\;\io)=1$. This says that for any $N\in\mbb{N}$, $\exists n\geq N:\;X_n>\varepsilon$ for some $\varepsilon>0$ almost surely. Since the $X_n$ are independent, $\varepsilon$ does not depend on $N$, and so $X_n\nrightarrow 0$ as $n\rightarrow\infty$ almost surely. Then, by the divergence test, $\sum_{n=1}^\infty X_n=\infty$ almost surely.\hfill{$\qed$}\\[5pt]
+\end{document}

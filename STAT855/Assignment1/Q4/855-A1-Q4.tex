@@ -1,0 +1,52 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 4.} Let $S=\{1,2,\dots,n\}$ and suppose $A$ and $B$ are independent, each equally likely to be any of the $2^n$ subsets of $S$.\\[10pt]
+    {\bf a)} Show that $P(A\subset B)=\left(\frac{3}{4}\right)^n$.\\[10pt]
+    {\bf Solution.} Define the independent random variables $\delta_i,\gamma_i$ for $i=1,2,\dots,n$ so that $\delta_i$ and $\gamma_i$ are equiprobable on the set $\{\emptyset, \{i\}\}$. Since these are independent, for $1\leq i\leq n$ we have the joint probabilities
+    \[P(\delta_i=\{i\},\gamma_i=\{i\})=P(\delta_i=\{i\})P(\gamma_i=\{i\})=\frac{1}{4}\]
+    and similarly
+    \begin{align*}
+        P(\delta_i=\emptyset,\gamma_i=\{i\})=\frac{1}{4},\quad
+        P(\delta_i=\emptyset,\gamma_i=\emptyset)=\frac{1}{4},\quad\text{and}\quad
+        P(\delta_i=\{i\},\gamma_i=\emptyset)=\frac{1}{4}.
+    \end{align*}
+    Then $A$ and $B$ can be constructed according to
+    \begin{align*}
+        A&=\bigcup_{j=1}^n\delta_j\quad\text{and}\quad B=\bigcup_{j=1}^n\gamma_j
+    \end{align*}
+    since these sets will be independent from one another (since $\delta_i\perp\delta_j$, $\gamma_i\perp\gamma_j$ for $i\neq j$ and $\delta_i\perp\gamma_j$ for $1\leq i,j\leq n$) and are each equiprobable on the power set of $S$.\\[10pt] 
+    Now, when $A\not\subset B$ $\exists k:$ $1\leq k\leq n$ where $\delta_k\in A$ but $\delta_k\notin B$. This can only be true if both $\delta_k=\{k\}$ (since if $\delta_k=\emptyset$ then it would
+    be trivially included in $B$) and $\gamma_k=\emptyset$ (since for all $j\neq k$, $P(\gamma_j=\{k\})=0$ by definition). The probability of this occuring for any particular $k\in\{1,2,\dots,n\}$ is
+    \[P(\delta_k=\{k\},\gamma_k=\emptyset)=\frac{1}{4}.\]
+    The negation of $A\not\subset B$ is $A\subset B$, and occurs when $\forall k:$ $1\leq k\leq n$, if $\delta_k\in A$ then $\delta_k\in B$. Of course, if $\delta_k=\emptyset$, then $\delta_k\in B$ is trivially true so we can have either $\gamma_k=\emptyset$ or $\gamma_k=\{k\}$. However, if $\delta_k=\{k\}$ then 
+    we require $\gamma_k=\{k\}$ for $A\subset B$ to hold. Thus,
+    \[P(A\subset B)=\prod_{j=1}^n\left(P(\delta_j=\{j\},\gamma_j=\{j\})+P(\delta_j=\emptyset)\right)=\prod_{j=1}^n\left(\frac{1}{4}+\frac{2}{4}\right)=\left(\frac{3}{4}\right)^n\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Show that $P(A\cap B=\emptyset)=\left(\frac{3}{4}\right)^n$.\\[10pt]
+    {\bf Solution.} Carring on with all of the same random variables and definitions as in {\bf a)}, the event $A\cap B$ occurs if $\forall k,$ $1\leq k\leq n$, if $\delta_k\in A$ then $\delta_k\notin B$. Further, this can only occur if whenever $\delta_k=\{k\}$, we have $\gamma_k=\emptyset$ for $1\leq k\leq n$.
+    As such, the probability of interest can be computed as
+    \[P(A\cap B)=\prod_{j=1}^n(P(\delta_k=\{k\}, \gamma_k=\emptyset)+P(\delta_k=\emptyset))=\prod_{j=1}^n\left(\frac{1}{4}+\frac{2}{4}\right)=\left(\frac{3}{4}\right)^n\]
+    and we are done.\hfill{$\qed$}\\[10pt]
+\end{document}

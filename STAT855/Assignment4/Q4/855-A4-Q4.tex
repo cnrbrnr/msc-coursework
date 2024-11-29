@@ -1,0 +1,120 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 4} A particle moves on a $d$-dimensional hypercube $\{+1,-1\}^d$, where $d\geq 2$. Define $q=(-1,-1,\dots,-1)$ and $p=-q$, the vertex opposite to $q$.\\[10pt]
+    At each step, if the particle is not at $p$, it is equally likely to flip the sign of one of the coordinates in its position vector; if the particle is at $p$,
+    it jumps to $q$. Denote by $X_n$ the position vector of the particle after $n$ steps.\\[10pt]
+    {\bf a)} Show that $\{X_n,n\geq 0\}$ is irreducible.\\[10pt]
+    {\bf Solution} Let the state space $S$ be the set of all $d$-tuples specifying vertices of the hypercube. Then, for $X\in S$, $X=(x_1,x_2,\dots,x_d)$ so that $x_i=\pm 1$, $i=1,2,\dots,d$, define the functions
+    \[N_q(X)=\left\|\frac{X-q}{2}\right\|_1=\sum_{n=1}^d\left|\frac{x_n+1}{2}\right|\quad\text{and}\quad N_p(X)=\left\|\frac{X-p}{2}\right\|_1=\sum_{n=1}^d\left|\frac{x_n-1}{2}\right|\]
+    where $\|\cdot\|_1$ can be understood as the taxicab norm on $\mbb{R}^d$ restricted to the set of vertices of the $d$-dimensional hypercube, and $N_p(X)$, $N_q(X)$ count the number of coordinates in which $X$ differs from $p$ and $q$ respectively.
+    Now, noting that for $1\leq i\leq d$,
+    \[\left|\frac{x_i+1}{2}\right|=\begin{cases}
+        1\quad&\text{if $x_i=1$}\\
+        0\quad&\text{if $x_i=-1$}
+    \end{cases}\quad\text{and}\quad \left|\frac{x_i-1}{2}\right|=\begin{cases}
+        1\quad&\text{if $x_i=-1$}\\
+        0\quad&\text{if $x_i=1$}
+    \end{cases}\]
+    we get
+    \[0=\sum_{n=1}^d0\leq\sum_{n=1}^d\left|\frac{x_n\pm1}{2}\right|\leq\sum_{n=1}^d1=d\]
+    so $0\leq N_p(X),N_q(X)\leq d$. Further, $N_q(X)=0$ if and only if $x_i=-1$ $\forall i$. That is, $X=q$. Similarly,
+    $N_q(X)=d$ if and only if $X=p$, $N_p(X)=0$ if and only if $X=p$, and $N_p(X)=d$ if and only if $X=q$.\\[10pt]
+    Now, fixing some $X\in S\setminus\{p,q\}$, we have $0<N_p(X)<d$, so $X$ differs from $p$ in exactly $N_p(X)$ indices, call them $i_1,i_2,\dots,i_{N_p(X)}$.\\[10pt]
+    \noindent We next define a new process, $\{Z_n,n\geq 0\}$ so that $\{Z_n=j\}$ is the event that we flip the $j$-th coordinate of $X_n$, and $\{Z_n,n\geq 0\}$ has state space $D=\{1,2,\dots,d\}$. Thus we get $P(Z_n=j)=p_{j}=1/d$, since the probability of flipping the $j$-th coordinate is uniformly distributed on $D$.
+    With all of this, we obtain
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&=\sum_{z_0, z_1,\dots,z_{N_p(X)-1}\in D}P(X_{N_p(X)}=p,Z_{N_p(X)-1}=z_{N_p(X)-1},\dots,Z_1=z_1,Z_0=z_0|X_0=X)\\
+        &\geq P(X_{N_p(X)}=p,Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1|X_0=X).
+    \end{align*}
+    For notational expedience, let $\mc{Z}_{X,p}=\{Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1\}$. Then the above becomes
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&\geq P(X_{N_p(X)}=p,\mc{Z}_{X,p}|X_0=X)\\
+        &=P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)P(\mc{Z}_{X,p}).\tag{7}
+    \end{align*}
+    Next, note that $\mc{Z}_{X,p}\cup \{X_0=X\}\subseteq \{X_{N_p(X)}=p\}$. To see this, suppose that $\omega\in\mc{Z}_{X,p}\cup \{X_0=X\}$. Then $X$ differs from $p$ in coordinates $i_1,i_2,\dots,i_{N_p(X)}$. But $Z_0=i_1$ yields $X_1$ which differs
+    from $p$ only in coordinates $i_2,\dots,i_{N_p(X)}$. Continuing in this way, we see
+    \begin{align*}
+        N_p(X_1)&=N_p(X)-1\\
+        N_p(X_2)&=N_p(X)-2\\
+        &\vdots\\
+        N_p(X_{N_p(X)})&=N_p(X)-N_p(X)\\
+        &=0.
+    \end{align*}
+    But $N_p(X_{N_p(X)})=0$ if and only if $X_{N_p(X)}=p$, so $\omega\in\{X_{N_p(X)}=p\}$, and $\mc{Z}_{X,p}\cup \{X_0=X\}\subseteq \{X_{N_p(X)}=p\}$ as claimed. But this gives us $P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)=1$ so, continuing from (7), we thus have
+    \begin{align*}
+        P(X_{N_p(X)}=p|X_0=X)&\geq P(X_{N_p(X)}=p|\mc{Z}_{X,p},X_0=X)P(\mc{Z}_{X,p})\\
+        &=P(Z_{N_p(X)-1}=i_{N_p(X)},\dots,Z_1=i_2,Z_0=i_1)\\
+        &=\left(1/d\right)^{N_p(X)}\tag{since $Z_i\perp Z_j$ whenever $i\neq j$}\\
+        &>0.
+    \end{align*}
+    So we have that $X\longrightarrow p$. Of course, $P(X_1=q|X_0=p)=1>0$, so $p\longrightarrow q$ as well. Observe now that $X\neq q$, so $0<N_q(X)$, and $X$ differs from $q$ in exactly $N_q(X)$ coordinates,
+    call them $j_1,j_2,\dots j_{N_q(X)}$. Defining $\mc{Z}_{q,X}=\{Z_{N_q(X)-1}=j_{N_q(X)},\dots,Z_1=j_2,Z_0=j_1\}$, we get $\mc{Z}_{q,X}\cup\{X_0=q\}\subseteq \{X_{N_q(X)}=X\}$ just as before. To see this, take $\omega\in\mc{Z}_{q,X}\cup\{X_0=q\}$. Then we get
+    $X_0=q$, which differs from $X$ at indices, $j_1,j_2,\dots,j_{N_q(X)}$, but $Z_0=j_1$ means that $X_1$ differs only at indices $j_2,\dots,j_{N_q(X)}$, and $Z_1=j_2$ means that $X_2$ differs from $X$ only in coordinates $j_3,\dots,j_{N_q(X)}$. Continuing in this way, we get
+    $X_{N_q(X)}$ differs from $X$ not at all, so $X_{N_q(X)}=X$  and thus $\omega\in \{X_{N_q(X)}=X\}$ implying that $\mc{Z}_{q,X}\cup\{X_0=q\}\subseteq\{X_{N_q(X)}=X\}$, as claimed.\\[10pt]
+    Then we can show that $q$ leads to $X$ just as we showed $X$ leads to $p$:
+    \begin{align*}
+        P(X_{N_q(X)}=X|X_0=q)&=\sum_{z_0,z_1,\dots,z_{N_q(X)-1}\in D}P(X_{N_q(X)}=X,Z_{N_q(X)-1}=z_{N_q(X)-1},\dots,Z_1=z_1,Z_0=z_0|X_0=q)\\
+        &\geq P(X_{N_q(X)}=X,\mc{Z}_{q,X}|X_0=q)\\
+        &=P(X_{N_q(X)}=X|\mc{Z}_{q,X},X_0=q)P(\mc{Z}_{q,X})\tag{since $P(X_{N_q(X)}=X|\mc{Z}_{q,X},X_0=q)=1$}\\
+        &=P(Z_{N_q(X)-1}=j_{N_q(X)},\dots,Z_1=j_2,Z_0=j_1)\\
+        &=(1/d)^{N_q(X)}\tag{since $Z_i\perp Z_j$ whenever $i\neq j$}\\
+        &>0.
+    \end{align*}
+    This tells us that $q\longrightarrow X$. So $X\longrightarrow p$ and $q\longrightarrow X$ so by transitivity of the 'leads to' relation, $q\longleftrightarrow p$ and $X\longleftrightarrow p$. But this was for arbitrary $X\in S\setminus\{p,q\}$, so now taking $A,B\in S$, we have that $A\longleftrightarrow p$, and $B\longleftrightarrow p$,
+    so by the transitivity of the communication relation, $A\longleftrightarrow B$, and thus the state space consists of a single communicating class and the process is irreducible.\hfill{$\qed$}\\[10pt]
+    {\bf b)} Determine the period of $\{X_n,n\geq 0\}$.\\[10pt]
+    {\bf Solution} Some preliminaries to get us started. First, observe that in order to begin at one state and return to it, we must have flipped an even number of coordinates. 
+    That is, for every coordinate changed between returns to a state $X\in S$, we must revert each of them to be at $X$ again, so 2 divides the number of coordinate changes.\\[10pt]
+    Next, we associate a number of coordinate changes to each step in $\{X_n,n\geq 0\}$. If $X_i\in S$, $X_i\neq p$ for some $i\geq 0$, then $X_{i+1}$ will differ by
+    exactly one coordinate. If instead $X_i=p$, then $X_{i+1}=q$, and the two differ in $d$ coordinates, the dimension of the hypercube.\\[10pt]
+    Let $P$ be the one-step transition matrix for this process so that $\forall i,j\in S$, $P_{i,j}=P(X_1=j|X_0=i)$. Define $\mc{T}_q=\{n>0:(P^n)_{qq}>0\}$, so that the period of $q\in S$ is $\gcd\mc{T}_q$. We proceed by induction to show that $2k\in\mc{T}_q$ $\forall k\in\mbb{N}$.\\[10pt]
+    Let $k=1$, and $\ell\in S$ so that $\ell$ and $q$ differ in just one coordinate, so $P(X_1=\ell|X_0=q)=1/d$ and $P(X_1=q|X_0=\ell)=1/d$. Then by the Chapman-Kolmogorov equations
+    \[(P^{2k})_{q,q}=(P^2)_{q,q}=\sum_{j\in S}P_{q,j}P_{j,q}\geq P_{q,\ell}P_{\ell,q}=(1/d)^2>0\]
+    so $2\cdot1\in\mc{T}_q$. Now, for the inductive hypothesis, suppose that for some $k\geq 1$ we have $(P^{2k})_{q,q}>0$. This gives us
+    \[(P^{2(k+1)})_{q,q}=(P^{2k+2})_{q,q}=\sum_{j\in S}(P^{2k})_{q,q}(P^2)_{q,q}\geq(P^{2k})_{q,q}(1/d)^2>0\]
+    so $2k\in\mc{T}_q\Rightarrow 2(k+1)\in\mc{T}_q$, so by the principle of mathematical induction, for every $n$ even, $n\in\mc{T}_q$.\\[10pt]
+    We now consider the cases when $d$ is even versus odd separately. First, suppose that $d$ is even, so $\exists k\in\mbb{N}:$ $d=2k$. Then $d\in\mc{T}_q$ by the previous result, but also
+    \begin{align*}
+        (P^{d+1})_{q,q}=\sum_{j\in S}(P^d)_{q,j}(P)_{j,q}&\geq(P^d)_{q,p}(P)_{p,q}\\
+        &=(P^d)_{q,p}\tag{since $P_{p,q}=1$}\\
+        &=\sum_{z_0,z_1,\dots,z_{d-1}\in D}P(X_d=p,Z_{d-1}=z_{d-1},\dots,Z_1=z_1,Z_0=z_0|X_0=q)\\
+        &\geq P(X_d=p,Z_{d-1}=d,\dots,Z_1=2,Z_1=1|X_0=q)\\
+        &=P(X_d=p|Z_{d-1}=d,\dots,Z_1=2,Z_0=1,X_0=q)P(Z_{d-1}=d,\dots,Z_1=2,Z_0=1)
+    \end{align*} 
+    where we have reintroduced the process $\{Z_n,n\geq0\}$ from part a. We can also apply the same reasoning as in part a to show that the conditional probability in the last line is 1. In particular, it is clear that if $X_0=q$, and
+    we flip the first coordinate, then the second, and continue until we've flipped the $d$th coordinate, that we will be at $p$. Thus the above becomes
+    \begin{align*}
+        (P^{d+1})_{q,q}\geq P(Z_{d-1}=d,\dots,Z_1=2,Z_0=1)&=(1/d)^d>0
+    \end{align*}
+    so $d+1\in\mc{T}_q$. But the only number dividing $d$ and $d+1$ is $1$, so $\gcd\mc{T}_q=1$ and the state $q$ is aperiodic. By part a, this process is irreducible, so in fact every
+    element of $S$ shares the same period -- that is, period is a class property (see problem 6 for proof). Thus when $d$ is even, the chain is aperiodic.\\[10pt]
+    Now consider the case of $d$ odd. Previously, we commented that this implies that the transition from $p$ to $q$ is associated with an odd number of coordinate changes, along with every other
+    possible state transition.
+    Assume for the purpose of deriving a contradiction that $(P^{2k+1})_{q,q}>0$ for some $k\in\mbb{N}$. Then there exists a sequence of $2k+1$ transitions from state $q$ back to itself. Let $c_i$ be the number of coordinate changes associated with the
+    $i$th of these transitions for $i=1,2,\dots,2k+1$. Then $c_i$ is odd number, so $\exists k_i\in\mbb{N}:$ $c_i=2k_i+1$ for $i=1,2,\dots,2k+1$, and the total number of coordinate changes during the excursion is given by
+    \[\sum_{i=1}^{2k+1}c_i=\left(\sum_{i=1}^{2k+1}2k_i+1\right)=\left(\sum_{i=1}^{2k+1}2k_i\right)+2k+1=2\left[\left(\sum_{i=1}^{2k+1}k_i\right)+k \right]+1\]
+    so any path of an odd number of state transitions from $q$ to itself must incur an odd number of coordinate changes, and thus cannot terminate at $q$. Thus, $\forall n$ odd, $n\notin\mc{T}_q$, but $n-1\in\mc{T}_q$, so $\gcd\mc{T}_q=2$. Thus, when $d$ is odd, the period of $q\in S$ is two.
+    Once more appealing to the irreducibility of the process from a and the forthcoming result in problem 6, we get that $\forall i\in S$, the period of $i$ is also 2, since period is a class property.\hfill{$\qed$}
+\end{document}

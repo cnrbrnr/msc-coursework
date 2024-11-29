@@ -1,0 +1,55 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment IV}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}    
+    \maketitle
+    \noindent{\bf Problem 6} Let $\{X_n:n\geq 0\}$ be a Markov chain with the state space $S$ and transition matrix $P$. We denote the period of a state $i\in S$ by
+    \[d_i=\gcd\{n\geq 1:(P^n)_{i,i}>0\}.\]
+    Show that for any $i,j\in S$, if $i$ and $j$ communicate, then $d_i=d_j$.\\[10pt]
+    {\bf Proof} Let $i,j\in S$ and suppose $i\neq j$ (since otherwise the proof is trivial). Let $d_i$ be the period of $i$ and $d_j$ the period of $j$. Since $i\longleftrightarrow j$, $\exists a,b\in\mbb{N}$ so that
+    $(P^{a})_{i,j}>0$ and $(P^{b})_{j,i}>0$. By the Chapman-Kolmogorov equations,
+    \[(P^{a+b})_{i,i}=\sum_{k\in S}(P^{a})_{i,k}(P^{b})_{k,i}\geq (P^{a})_{i,j}(P^{b})_{j,i}>0\]
+    So $a+b\in\{n\geq 1:(P^n)_{i,i}>0\}$, and thus $d_i|(a+b)$ (where $\forall \alpha,\beta\in\mbb{N}$, we write $\alpha|\beta$ to mean $\exists k\in\mbb{N}:$ $\beta=k\alpha$ ).
+    Now, since $j\longleftrightarrow i$ and $i\longleftrightarrow j$, $\exists {c_j}>0:$ $(P^{c_j})_{j,j}>0$. Then
+    \begin{align*}
+        (P^{a+c_j+b})_{i,i}=\sum_{k\in S}(P^a)_{i,k}(P^{c_j+b})_{k,i}&=\sum_{k\in S}(P^a)_{i,k}\left(\sum_{\ell\in S}(P^{c_j})_{k,\ell}(P^{b})_{\ell, i}\right)\\
+        &\geq\sum_{k\in S}(P^a)_{i,k}(P^{c_j})_{k,j}(P^b)_{j,i}\\
+        &\geq (P^a)_{i,j}(P^{c_j})_{j,j}(P^b)_{j,i}\\
+        &>0
+    \end{align*}
+    so that we also get $a+b+{c_j}\in\{n\geq 1:(P^n)_{i,i}>0\}$, thus $d_i|(a+b+{c_j})$. From this, $\exists k,m\in\mbb{N}$ so that $(a+b)=kd_i$, and $(a+b+{c_j})=md_i$. But then
+    \[(a+b+{c_j})=md_i\quad\Rightarrow\quad {c_j}+kd_i=md_i\quad\Rightarrow\quad {c_j}=d_i(m-k)\]
+    which gives us $d_i|{c_j}$. But $d_j|{c_j}$ by definition, and is the greatest such divisor, so $d_i\leq d_j$. We now reverse this argument. Observe that
+    \[(P^{b+a})_{j,j}=\sum_{k\in S}(P^{b})_{j,k}(P^{a})_{k,j}\geq (P^{b})_{j,i}(P^{a})_{i,j}>0\]
+    so $b+a\in\{n\geq 1: (P^n)_{j,j}>0\}$, and thus $d_j|(b+a)$. Next, since $i\longleftrightarrow j$ and $j\longleftrightarrow i$, $\exists c_i>0:$ $(P^{c_i})_{i,i}>0$. Then
+    \begin{align*}
+        (P^{b+c_i+a})_{j,j}=\sum_{k\in S}(P^b)_{j,k}(P^{c_i+a})_{k,j}&=\sum_{k\in S}(P^b)_{j,k}\left(\sum_{\ell\in S}(P^{c_i})_{k,\ell}(P^{a})_{\ell, j}\right)\\
+        &\geq\sum_{k\in S}(P^b)_{j,k}(P^{c_i})_{k,i}(P^a)_{i,j}\\
+        &\geq (P^b)_{j,i}(P^{c_i})_{i,i}(P^a)_{i,j}\\
+        &>0
+    \end{align*} 
+    so that $a+b+c_i\in\{n\geq 1:(P^n)_{j,j}>0\}$, thus $d_j|(a+b+c_i)$, and we know now that $\exists \ell,n\in\mbb{N}$ so that $(a+b)=\ell d_j$ and $(a+b+c_i)=nd_j$.  
+    But this gives us
+    \[(a+b+c_i)=nd_j\quad\Rightarrow\quad c_i+\ell d_j=nd_j\quad\Rightarrow\quad c_i=d_j(n-\ell)\]
+    which gives us $d_j|c_i$. But $d_i|c_i$, and is the greatest such divisor, so $d_j\leq d_i$. Previously we found that $d_i\leq d_j$, so we are forced to conclude that $d_i=d_j$.
+    Thus, for any two states $i,j\in S$ with $i\longleftrightarrow j$, we have $d_i=d_j$, so period is a class property.\hfill{$\qed$}
+\end{document}

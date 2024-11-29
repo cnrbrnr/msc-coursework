@@ -1,0 +1,65 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment III}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document} 
+    \maketitle
+    \noindent{\bf Problem 6} Let $\{X_n\}_{n\geq 0}$ be a Markov chain on state space $S=\{0,1,2,\dots\}$. Show that if $\{X_n\}_{n\geq 0}$ is irreducible and recurrent, then
+    \[P\left(\liminf_{n\rightarrow\infty}X_n=0,\limsup_{n\rightarrow\infty} X_n=\infty\right)=1.\]
+    {\bf Proof} Let $\{X_n\}_{n\geq 0}$ be an irreducible, recurrent markov chain on the nonnegative integers. We will make use of the following lemma:
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma} Let $\{Y_n\}_{n\geq 0}$ be a Markov chain that is irreducible and recurrent on some state space $\mc{S}$. Independent of the initial distribution, we have for $j\in\mc{S}$
+            \[P(Y_n=j\;\text{for infinitely many $n$})=1.\]  
+        \end{minipage}
+    \end{center}\vspace{10pt}
+    Let $\Omega$ be the sample space for the process $\{X_n\}_{n\geq 0}$. By the lemma, taking $\omega\in\Omega$ and choosing arbitrary $j\in S$ we get
+    \[P(X_n(\omega)=j\;\text{for infinitely many $n$})=1\]
+    so that for any realization of the Markov chain, $j$ occurs infinitely many times {\it w.p.} 1.
+    Let us now fix some $\omega\in\Omega$ giving rise to realization $\{X_n(\omega)\}_{n\geq 0}$. Next, choose $M\in\mbb{R}$, $M\geq 0$. Then $\lceil M\rceil\in S$, so $\lceil M\rceil$ occurs in $\{X_n(\omega)\}_{n\geq 0}$ infinitely many times {\it w.p.} 1.
+    That is, for any $N\geq 0$, {\it w.p.} 1 we have $\lceil M\rceil\in\{X_n(\omega)\}_{n\geq N}$ (for otherwise $\lceil M\rceil$ could only occur at most $N$ times), so
+    \[\sup_{n\geq N}X_n(\omega)\geq\lceil M\rceil\geq M.\]
+    But this was for arbitrary choice of $N\geq 0$, so we get
+    \[\limsup_{n\rightarrow\infty}X_n(\omega)\geq M\]
+    {\it w.p.} 1. Additionally, $M$ was arbitrary, so the limit supremum is almost surely unbounded and thus
+    \[P(\limsup_{n\rightarrow\infty}X_n=\infty)=1.\tag{4}\]
+    Additonally, we have $0\in S$, so $0$ occurs in $\{X_n(\omega)\}_{n\geq 0}$ infinitely many times {\it w.p.} 1. But for any $i\in S$, $0\leq i$, so taking $N\geq 0$, $\{X_n(\omega)\}_{n\geq N}$ is bounded below by $0$. It is easy to see that this is a greatest lower bound,
+    since $0\in\{X_n(\omega)\}_{n\geq N}$ (for otherwise $0$ could occur at most only $N$ times) so for any $\varepsilon>0$, $\varepsilon$ is not a lower bound of $\{X_n(\omega)\}_{n\geq N}$. In other words, for any $N\geq 0$ we have
+    \[\inf\{X_n(\omega)\}_{n\geq N}=0\]
+    {\it w.p.} 1. But of course this was for arbitrary choice of $N\geq 0$, so
+    \[P(\liminf_{n\rightarrow\infty}X_n=0)=1.\tag{5}\]
+    To finish the proof, we make use of the following lemma:
+    \begin{center}
+        \begin{minipage}[c]{0.85\linewidth}
+            {\bf Lemma.} Let $A,B$ be two events with $P(A)=1$ and $P(B)=1$. Then $P(A\cap B)=1$.\\[10pt]
+            {\bf Proof.} The result follows directly from, DeMorgan's law, finite subadditivity and elementary properties of probability measures.
+            \begin{align*}
+                P(A\cap B)&=1-P(A^c\cup B^c)\tag{DeMorgan's law}\\
+                &\geq1-P(A^c)-P(B^c)\tag{finite subadditivity}\\
+                &=1-(1-1)-(1-1)\\
+                &=1
+            \end{align*}
+            so $1\leq P(A\cap B)\leq 1\Rightarrow P(A\cap B)=1$.\hfill{$\qed$}
+        \end{minipage}\vspace{10pt}
+    \end{center}
+    so that by (4) and (5) and this lemma we determine that the joint probability of interest is
+    \[P(\liminf_{n\rightarrow\infty}X_n=0,\;\limsup_{n\rightarrow\infty}X_n=\infty)=1\tag*{$\qed$}\]
+\end{document}

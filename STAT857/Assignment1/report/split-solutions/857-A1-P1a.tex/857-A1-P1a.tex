@@ -1,0 +1,158 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-02-04}
+    \end{center}
+    \noindent{\bf Problem 1}\\[5pt]
+    Let $\{(x_i,y_i)\in\mbb{R}^{p+1}:1\leq i\leq n\}$ be the training data, where $p$ is the number
+    of covariates and $n$ is the number of training instances. Suppose $x_i$ and $y_i$ are standardized.
+    The elastic net solves the following optimization problem:
+    \[\min_{\beta\in\mbb{R}^p}\left\{\frac{1}{2n}\sum_{i=1}^n(y_i-\beta^Tx_i)^2+\lambda\bp{\frac{1-\alpha}{2}\sum_{j=1}^p\beta_j^2+\alpha\sum_{j=1}^p|\beta_j|}\right\}\]
+    where $\lambda>0$, $\alpha\in[0,1]$, and 
+    \begin{align*}
+        y=\begin{pmatrix}
+            y_1\\
+            y_2\\
+            \vdots\\
+            y_n
+        \end{pmatrix},\quad X=\begin{pmatrix}
+            x_{1,1} & x_{1,2} & \cdots & x_{1,p}\\
+            x_{2,1} & x_{2,2} & \cdots & x_{2,p}\\
+            \vdots & \vdots & \ddots & \vdots\\
+            x_{n,1} & x_{n,2} & \cdots & x_{n,p}
+        \end{pmatrix}.
+    \end{align*}
+    When $\alpha=0$ this reduces to ridge regression, when $\alpha=1$ this reduces to LASSO.\\[5pt]
+    {\bf a)}\hspace{5pt} Let $r\in\mbb{R}^n$ and $V\in\mbb{R}^n$ and consider the following one-dimensional optimization problem:
+    \begin{align*}
+        \min_{z\in\mbb{R}}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\}.
+    \end{align*}
+    Show that the minimizer $z^\ast$ is
+    \[z^\ast=\mc{S}_{\frac{n\lambda\alpha}{\|V\|^2+n\lambda(1-\alpha)}}\bp{\frac{r^TV}{\|V\|^2+n\lambda(1-\alpha)}}\] 
+    where for $x,\delta\in\mbb{R}$ we define $\mc{S}_\delta(x):=\sgm(x)(|x|-\delta)_+$, called the {\it soft-thresholding operator}, with $\sgm(\cdot)$
+    the signum function and $(|x|-\delta)_+$ the positive part of $x$.\\[5pt]
+    {\bf Proof}\hspace{5pt}Let $f$ be the objective function and define
+    \begin{align*}
+        g(z):=\frac{1}{2n}(r-zV)^T(r-zV)+\frac{\lambda(1-\alpha)}{2}z^2,\qquad h(z):=\lambda\alpha|z|
+    \end{align*}
+    so that $f(z)=g(z)+h(z)$. Let us begin by finding the optimum of $g$, which is differentiable. First, let us express $g$ in a more convenient form:
+    \begin{align*}
+        g(z)&=\frac{1}{2n}(r-zV)^T(r-zV)+\frac{\lambda(1-\alpha)}{2}z^2\\
+        &=\frac{r^Tr}{2n}-\frac{2zr^TV}{2n}+\frac{z^2V^TV}{2n}+\frac{\lambda(1-\alpha)z^2}{2}\\
+        &=\frac{r^Tr}{2n}-\frac{zr^TV}{n}+z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}\\
+    \end{align*}
+    so that by differentiating we obtain
+    \begin{align*}
+        g^\prime(z)&=\frac{-r^TV}{n}+2z\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}.
+    \end{align*}
+    Thus, if $\hat{z}_{LS}$ is an extremum of $g$, then we get
+    \begin{align*}
+        0=g^\prime(\hat{z}_{LS})=\frac{-r^TV}{n}+2\hat{z}_{LS}\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}\quad\Rightarrow\quad \hat{z}_{LS}=\frac{r^TV}{V^TV+n\lambda(1-\alpha)}.
+    \end{align*}
+    Further, $\hat{z}_{LS}$ is a global minimum, since, for all $x\in\mbb{R}$,
+    \begin{align*}
+        g^{\prime\prime}(x)=\frac{V^TV+n\lambda(1-\alpha)}{n}\geq0
+    \end{align*}
+    so that $g$ is convex on $\mbb{R}$. From here, we may proceed by cases to identify the optimum of $f$. Let us begin by
+    taking $\hat{z}_{LS}>0$. Under this assumption, the minimizer of $f(z)=g(z)+h(z)$, call it $\hat{z}$, is $\geq 0$ too.
+    To see this, notice that if $\hat{z}<0$, then both $h(z)$ and $g(z)$ could be reduced by taking $z=0$ (which follows by the definition of $h$ and the convexity of $g$),
+    so the minimizer must be nonnegative.\\[5pt]
+    We may thus continue by solving the problem on a restricted domain. That is, we find
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\} = \argmin_{z\in\mbb{R}_+}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha z\right\}
+    \end{align*}
+    where $\mbb{R}_+:=\{x\in\mbb{R}:x\geq 0\}$, and is solved easily in the typical manner.
+    \begin{align*}
+        f(z)=\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha z&=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV}{n}}+\frac{r^Tr}{2n}+\lambda\alpha z\\
+        &=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV-n\lambda\alpha}{n}}+\frac{r^Tr}{2n}
+    \end{align*}
+    so that
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{f(z)\right\}&=\argmin_{z\in\mbb{R}_+}\left\{z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV-n\lambda\alpha}{n}}\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{z^2-2z\bp{\frac{r^TV-n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}+\bp{\frac{r^TV-n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}^2\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{\bp{z-\bp{\hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}}^2\right\}\\
+        &=\begin{cases}
+            \hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad&\text{if $\hat{z}_{LS}>\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad&\text{if $0\leq\hat{z}_{LS}\leq \tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}
+        \end{cases}\tag{1}
+    \end{align*}
+    Similarly, we may consider the second possibility where $\hat{z}_{LS}\leq 0$. Under this new assumption, $\hat{z}$ is $\leq 0$ as well. If it weren't, we could once again reduce both $g(z)$ and $h(z)$ by taking
+    $z=0$, so that $h(z)=0$ and $z$ is closer to the global minimum of $g$. Thus, the minimizer must be nonpositive.\\[5pt]
+    We may thus proceed in precisely the same manner as for the previous case, only now the objective is to find
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_-}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}+\lambda\alpha|z|\right\} = \argmin_{z\in\mbb{R}_-}\left\{\frac{1}{2n}\|r-zV\|^2+\lambda(1-\alpha)\frac{z^2}{2}-\lambda\alpha z\right\}
+    \end{align*}
+    with $\mbb{R}_-:=\{x\in\mbb{R}:x\leq 0\}$. By precisely the same computation as above, we obtain
+    \begin{align*}
+        f(z)=z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV+n\lambda\alpha}{n}}+\frac{r^Tr}{2n}
+    \end{align*}
+    so that now,
+    \begin{align*}
+        \argmin_{z\in\mbb{R}_+}\left\{f(z)\right\}&=\argmin_{z\in\mbb{R}_+}\left\{z^2\bp{\frac{V^TV+n\lambda(1-\alpha)}{2n}}-z\bp{\frac{r^TV+n\lambda\alpha}{n}}\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{z^2-2z\bp{\frac{r^TV+n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}+\bp{\frac{r^TV+n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}^2\right\}\\
+        &=\argmin_{z\in\mbb{R}_+}\left\{\bp{z-\bp{\hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}}^2\right\}\\
+        &=\begin{cases}
+            \hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad&\text{if $\hat{z}_{LS}<-\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad&\text{if $-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\leq\hat{Z}_{LS}\leq 0$}
+        \end{cases}\tag{2}
+    \end{align*}
+    whereby combining (1) and (2), we obtain
+    \begin{align*}
+        \hat{z}=\begin{cases}
+            \hat{z}_{LS}-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad & \text{if $\hat{z}_{LS}>\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            0\quad & \text{if $0\leq |\hat{z}_{LS}|\leq\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}\\
+            \hat{z}_{LS}+\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}\quad &\text{if $\hat{z}_{LS}<-\tfrac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}$}
+        \end{cases}&=\sgm(\hat{z}_{LS})\bp{|\hat{z}_{LS}|-\frac{n\lambda\alpha}{V^TV+n\lambda(1-\alpha)}}_+\\
+        &=\mc{S}_{\frac{n\lambda\alpha}{\|V\|^2+n\lambda(1-\alpha)}}\bp{\frac{r^TV}{\|V\|^2+n\lambda(1-\alpha)}}
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[5pt]
+\end{document}

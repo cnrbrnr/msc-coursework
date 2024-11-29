@@ -1,0 +1,93 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 3}\\[5pt]
+    For $n,r\geq 1$, find the number of solutions $(x_1,\dots,x_r)$ to the equation
+    \[x_1+x_2+\dots +x_r=n\]
+    where $x_i\geq 0$, $i=1,2,\dots, r$ are integers. Let $\Omega_{n,r}$ be the set of solutions. Consider the $\sigma$-algebra $2^{\Omega_{n,r}}$ and the uniform probability measure $P_{n,r}$ thereupon.\\[5pt]
+    {\bf a)} For every nonnegative integer $k$, find $P_{n,r}(x_1=k)$.\\[5pt]
+    {\bf Solution}\hspace{5pt} For a set $A\in 2^{\Omega_{n,r}}$, the uniform probability measure is simply
+    \[P_{n,r}(A)=\frac{|A|}{|\Omega_{n,r}|}\]
+    so we first set about finding $|\Omega_{n,r}|$, setting $N_{n,r}:=|\Omega_{n,r}|$. We claim that $N_{n,r}={n+r-1\choose r-1}$, and show this by induction, fixing some $n\geq 1$ throughout the duration.\\[5pt]
+    Proceeding with the basis, set $r=1$. In this case, the only solution is $x_1=n$, and in fact $1=\nck{n}{0}=\nck{n+1-1}{1-1}=\nck{n+r-1}{r-1}$. Now, suppose that for some $r\geq 1$ we have $N_{n,r}=\nck{n+r-1}{r-1}$. We want to show that $N_{n,r+1}=\nck{n+1+r-1}{r}$.\\[5pt]
+    Observe that, were we to fix $x_1=0$, there would remain $r$ free coordinates $x_2,\dots,x_{r+1}$, all of which must add up to $n=n-x_1$, and there are $N_{n-x_1,r}$ solutions to this problem. Similarly, fixing $x_1=1$, the remaining $r$ coordinates must sum to $n-1=n-x_1$, and there are now $N_{n-x_1,r}$ solutions.
+    We could repeat this for all $n+1$ possible values of $x_1$ to find all possible solutions of $\sum_{i=1}^{n+1}x_i=n$, such that
+    \begin{align*}
+        N_{n,r+1}=\sum_{j=0}^n N_{n-j,r}&=\sum_{j=0}^n \nck{n-j+r-1}{r-1}\tag{by inductive hypothesis}\\
+        &=\sum_{j=0}^n\nck{j+r-1}{r-1}=\nck{n+r}{r}\tag{9}
+    \end{align*}
+    where the last step follows Chu's Theorem [2] (see Appendix A.1 for a proof). By the principle of induction,
+    we have that for $n\geq 1$, $r\geq 1$, $N_{n,r}=\nck{n+r-1}{r-1}$.\\[5pt]
+    For the probability of interest, fix some $1\leq k\leq n$ and take $r=1$. Then $|\Omega_{n,1}|=1$, and so
+    \[P_{n,1}(x_1=k)=\delta_{n,k}=\begin{cases}
+        1,\quad\text{if $k=n$}\\
+        0,\quad\text{otherwise.}
+    \end{cases}\]
+    Now take $r\geq 2$ and consider $\Omega_{n,k,r}=\{x\in\Omega_{n,r}:x=(x_1,\dots,x_r),\;x_1=k\}$. As argued previously, for $(x_1,\dots,x_r)\in\Omega_{n,k,r}$ to be a solution, we require $\sum_{j=2}^rx_j=n-k$. The set of all such tuples $(x_2,\dots,x_r)$ is
+    quite obviously isomorphic to $\Omega_{n-k,r-1}$, so we have a total of $|\Omega_{n,k,r}|=N_{n-k,r-1}$ solutions. Thus
+    \[P_{n,r}(x_1=k)=\frac{|\Omega_{n,k,r}|}{|\Omega_{n,r|}}=\frac{|\Omega_{n-k,r-1}|}{|\Omega_{n,r}|}=\frac{N_{n-k,r-1}}{N_{n,r}}=\frac{\nck{n-k+r-2}{r-2}}{\nck{n+r-1}{r-1}}=\frac{(n-k+r-2)!n!(r-1)}{(n-k)!(n+r-1)!}.\tag{10}\]
+    Having obtained an expression for $P_{n,r}(x_1=k)$ for all $n,r\geq 1$ and $k\geq 0$, we are finished.\hfill{$\qed$}\\[5pt]
+    {\bf b)} Find the limit of $P_{n,r}(x_1=k)$ as $r,n\rightarrow\infty$ with $\frac{n}{r}\rightarrow\rho>0$.\\[5pt]
+    {\bf Solution}\hspace{5pt} Fix $n,r\geq 1$ and $0\leq k\leq n$. Let us first expand the probability in (10) to find that
+    \begin{align*}
+        P_{n,r}(x_1=k)&=(r-1)\frac{{n(n-1)\cdots(n-k+1)}}{(n+r-1)(n+r-2)\cdots(n+r-k-1)}\\
+        &=r(1-\frac{1}{r})\frac{n^k(1-\frac{1}{n})\cdots(1-\frac{k+1}{n})}{(n+r)^{k+1}(1-\frac{1}{n+r})\cdots(1-\frac{k-1}{n+r})}.
+    \end{align*}
+    Next, since $\frac{n}{r}\rightarrow\rho>0$ as $n,r\rightarrow\infty$ by supposition, we can consider $n=n(r)$ with $\lim_{n\rightarrow\infty}n=\lim_{r\rightarrow\infty}r\rho$. Thus,
+    \begin{align*}
+        \lim_{n,r\rightarrow\infty}P_{n,r}(x_1=k)&=\lim_{n,r\rightarrow\infty}r(1-\frac{1}{r})\frac{n^k(1-\frac{1}{n})\cdots(1-\frac{k+1}{n})}{(n+r)^{k+1}(1-\frac{1}{n+r})\cdots(1-\frac{k-1}{n+r})}\\
+        &=\lim_{r\rightarrow\infty}r(1-\frac{1}{r})\frac{(r\rho)^k(1-\frac{1}{r\rho})\cdots(1-\frac{k+1}{r\rho})}{(r\rho+r)^{k+1}(1-\frac{1}{r\rho+r})\cdots(1-\frac{k-1}{r\rho+r})}\\
+        &=\lim_{r\rightarrow\infty}(1-\frac{1}{r})\frac{r^{k+1}\rho^k(1-\frac{1}{r\rho})\cdots(1-\frac{k+1}{r\rho})}{r^{k+1}(\rho+1)^{k+1}(1-\frac{1}{r\rho+r})\cdots(1-\frac{k-1}{r\rho+r})}\\
+        &=\frac{\rho^k}{(\rho+1)^{k+1}}
+    \end{align*}
+    and we are done.\hfill{$\qed$}\\[5pt]
+\end{document}

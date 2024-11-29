@@ -1,0 +1,66 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{calrsfs}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./Images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Stochastic Processes: Assignment V}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+    \maketitle
+    \noindent{\bf Problem 6} Consider the setup in problem 4. For any integer $n\geq 0$, denote $m_n(t)$ the expected number of lines in use at time $t$, given that $n$
+    are in use at time $0$. Show that
+    \[m_n(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t}).\]
+    {\bf Proof} Suppose that there are $n\in\mbb{N}$ people in the queue at time $t=0$. Define the random variable $N(t)$ to be the number of people in the queue at time $t$.
+    We can be decompose $N(t)$
+    \[N(t)=K(t)+L(t)\]
+    where $K(t)$ is the number of the original $n$ individuals who remain in the queue at time $t$, and $L(t)$ is the number of individuals
+    who arrived later and remain in the queue by time $t$.\\[10pt]
+    With this setup, let $K_j$ be the random variable for the time that the $j$th person (of the original $n$) leaves the queue. Then,
+    \[K(t)=\sum_{j=1}^n\mathbbm{1}_{\{K_j>t\}}\quad\Rightarrow\quad\mbb{E}[K(t)]=\sum_{j=1}^nP(K_j>t)=\sum_{j=1}^ne^{-\mu t}=ne^{-\mu t}\]
+    where $P(K_j>t)=e^{-\mu t}$ is the survival function of the $j$th person when the duration of their call is exponentially distributed with rate parameter $\mu$. Now, to compute the desired expectation
+    \[m_n(t)=\mbb{E}[N(t)]=\mbb{E}[K(t)]+\mbb{E}[L(t)]=ne^{-\mu t}+m_0(t)\]
+    we need only determine $m_0(t)$. To do this, we use the law of iterated expectation, conditioning on the value of the first holding time $S_1$.
+    \begin{align*}
+        m_0(t)=\mbb{E}[L(t)]=\mbb{E}_{S_1}[\mbb{E}[L(t)|S_1<t]]\tag{5}
+    \end{align*}
+    where we condition on $S_1<t$ since otherwise $L(t)=0$ {\it w.p.} 1 so that these instances do not influence the expectation. However, provided $S_1<t$ is fixed, the inner expectation can be expressed
+    \[\mbb{E}[L(t)|S_1<t]=\mbb{E}[\mathbbm{1}_{\{L_1>t-S_1\}}+L(t-S_1)|S_1<t]=P(L_1>t-S_1)+m_0(t-S_1)=e^{-\mu(t-S_1)}+m_0(t-S_1)\]
+    having let $L_1$ be the random variable for the time at which the first person to arrive departs. Returning to (5) we can now compute the outer expectation. Since $S_1\sim\text{Exp}\;(\lambda)$, we have
+    \begin{align*}
+        m_0(t)=\mbb{E}_{S_1}[e^{-\mu(t-S_1)}+m_0(t-S_1)|S_1<t]&=\int_{0}^t\left(e^{-\mu(t-x)}+m_0(t-x)\right)\lambda e^{-\lambda x}dx\\
+        &=\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{-\lambda(t-y)}dy\tag{substituting $y=t-x$}\\
+        &=e^{-\lambda t}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy.
+    \end{align*}
+    From here, we differentiate $m_0(t)$ to obtain a first order, linear ordinary differential equation:
+    \begin{align*}
+        m_0^\prime(t)&=-\lambda e^{-\lambda t}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy+e^{-\lambda t} \frac{d}{dt}\int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{\lambda y}dy\\
+        &=-\lambda \int_0^t\left(e^{-\mu y}+m_0(y)\right)\lambda e^{-\lambda (t-y)}dy+\lambda e^{-\lambda t}e^{\lambda t}(e^{-\mu t}+m_0(t))\\
+        &=-\lambda m_0(t)+\lambda e^{-\mu t}+\lambda m_0(t)\\
+        &=\lambda e^{-\mu t}.
+    \end{align*}
+    Supplying the initial condition that $m_0(0)=0$, we see that the second term in the proposed solution
+    \[m_n(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t})\]
+    is the unique solution to $m_0^\prime(t)=\lambda e^{-\mu t}$, $m_0(0)=0$, since
+    \begin{align*}
+        \frac{\lambda}{\mu}(1-e^{-\mu t})\bigg|_{t=0}=0\quad\text{and}\quad\frac{d}{dt}\frac{\lambda}{\mu}(1-e^{-\mu t})=\lambda e^{-\mu t}=m_0^\prime(t).
+    \end{align*}
+    With this, we get
+    \[m_n(t)=\mbb{E}[N(t)]=\mbb{E}[K(t)]+\mbb{E}[L(t)]=ne^{-\mu t}+m_0(t)=ne^{-\mu t}+\frac{\lambda}{\mu}(1-e^{-\mu t})\]
+    as desired.\hfill{$\qed$}\\[10pt]
+\end{document}

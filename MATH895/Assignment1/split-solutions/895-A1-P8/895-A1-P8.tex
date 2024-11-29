@@ -1,0 +1,81 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+    \begin{center}
+        {\bf\large{MATH 895: CORE COURSE IN PROBABILITY}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment} 1\hfill {\bf Connor Braun} \hfill {\bf 2024-01-25}
+    \end{center}
+    \noindent{\bf Problem 8}\\[5pt]
+    Show that $(X_k)_{k\geq 1}$ defined in $(16)$ satisfies condition $2$ of Kolmogorov's theorem.\\[5pt]
+    {\bf Proof}\hspace{5pt}From ($17$), we have that whenever $k\leq n^{2/5}$, $|X_k|<n$ w.p. $1$ so that $X_{n,k}=X_k$ w.p. $1$, in which case
+    \begin{align*}
+        \E(X_{k,n})=\E(X_k)=\frac{1}{k^2}(-1)^kk^{5/2}+(1-k^{-2})(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}=(-1)^k(k^{1/2}-k^{1/2})=0
+    \end{align*}
+    with $\E(X_{1,n})=0$ as well. Similarly, by ($18$), when $n^{2/5}\leq k\leq n$ we have
+    \begin{align*}
+        \E(X_{k,n})=0\frac{1}{k^2}+(1-k^{-2})(-1)^{k+1}\frac{k^{1/2}}{1-k^{-2}}=(-1)^{k+1}k^{1/2}
+    \end{align*}
+    so that the sum of interest can be computed as follows:
+    \begin{align*}
+        \frac{1}{n}\sum_{k=1}^n\E(X_{k,n})=\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}^n(-1)^kk^{1/2}.
+    \end{align*}
+    Now, if this sum consists of an even number of terms, then using the fact that $\sqrt{s}-\sqrt{s-1}<\tfrac{1}{2\sqrt{s-1}}$ for $s>1$ we can write
+    \begin{align*}
+        \left|\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}^n(-1)^kk^{1/2}\right|=\frac{1}{n}\left|-\sqrt{\ceil{n^{2/5}}}+\sqrt{\ceil{n^{2/5}}+1}-\dots+\sqrt{n}\right|&<\frac{1}{2n}\bp{\frac{1}{\sqrt{\ceil{n^{2/5}}}}+\frac{1}{\sqrt{\ceil{n^{2/5}}+2}}+\dots+\frac{1}{\sqrt{n-1}}}\\
+        &<\frac{1}{2n}\sum_{k=1}^{n}\frac{1}{\sqrt{k}}\\
+        &<\frac{2\sqrt{n}}{2n}\tag{19}\\
+        &=\frac{1}{\sqrt{n}}
+    \end{align*}
+    which, of course, goes to zero as $n\rightarrow\infty$. In ($19$), we used the fact that $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$ (see Appendix A.1 for a proof). Alternatively, if the number of terms in the sum was odd then
+    \begin{align*}
+        \left|\frac{(-1)}{n}\sum_{k=\ceil{n^{2/5}}}(-1)^kk^{1/2}\right|=\frac{1}{n}\left|\sqrt{\ceil{n^{2/5}}}-\sqrt{\ceil{n^{2/5}}+1}+\dots,+\sqrt{n}\right|&<\frac{1}{2n}\bp{\frac{1}{\sqrt{\ceil{n^{2/5}}+1}}+\dots+\frac{1}{\sqrt{n-1}}}+\frac{1}{n}\sqrt{\ceil{n^{2/5}}}\\
+        &<\frac{1}{2n}\sum_{k=1}^n\frac{1}{\sqrt{k}}+\frac{1}{n}(n^{2/5}+1)^{1/2}\tag{$\ceil{x}<x+1\;\forall x\in\mbb{R}$}\\
+        &<\frac{1}{\sqrt{n}}+\frac{1}{n^{4/5}}\bp{1+\frac{1}{n^{2/5}}}^{1/2}
+    \end{align*}
+    which, again, uses the fact that $\sum_{k=1}^n\tfrac{1}{\sqrt{k}}<2\sqrt{n}$. But this latest expression also goes to zero as $n\rightarrow\infty$. In either case, we have that $\frac{1}{n}\sum_{k=1}^n\E(X_{k,n})\rightarrow 0$ as $n\rightarrow\infty$, and we are done.\hfill{$\qed$}\\[5pt]
+\end{document}

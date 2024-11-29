@@ -1,0 +1,67 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Information Theory: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent{\bf Problem 2} For each experiment described below involving random variables $X$ and $Y$, determine $I(X;Y)$ in bits.\\[10pt]
+{\bf a)} You toss a biased coin with probability of heads given by $p$, with $0<p\leq 1/2$. Let $X$ be the event the coin comes up heads, and $Y$
+the event it comes up tails.\\[10pt]
+{\bf Solution} Noting that $X\sim Bernoulli(p)$ and $Y\sim Bernoulli(1-p)$ (i.e., $X=1$ for heads, $X=0$ for tails, $Y=1$ for tails and $Y=0$ for heads), we have $H(X)=h_b(p)$ and $H(Y)=h_b(1-p)$, where $h_b(\cdot)$ is the binary
+entropy function, accepting arguments in the interval $[0,1]$. But these two entropies are equal for any fixed $p\in[0,1]$, since
+\[h_b(p)=-p\log_2p-(1-p)\log_2(1-p)=-(1-p)\log_2(1-p)-p\log_2p=h_b(1-p)\]
+so now $H(X)=H(Y)$. Since $\{X=j\}\cap\{Y=j\}=\emptyset$ for $j=0,1$ (i.e., $X$ and $Y$ are mutually exclusive) their joint probability mass function is given by
+\begin{align*}
+    p_{XY}(x,y)=\begin{cases}
+        p,\quad\text{if $(x,y)=(1,0)$}\\
+        0,\quad\text{if $(x,y)=(0,0)$}\\
+        0,\quad\text{if $(x,y)=(1,1)$}\\
+        1-p,\quad\text{if $(x,y)=(0,1)$}
+    \end{cases}
+\end{align*}
+which enables us to compute the conditional entropy $H(X|Y)$ directly from the definition
+\begin{align*}
+    H(X|Y)&=-\sum_{y\in\{0,1\}}\sum_{x\in\{0,1\}}p_{XY}(x,y)\log_2\frac{p_{XY}(x,y)}{p_Y(y)}\\
+    &=-\left(p\log_2\frac{p}{p}+(1-p)\log_2\frac{1-p}{1-p}\right)\\
+    &=0.
+\end{align*}
+That is, there is no uncertainty in the outcome of $X$ if $Y$ is known -- a sensible conclusion, since we're flipping a coin, so the face-down side is determined by the face-up side. The mutual information between $X$ and $Y$
+is then computed by the difference between the marginal and conditional entropies
+\[I(X;Y)=H(X)-H(X|Y)=h_b(p)-0=h_b(p)\]
+which is just the binary entropy function evaluated at $p$.\\[10pt]
+{\bf b)} You roll a fair die. Here $X$ denotes the top side of the die, and $Y$ denotes the front side.\\[10pt]
+{\bf Solution} Let $D_6=\{1,2,3,4,5,6\}$ be the set of faces of our die, and notice that $X\sim discrete\;uniform(1,6)$ and $Y\sim discrete\;uniform(1,6)$, so that
+\[p_X(x)=\frac{1}{6},\quad\text{and}\quad p_Y(y)=\frac{1}{6}\]
+$\forall x,y\in D_6$. Upon rolling the die, one side is face up, and another is face down, so neither can be on the front side. The remaining four sides can still be, however, and
+the probability that any one of these sides is front-facing is uniformly distributed, since $Y$ is. Thus, for any $x\in D_6$, let $i_j^x$ for $j=1,2,3,4$ be the four faces which share an edge with
+$x$ on our cubic die. Denote $D_6^x=\{i^x_1,i^x_2,i^x_3,i^x_4\}$. Then the conditional probability mass function of $Y|X$ is
+\begin{align*}
+    p_{Y|X}(y|x)=\begin{cases}
+        \frac{1}{4},\quad\text{if $y\in D_6^x$}\\
+        0,\quad\text{if $y\in D_6\setminus D_6^x$}.
+    \end{cases}
+\end{align*}
+Since both the marginal and conditional distributions are uniformly distributed on their support, we have
+\[H(X)=H(Y)=\log_2|D_6|,\quad\text{and}\quad H(Y|X=x)=\log_2|D_6^x|\tag{Lemma 2.6}\]
+so that the mutual information can be computed from the definition
+\[I(X;Y)=I(Y;X)=H(Y)-H(Y|X=x)=\log_2|D_6|-\log_2|D_6^x|=\log_26-\log_24=\log_2\frac{3}{2}\]
+and we are done.\\[10pt]
+\end{document}

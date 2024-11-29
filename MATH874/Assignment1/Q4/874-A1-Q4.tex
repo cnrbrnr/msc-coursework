@@ -1,0 +1,89 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\pagestyle{plain}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm}
+\usepackage[shortlabels]{enumitem}
+\usepackage[makeroom]{cancel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array, booktabs, ragged2e}
+\graphicspath{{./images/}}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\title{\bf Information Theory: Assignment I}
+\author{\bf Connor Braun}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent{\bf Problem 4} Prove or disprove each of the following statements.\\[10pt]
+{\bf a)} Let $X$ and $Y$ be independent discrete {\it r.v.}s. Then $H(X+Y)\geq\max\{H(X),H(Y)\}$.\\[10pt]
+{\bf Solution} The statement is true.\\[10pt]
+{\bf Proof} Let $\mc{X}$ and $\mc{Y}$ be the alphabets of $X$ and $Y$ respectively, with probability mass functions $p_X(x)$ and $p_Y(y)$ for $x\in\mc{X}$ and $y\in\mc{Y}$.
+We will show that both $H(X+Y)\geq H(X)$ and $H(X+Y)\geq H(Y)$. Each inequality is obtained by precisely the same argument, but we will show both
+for completeness.
+\begin{align*}
+    H(X+Y)&=H(Y)-H(Y|X+Y)+H(X+Y|Y)\\
+    &=H(Y)-H(Y|X+Y)+H(X)\tag{6}\\
+    &=H(X)+I(Y;X+Y)\\
+    &\geq H(X)
+\end{align*}
+where the inequality above holds since $I(Y;X+Y)\geq 0$, with equality iff $Y$ and $X+Y$ are independent. To justify (6), we note that
+\[Pr(X+Y=x+y|Y=y)=Pr(X+y=x+y|Y=y)=Pr(X=x|Y=y)=Pr(X=x)\]
+where the last equality holds since $X$ is indpenendent of $Y$. Letting $p_{X+Y|Y}(x+y|y)$ be the conditional probability mass functions of $X+Y|Y$,
+the above says that $p_{X+Y|Y}(x+y|y)=p_X(x)$ so
+\begin{align*}
+    H(X+Y|Y)&=-\sum_{x\in\mc{X}}\sum_{y\in\mc{Y}}p_Y(y)p_{X+Y|Y}(x+y|y)\log_2p_{X+Y|Y}(x+y|y)\\
+    &=\sum_{y\in\mc{Y}}p_Y(y)\left(-\sum_{x\in\mc{X}}p_X(x)\log_2p_X(x)\right)\\
+    &=H(X).
+\end{align*}
+To get $H(X+Y)\geq H(Y)$, the first argument is simply repeated.
+\begin{align*}
+    H(X+Y)&=H(X)-H(X|X+Y)+H(X+Y|X)\\
+    &=H(X)-H(X|X+Y)+H(Y)\\
+    &=H(Y)+I(X;X+Y)\\
+    \geq H(Y).
+\end{align*}
+Since both $H(X+Y)\geq H(X)$ and $H(X+Y)\geq H(Y)$, $H(X+Y)\geq\max\{H(X),H(Y)\}$.\hfill{$\qed$}\\[10pt]
+{\bf b)} Define the following two probability distributions on an alphabet of size $m$:
+\[P=(p_1,p_2,p_3,\dots,p_m)\quad\text{and}\quad \tilde{P}=\left(\frac{p_1+p_2}{2},\frac{p_1+p_2}{2},p_3,\dots,p+m\right).\]
+Then $H(P)>H(\tilde{P})$.\\[10pt]
+{\bf Solution} The statement is false.\\[10pt]
+{\bf Proof} We aim to prove the negation $H(\tilde{P})\geq H(P)\Leftrightarrow H(\tilde{P})-H(P)\geq 0$.
+\begin{align*}
+    H(\tilde{P})-H(P)&=\left(-2\frac{p_1+p_2}{2}\log_2\frac{p_1+p_2}{2}-p_3\log_2p_3-\dots-p_m\log_2p_m\right)+\left(p_1\log_2p_1+p_2\log_2p_2+\dots+p_m\log_2p_m\right)\\
+    &=-(p_1+p_2)\log_2\frac{p_1+p_2}{2}+p_1\log_2p_1+p_2\log_2p_2\\
+    &=p_1\log_2p_1-p_1\log_2\frac{p_1+p_2}{2}+p_2\log_2p_2-p_2\log_2\frac{p_1+p_2}{2}\\
+    &=p_1\log_2\frac{2p_1}{p_1+p_2}+p_2\log_2\frac{2p_2}{p_1+p_2}\\
+    &\geq \log_2e\left(p_1\left(1-\frac{p_1+p_2}{2p_1}\right)+p_2\left(1-\frac{p_1+p_2}{2p_2}\right)\right)\tag{fundamental inequality of the logarithm}\\
+    &=\log_2e(p_1+p_2-p_1-p_2)\\
+    &=0.
+\end{align*}
+So in fact we have $H(\tilde{P})-H(P)\geq 0\Rightarrow H(\tilde{P})\geq H(P)$.\hfill{$\qed$}\\[10pt]
+{\bf c)} Let $X_1$, $X_2,\dots$ be {\it i.i.d.} with $X_1\sim Bernoulli(p=1/2)$. Let a success indicate an outcome of heads on a fair coin toss. Now let the random variable $L$
+denote the number of tosses needed for the first head to appear. Then we have
+\[I(L;X^L)=2.\tag{bits}\]
+{\bf Solution} The statement is True.\\[10pt]
+{\bf Proof} We first show a fact about the geometric series. For any $|x|<1$, we have
+\[\sum_{n=0}^\infty x^n=\frac{1}{1-x}\quad\Rightarrow\quad \frac{d}{dx}\sum_{n=0}^\infty x^n=\frac{d}{dx}\frac{1}{1-x}\quad\Rightarrow\quad \sum_{n=0}^\infty nx^{n-1}=\frac{1}{(1-x)^2}.\]
+Given this result, we can compute $H(L)$, since $L$ is a geometric random variable with success probability $p=1/2$. That is, its probability mass function $p_L$ is given by
+\[p_L(k)=\left(\frac{1}{2}\right)^{k-1}\left(\frac{1}{2}\right)=\left(\frac{1}{2}\right)^k\]
+for all $k\in\mbb{N}$. The entropy of $L$ is then
+\begin{align*}
+    H(L)&=-\sum_{k=1}^\infty \left(\frac{1}{2}\right)^k\log_2\left(\frac{1}{2}\right)^k\\
+    &=\sum_{k=1}^\infty k\left(\frac{1}{2}\right)^k\\
+    &=\frac{1}{2}\sum_{k=0}^\infty k\left(\frac{1}{2}\right)^{k-1}.
+\end{align*}
+Using the previously obtained fact about the geometric series, we get
+\[H(L)=\frac{1}{2}\frac{1}{(1-1/2)^2}=\frac{4}{2}=2\]
+so that the entropy of $L$ is 2 bits. Next, if we condition $L$ on the vector $X^L$, then $L$ is deterministic. That is, given a realized vector of tosses $X^L=(X_1,X_2,\dots,X_L)$,
+where $X_j=1$ for at least one $j=1,2,\dots,L$, we have $L=\min\{j\in\{1,2,\dots,L\}: X_j=1\}$ with probability 1. This implies that $H(L|X^L)=0$, so finally the mutual information quantity of interest is determined to be
+\[I(L;X^L)=H(L)-H(L|X^L)=2-0=2\]
+as asserted.\hfill{$\qed$}
+\end{document}

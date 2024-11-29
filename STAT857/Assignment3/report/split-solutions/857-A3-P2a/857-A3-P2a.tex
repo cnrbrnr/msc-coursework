@@ -1,0 +1,64 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+
+% Packages
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{bbm} 
+\usepackage{dutchcal} % [dutchcal, calrsfs, pzzcal] calligraphic fonts
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[tracking]{microtype}
+
+% Palatino for text goes well with Euler
+\usepackage[sc,osf]{mathpazo}   % With old-style figures and real smallcaps.
+\linespread{1.025}              % Palatino leads a little more leading
+
+% Euler for math and numbers
+\usepackage[euler-digits,small]{eulervm}
+
+% Command initialization
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\graphicspath{{./images/}}
+
+% Custom Commands
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+\newcommand{\bp}[1]{\left({#1}\right)}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\1}[1]{\mathbbm{1}_{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\nck}[2]{{#1\choose#2}}
+\newcommand{\pc}[1]{\pazocal{#1}}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\sgm}{sgm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+    \begin{center}
+        {\bf\large{MATH 857: STATISTICAL LEARNING II}}
+        \smallskip
+        \hrule
+        \smallskip
+        {\bf Assignment 3} \hfill {\bf Connor Braun} \hfill {\bf 2024-03-03}
+    \end{center}
+    \noindent{\bf Problem 2}\\[5pt]
+    {\bf a)}\hspace{5pt}Let $\phi:\mathbb{R}\rightarrow\mbb{R}$ be a differentiable function. Show that if the first-order
+    derivative $\phi^\prime$ is non-decreasing, then for any $x,y\in\mbb{R}$, we have
+    \[\phi(y)\geq \phi(x)+\phi^\prime(x)(y-x).\]
+    {\bf Proof}\hspace{5pt} With $\phi$ as described, take some $x,y\in\mathbb{R}$ and without loss of generality let us have that $x<y$ (since if $x=y$ then the proof is trivial -- that is, $\phi(y)=\phi(x)+0$ implies $\phi(y)=\phi(x)+\phi^\prime(x)(y-x)$). 
+    Then $\phi$ is differentiable on $[x,y]$, so by the mean value theorem $\exists c\in[x,y]$ satisfying
+    \[\phi(y)-\phi(x)=\phi^\prime(c)(y-x)\quad\Rightarrow\quad \phi(y)=\phi(x)+\phi^\prime(c)(y-x)\]
+    but $\phi^\prime$ is non-decreasing, so $x\leq c$ implies that $\phi^\prime(x)\leq \phi^\prime(c)$ and so from the above we obtain
+    \[\phi(y)\geq \phi(x)+\phi^\prime(x)(y-x)\]
+    which holds since $y-x>0$. Thus, any such $\phi$ is convex. \hfill{$\qed$}\\[5pt]
+\end{document}
